@@ -3,6 +3,7 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from flask_migrate import Migrate, upgrade
 import os
+import fb
 
 from marshmallow import ValidationError
 
