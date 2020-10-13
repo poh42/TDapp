@@ -11,3 +11,4 @@ JWT_BLACKLIST_ENABLED = True
 JWT_BLACKLIST_TOKEN_CHECKS = ["access", "refresh"]
 APP_SECRET_KEY = os.environ["APP_SECRET_KEY"]
 UPLOADED_IMAGES_DEST = os.path.join("static", "images")
+RUN_ALEMBIC_MIGRATIONS = True

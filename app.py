@@ -11,7 +11,6 @@ from db import db
 from resources.user import (
     UserRegister,
     UserLogin,
-    User,
     # TokenRefresh,
     # UserLogout,
     # SetPassword,
@@ -28,10 +27,13 @@ api = Api(app)
 migrate = Migrate(app, db)
 
 
-# Here we have to run alembic first
 @app.before_first_request
 def create_tables():
-    upgrade()
+    if app.config["RUN_ALEMBIC_MIGRATIONS"]:
+        print("Running migrations")
+        upgrade()
+    else:
+        print("App started without running migrations")
 
 
 @app.errorhandler(ValidationError)
@@ -40,13 +42,13 @@ def handle_marshmallow_error(err):
 
 
 api.add_resource(UserRegister, "/register")
-api.add_resource(User, "/user/<int:user_id>")
 api.add_resource(UserLogin, "/login")
-#api.add_resource(TokenRefresh, "/refresh")
-#api.add_resource(UserLogout, "/logout")
-#api.add_resource(SetPassword, "/user/password")
+# api.add_resource(TokenRefresh, "/refresh")
+# api.add_resource(UserLogout, "/logout")
+# api.add_resource(SetPassword, "/user/password")
 
 db.init_app(app)
+migrate.init_app(app)
 
 if __name__ == "__main__":
     ma.init_app(app)

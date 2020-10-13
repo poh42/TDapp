@@ -15,5 +15,6 @@ def check_token(f):
             return {"message": "Invalid token provided."}, 400
         return f(*args, **kwargs)
 
+    # This is used in tests to check if an endpoint is protected.
     wrap.is_checked_by_token = True
     return wrap
