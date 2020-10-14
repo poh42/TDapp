@@ -19,6 +19,10 @@ class UserModel(db.Model):
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
 
+    @classmethod
+    def find_by_username(cls, username):
+        return cls.query.filter_by(username=username).first()
+
     def save(self):
         db.session.add(self)
         db.session.commit()
