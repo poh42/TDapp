@@ -18,10 +18,11 @@ from resources.user import (
     # UserLogout,
     # SetPassword,
 )
+
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
 
-if 'unittest' in sys.modules.keys():
+if "unittest" in sys.modules.keys():
     # tests are running
     log.info("Loading .env.test environment variables")
     current_path = os.path.dirname(__file__)
