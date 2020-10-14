@@ -139,3 +139,5 @@ cython_debug/
 
 # Sqlite
 data.db
+fbAdminConfig.json
+fbconfig.json
