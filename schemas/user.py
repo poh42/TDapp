@@ -6,6 +6,7 @@ from marshmallow import fields, validate
 class UserSchema(ma.SQLAlchemyAutoSchema):
     email = fields.Email()
     password = fields.String(validate=validate.Length(min=6), required=True)
+
     class Meta:
         model = UserModel
         load_only = ("password",)

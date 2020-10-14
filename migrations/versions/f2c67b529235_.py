@@ -32,10 +32,7 @@ def upgrade():
         sa.Column("range_bet_low", sa.Numeric(precision=10, scale=2), nullable=True),
         sa.Column("range_bet_high", sa.Numeric(precision=10, scale=2), nullable=True),
         sa.Column(
-            "created_at",
-            sa.DateTime(),
-            server_default=sa.text("now()"),
-            nullable=True,
+            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True,
         ),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),

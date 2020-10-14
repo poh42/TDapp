@@ -14,7 +14,9 @@ class UserRegister(Resource):
         json_data = request.get_json()
         user_instance: UserModel = user_schema.load(json_data)
         try:
-            user_firebase = auth.create_user(email=user_instance.email, password=json_data["password"])
+            user_firebase = auth.create_user(
+                email=user_instance.email, password=json_data["password"]
+            )
             user_instance.firebase_id = user_firebase.uid
             user_instance.save()
         except auth.EmailAlreadyExistsError as e:
@@ -22,6 +24,7 @@ class UserRegister(Resource):
         except Exception as e:
             return {"message": "There was an error creating the user"}, 400
         return {"message": "User creation successful"}, 200
+
 
 class UserLogin(Resource):
     @classmethod
