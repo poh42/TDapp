@@ -6,7 +6,7 @@ from models.user import UserModel
 
 
 class TestUserEndpoints(BaseAPITestCase):
-    def test_something(self):
+    def test_signup(self):
         email = "test@topdog.com"
         password = "Pa55w0rd"
         username = "asdrubal"
