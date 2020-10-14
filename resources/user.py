@@ -1,6 +1,10 @@
 from flask_restful import Resource
 from flask import request
 from firebase_admin import auth
+from marshmallow import ValidationError
+from fb import pb
+from requests import HTTPError
+import json
 
 from models.user import UserModel
 from schemas.user import UserSchema
@@ -30,7 +34,7 @@ class UserRegister(Resource):
         return (
             {
                 "message": "User creation successful",
-                "user": user_schema.dumps(user_instance),
+                "user": user_schema.dump(user_instance),
             },
             201,
         )
@@ -39,4 +43,34 @@ class UserRegister(Resource):
 class UserLogin(Resource):
     @classmethod
     def post(cls):
-        pass
+        json_data = request.get_json()
+        errors = user_schema.validate(json_data, partial=("username",))
+        if errors:
+            raise ValidationError(errors)
+        email = json_data["email"]
+        password = json_data["password"]
+        user_instance = UserModel.find_by_email(email)
+        if user_instance:
+            try:
+                user = pb.auth().sign_in_with_email_and_password(email, password)
+                jwt = user["idToken"]
+                return {"token": jwt}, 200
+            except HTTPError as e:
+                try:
+                    error_data = json.loads(e.strerror)
+                    if (
+                        error_data
+                        and error_data.get("error")
+                        and error_data["error"].get("message", "") == "INVALID_PASSWORD"
+                    ):
+                        return {"message": "Invalid password"}, 400
+                    else:
+                        return {"message": "There was an error logging in"}, 400
+                except:
+                    return {"message": "There was an error logging in"}, 400
+            except Exception as e:
+                log.error(e.__class__.__name__)
+                log.error(e)
+                return {"message": "There was an error logging in"}, 400
+        else:
+            return {"message": "User not found"}
