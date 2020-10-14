@@ -3,7 +3,9 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from flask_migrate import Migrate, upgrade
 import os
+import sys
 import fb
+import logging
 
 from marshmallow import ValidationError
 
@@ -16,8 +18,18 @@ from resources.user import (
     # UserLogout,
     # SetPassword,
 )
+logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
+log = logging.getLogger(__name__)
 
-load_dotenv(".env", verbose=True)
+if 'unittest' in sys.modules.keys():
+    # tests are running
+    log.info("Loading .env.test environment variables")
+    current_path = os.path.dirname(__file__)
+    load_dotenv(os.path.join(current_path, ".env.test"), verbose=True)
+else:
+    # Tests are not running
+    log.info("Loading .env environment variables")
+    load_dotenv(".env", verbose=True)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET_KEY")
@@ -31,10 +43,10 @@ migrate = Migrate(app, db)
 @app.before_first_request
 def create_tables():
     if app.config["RUN_ALEMBIC_MIGRATIONS"]:
-        print("Running migrations")
+        log.info("Running migrations")
         upgrade()
     else:
-        print("App started without running migrations")
+        log.info("App started without running migrations")
 
 
 @app.errorhandler(ValidationError)
