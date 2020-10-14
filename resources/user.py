@@ -4,6 +4,9 @@ from firebase_admin import auth
 
 from models.user import UserModel
 from schemas.user import UserSchema
+import logging
+
+log = logging.getLogger(__name__)
 
 user_schema = UserSchema()
 
@@ -22,8 +25,15 @@ class UserRegister(Resource):
         except auth.EmailAlreadyExistsError as e:
             return {"message": "Email is already registered"}, 400
         except Exception as e:
+            log.error(e)
             return {"message": "There was an error creating the user"}, 400
-        return {"message": "User creation successful"}, 200
+        return (
+            {
+                "message": "User creation successful",
+                "user": user_schema.dumps(user_instance),
+            },
+            201,
+        )
 
 
 class UserLogin(Resource):
