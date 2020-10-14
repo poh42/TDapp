@@ -4,16 +4,17 @@ from unittest.mock import patch
 import json
 from models.user import UserModel
 
+email = "test@topdog.com"
+password = "Pa55w0rd"
+username = "asdrubal"
+
+
+class TestClass:
+    uid = 1
+
 
 class TestUserEndpoints(BaseAPITestCase):
     def test_signup(self):
-        email = "test@topdog.com"
-        password = "Pa55w0rd"
-        username = "asdrubal"
-
-        class TestClass:
-            uid = 1
-
         with self.test_client() as c:
             with patch("firebase_admin.auth.create_user") as patched_create_user:
                 patched_create_user.side_effect = (TestClass(),)
