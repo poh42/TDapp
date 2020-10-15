@@ -15,9 +15,6 @@ from resources.user import (
     UserRegister,
     UserLogin,
     SetAdminStatus,
-    # TokenRefresh,
-    # UserLogout,
-    # SetPassword,
 )
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
@@ -59,8 +56,6 @@ def handle_marshmallow_error(err):
 api.add_resource(UserRegister, "/register")
 api.add_resource(UserLogin, "/login")
 api.add_resource(SetAdminStatus, "/set_admin/<int:user_id>")
-# api.add_resource(UserLogout, "/logout")
-# api.add_resource(SetPassword, "/user/password")
 
 db.init_app(app)
 migrate.init_app(app)
