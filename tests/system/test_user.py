@@ -54,6 +54,35 @@ class TestUserEndpoints(BaseAPITestCase):
                         {"token": "MyToken"}, json_data, "A token should be returned"
                     )
 
+    def test_set_admin(self):
+        with self.test_client() as c:
+            with self.app_context():
+                user = UserModel()
+                user.email = email
+                user.password = password
+                user.username = username
+                user.firebase_id = "dummy"
+                user.save()
+                with patch(
+                    "firebase_admin.auth.set_custom_user_claims", return_value=None
+                ) as set_custom_claims_mock:
+                    data = json.dumps(dict(is_admin=True))
+                    rv = c.post(
+                        f"/set_admin/{user.id}",
+                        data=data,
+                        content_type="application/json",
+                    )
+                    json_data = rv.get_json()
+                    self.assertEqual(rv.status_code, 200, "Invalid status code")
+                    self.assertDictEqual(
+                        {"message": "Admin status set", "is_admin": True},
+                        json_data,
+                        "Wrong response",
+                    )
+                    set_custom_claims_mock.assert_called_once_with(
+                        user.firebase_id, {"admin": True}
+                    )
+
 
 if __name__ == "__main__":
     unittest.main()

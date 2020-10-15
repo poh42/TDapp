@@ -2,16 +2,20 @@ import unittest
 from unittest.mock import patch
 import importlib
 import app
+from resources import user
 from flask_migrate import upgrade, downgrade
 
 
 class BaseAPITestCase(unittest.TestCase):
+    def reload_modules(self):
+        modules_to_reload = [app, user]
+        for m in modules_to_reload:
+            importlib.reload(m)
+
     def setUp(self):
         def kill_patches():  # Create a cleanup callback that undoes our patches
             patch.stopall()  # Stops all patches started with start()
-            importlib.reload(
-                app
-            )  # Reload our UUT module which restores the original decorator
+            self.reload_modules()
 
         def remove_database():
             with self.app_context():
@@ -29,9 +33,7 @@ class BaseAPITestCase(unittest.TestCase):
         patch("decorators.check_token", lambda x: x).start()
         patch("decorators.check_is_admin", lambda x: x).start()
         patch("decorators.check_is_admin_or_user_authorized", lambda x: x).start()
-        importlib.reload(
-            app
-        )  # Reloads the uut.py module which applies our patched decorator
+        self.reload_modules()
         with self.app_context():
             print("upgrading")
             upgrade()
