@@ -8,6 +8,15 @@ email = "test@topdog.com"
 password = "Pa55w0rd"
 username = "asdrubal"
 
+def create_dummy_user():
+    user = UserModel()
+    user.email = email
+    user.password = password
+    user.username = username
+    user.firebase_id = "dummy"
+    user.save()
+    return user
+
 
 class TestUserEndpoints(BaseAPITestCase):
     def test_signup(self):
@@ -39,12 +48,7 @@ class TestUserEndpoints(BaseAPITestCase):
         with self.test_client() as c:
             with self.app_context():
                 with patch("fb.pb.auth") as pb:
-                    user = UserModel()
-                    user.email = email
-                    user.password = password
-                    user.username = username
-                    user.firebase_id = "dummy"
-                    user.save()
+                    create_dummy_user()
                     pb.side_effect = (TestClass,)
                     data = json.dumps(dict(email=email, password=password))
                     rv = c.post("/login", data=data, content_type="application/json")
@@ -57,12 +61,7 @@ class TestUserEndpoints(BaseAPITestCase):
     def test_set_admin(self):
         with self.test_client() as c:
             with self.app_context():
-                user = UserModel()
-                user.email = email
-                user.password = password
-                user.username = username
-                user.firebase_id = "dummy"
-                user.save()
+                user = create_dummy_user()
                 with patch(
                     "firebase_admin.auth.set_custom_user_claims", return_value=None
                 ) as set_custom_claims_mock:
@@ -83,6 +82,8 @@ class TestUserEndpoints(BaseAPITestCase):
                         user.firebase_id, {"admin": True}
                     )
 
+    def test_user_settings(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()
