@@ -3,7 +3,7 @@ from flask import request, g
 from firebase_admin import auth
 from marshmallow import ValidationError
 
-from decorators import check_token, check_is_admin
+from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
 from utils.claims import set_is_admin
 from fb import pb
 from requests import HTTPError
@@ -90,3 +90,34 @@ class SetAdminStatus(Resource):
         user: UserModel = UserModel.find_by_id(user_id)
         set_is_admin(user.firebase_id, payload["is_admin"])
         return {"message": "Admin status set", **admin_status_schema.dump(payload)}
+
+
+class User(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin_or_user_authorized
+    def put(cls, user_id):
+        user: UserModel = UserModel.find_by_id(user_id)
+        if not user:
+            return {"message": "User not found"}, 400
+        json_data = request.get_json()
+        errors = user_schema.validate(json_data, partial=True)
+        if errors:
+            raise ValidationError(errors)
+        if json_data.get("email"):
+            user.email = json_data["email"]
+        if json_data.get("name"):
+            user.name = json_data["name"]
+        if json_data.get("playing_hours_begin") and json_data.get("playing_hours_end"):
+            user.playing_hours_begin = json_data["playing_hours_begin"]
+            user.playing_hours_end = json_data["playing_hours_end"]
+        if json_data.get("range_bet_low") and json_data.get("range_bet_high"):
+            user.range_bet_low = json_data["range_bet_low"]
+            user.range_bet_high = json_data["range_bet_high"]
+        try:
+            user.save()
+        except Exception as e:
+            print(e)
+        if json_data.get("password"):
+            user.update_password(json_data["password"])
+        return {"message": "Edit successful", "user": user_schema.dump(user)}, 200
