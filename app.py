@@ -14,6 +14,7 @@ from db import db
 from resources.user import (
     UserRegister,
     UserLogin,
+    SetAdminStatus,
     # TokenRefresh,
     # UserLogout,
     # SetPassword,
@@ -57,7 +58,7 @@ def handle_marshmallow_error(err):
 
 api.add_resource(UserRegister, "/register")
 api.add_resource(UserLogin, "/login")
-# api.add_resource(TokenRefresh, "/refresh")
+api.add_resource(SetAdminStatus, "/set_admin/<int:user_id>")
 # api.add_resource(UserLogout, "/logout")
 # api.add_resource(SetPassword, "/user/password")
 
