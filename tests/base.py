@@ -27,6 +27,8 @@ class BaseAPITestCase(unittest.TestCase):
         self.addCleanup(kill_patches)
         self.addCleanup(remove_database)
         patch("decorators.check_token", lambda x: x).start()
+        patch("decorators.check_is_admin", lambda x: x).start()
+        patch("decorators.check_is_admin_or_user_authorized", lambda x: x).start()
         importlib.reload(
             app
         )  # Reloads the uut.py module which applies our patched decorator
