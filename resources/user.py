@@ -1,18 +1,23 @@
 from flask_restful import Resource
-from flask import request
+from flask import request, g
 from firebase_admin import auth
 from marshmallow import ValidationError
+
+from decorators import check_token, check_is_admin
+from utils.claims import set_is_admin
 from fb import pb
 from requests import HTTPError
 import json
 
 from models.user import UserModel
 from schemas.user import UserSchema
+from schemas.admin_status import AdminStatusSchema
 import logging
 
 log = logging.getLogger(__name__)
 
 user_schema = UserSchema()
+admin_status_schema = AdminStatusSchema()
 
 
 class UserRegister(Resource):
@@ -74,3 +79,14 @@ class UserLogin(Resource):
                 return {"message": "There was an error logging in"}, 400
         else:
             return {"message": "User not found"}
+
+
+class SetAdminStatus(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin
+    def post(cls, user_id):
+        payload = admin_status_schema.load(request.get_json())
+        user: UserModel = UserModel.find_by_id(user_id)
+        set_is_admin(user.firebase_id, payload["is_admin"])
+        return {"message": "Admin status set", **admin_status_schema.dump(payload)}
