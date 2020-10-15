@@ -1,5 +1,6 @@
 from db import db
 from sqlalchemy.sql import func
+from firebase_admin import auth
 
 
 class UserModel(db.Model):
@@ -34,6 +35,9 @@ class UserModel(db.Model):
     @classmethod
     def find_by_firebase_id(cls, firebase_id):
         return cls.query.filter_by(firebase_id=firebase_id).first()
+
+    def update_password(self, new_password):
+        auth.update_user(self.firebase_id, password=new_password)
 
     def save(self):
         db.session.add(self)
