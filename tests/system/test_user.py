@@ -8,6 +8,7 @@ email = "test@topdog.com"
 password = "Pa55w0rd"
 username = "asdrubal"
 
+
 def create_dummy_user():
     user = UserModel()
     user.email = email
@@ -84,6 +85,7 @@ class TestUserEndpoints(BaseAPITestCase):
 
     def test_user_settings(self):
         pass
+
 
 if __name__ == "__main__":
     unittest.main()
