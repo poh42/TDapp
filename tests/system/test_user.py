@@ -84,8 +84,56 @@ class TestUserEndpoints(BaseAPITestCase):
                     )
 
     def test_user_settings(self):
-        pass
+        with self.test_client() as c:
+            with self.app_context():
+                user = create_dummy_user()
+                with patch("firebase_admin.auth.update_user") as update_user_mock:
 
-
-if __name__ == "__main__":
-    unittest.main()
+                    data = json.dumps(
+                        {
+                            "range_bet_low": 100,
+                            "playing_hours_end": 20,
+                            "range_bet_high": 120,
+                            "phone": "885",
+                            "email": "asdr@hotmail.com",
+                            "name": "Test",
+                            "playing_hours_begin": 1,
+                            "password": "1234567",
+                        }
+                    )
+                    rv = c.put(
+                        f"/user/{user.id}", data=data, content_type="application/json"
+                    )
+                    json_data = rv.get_json()
+                    user_data = json_data["user"]
+                    update_user_mock.assert_called_once_with(
+                        user.firebase_id, password="1234567"
+                    )
+                    self.assertEqual(
+                        user_data["range_bet_low"], 100, "Range bet low should be 100"
+                    )
+                    self.assertEqual(
+                        user_data["range_bet_high"], 120, "Range bet high should be 120"
+                    )
+                    self.assertEqual(user_data["phone"], "885", "Phone should be 885")
+                    self.assertEqual(
+                        user_data["email"], "asdr@hotmail.com", "Email should be valid"
+                    )
+                    self.assertEqual(
+                        user_data["playing_hours_begin"],
+                        1,
+                        "Playing hours begin should be 1",
+                    )
+                    self.assertEqual(
+                        user_data["playing_hours_end"],
+                        20,
+                        "Playing hours end should be 20",
+                    )
+                    self.assertEqual(
+                        user_data["name"], "Test", "Name should be equal to test"
+                    )
+                    self.assertFalse(
+                        "password" in user_data,
+                        "Password should not be in the return data",
+                    )
+                    self.assertEqual(rv.status_code, 200, "Invalid status code")
