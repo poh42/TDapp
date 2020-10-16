@@ -4,6 +4,7 @@ from apispec_flask_restful import RestfulPlugin
 import json
 from app import app, api
 from schemas.user import UserSchema
+from schemas.admin_status import AdminStatusSchema
 from resources.user import User, UserRegister, SetAdminStatus
 
 # Create spec
@@ -18,6 +19,7 @@ spec = APISpec(
 # Reference your schemas definitions
 
 spec.components.schema("User", schema=UserSchema)
+spec.components.schema("AdminStatus", schema=AdminStatusSchema)
 
 # We need a working context for apispec introspection.
 with app.test_request_context():

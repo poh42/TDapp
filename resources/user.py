@@ -86,6 +86,42 @@ class SetAdminStatus(Resource):
     @check_token
     @check_is_admin
     def post(cls, user_id):
+        """
+        Set user as admin
+            ---
+            description: Set a user as an admin
+            tags:
+              - user
+            produces:
+              - application/json
+            parameters:
+              - in: "path"
+                name: user_id
+                required: true
+                description: User ID
+                type: integer
+              - in: "body"
+                name: "body"
+                type: object
+                schema:
+                  type: object
+                  properties:
+                    is_admin:
+                      type: boolean
+                      description: |
+                        True if the user is going to be set as an admin,
+                        False otherwise
+            responses:
+              200:
+                description: User admin status changed successfully
+                properties:
+                    is_admin:
+                      type: boolean
+                      description: |
+                        True if the user is going to be set as an admin,
+                        False otherwise
+
+        """
         payload = admin_status_schema.load(request.get_json())
         user: UserModel = UserModel.find_by_id(user_id)
         set_is_admin(user.firebase_id, payload["is_admin"])
@@ -106,6 +142,11 @@ class User(Resource):
                produces:
                 - application/json
                parameters:
+               - in: "path"
+                 name: user_id
+                 required: true
+                 description: User ID
+                 type: integer
                - in: "body"
                  name: "body"
                  description: |
