@@ -1,10 +1,10 @@
 from dotenv import load_dotenv
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from flask_restful import Api
 from flask_migrate import Migrate, upgrade
 import os
 import sys
-import fb
+import simplejson
 import logging
 
 from marshmallow import ValidationError
@@ -38,6 +38,13 @@ app.config.from_envvar("APPLICATION_SETTINGS")
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 api = Api(app)
 migrate = Migrate(app, db)
+
+
+@api.representation("application/json")
+def output_json(data, code, headers=None):
+    resp = make_response(simplejson.dumps(data), code)
+    resp.headers.extend(headers or {})
+    return resp
 
 
 @app.before_first_request
