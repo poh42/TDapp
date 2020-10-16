@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask import request, g
+from flask import request, jsonify
 from firebase_admin import auth
 from marshmallow import ValidationError
 
@@ -7,8 +7,8 @@ from decorators import check_token, check_is_admin, check_is_admin_or_user_autho
 from utils.claims import set_is_admin
 from fb import pb
 from requests import HTTPError
-import json
 
+import simplejson as json
 from models.user import UserModel
 from schemas.user import UserSchema
 from schemas.admin_status import AdminStatusSchema
@@ -114,6 +114,8 @@ class User(Resource):
         if json_data.get("range_bet_low") and json_data.get("range_bet_high"):
             user.range_bet_low = json_data["range_bet_low"]
             user.range_bet_high = json_data["range_bet_high"]
+        if json_data.get("phone"):
+            user.phone = json_data["phone"]
         try:
             user.save()
         except Exception as e:
