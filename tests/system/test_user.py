@@ -137,3 +137,21 @@ class TestUserEndpoints(BaseAPITestCase):
                         "Password should not be in the return data",
                     )
                     self.assertEqual(rv.status_code, 200, "Invalid status code")
+
+    def test_user_get(self):
+        with self.test_client() as c:
+            with self.app_context():
+                user = create_dummy_user()
+                rv = c.get(f"/user/{user.id}", content_type="application/json")
+                json_data = rv.get_json()
+                user_data = json_data["user"]
+
+                self.assertEqual(
+                    user.name, user_data["name"], f"Name should be equal to {user.name}"
+                )
+                self.assertFalse(
+                    "password" in user_data,
+                    "Password should not be in the return data",
+                )
+                self.assertEqual(user.id, user_data["id"])
+                self.assertEqual(user.firebase_id, user_data["firebase_id"])

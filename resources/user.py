@@ -132,6 +132,15 @@ class User(Resource):
     @classmethod
     @check_token
     @check_is_admin_or_user_authorized
+    def get(cls, user_id):
+        user = UserModel.find_by_id(user_id)
+        if not user:
+            return {"message": "User not found"}, 400
+        return {"message": "User found", "user": user_schema.dump(user)}
+
+    @classmethod
+    @check_token
+    @check_is_admin_or_user_authorized
     def put(cls, user_id):
         """
         Edit user endpoint
