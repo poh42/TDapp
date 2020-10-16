@@ -17,7 +17,7 @@ spec = APISpec(
 
 # Reference your schemas definitions
 
-spec.components.schema("User", schema=UserSchema, example=dict(a=1))
+spec.components.schema("User", schema=UserSchema)
 
 # We need a working context for apispec introspection.
 with app.test_request_context():
