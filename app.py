@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, send_from_directory, redirect
 from flask_restful import Api
 from flask_migrate import Migrate, upgrade
 import os
@@ -59,6 +59,16 @@ def create_tables():
 @app.errorhandler(ValidationError)
 def handle_marshmallow_error(err):
     return jsonify(err.messages), 400
+
+
+@app.route("/docs")
+def send_index_docs():
+    return redirect("/docs/index.html")
+
+
+@app.route("/docs/<path:path>")
+def send_docs(path=None):
+    return send_from_directory("docs", path)
 
 
 api.add_resource(UserRegister, "/register")

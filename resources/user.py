@@ -97,6 +97,37 @@ class User(Resource):
     @check_token
     @check_is_admin_or_user_authorized
     def put(cls, user_id):
+        """
+        Edit user endpoint
+               ---
+               description: Edits user settings
+               responses:
+                   200:
+                       description: User settings edited
+                       schema:
+                           type: object
+                           properties:
+                             message:
+                                description: A success message
+                                type: string
+                             user:
+                                description: The user
+                                schema: User
+                                example:
+                                    id: 1
+                                    email: user@example.com"
+                                    username: "kyloRen"
+                                    firebase_id: "string"
+                                    last_active: "2019-08-24T14:15:22Z"
+                                    accepted_terms: true
+                                    is_banned: true
+                                    playing_hours_begin: "2019-08-24T14:15:22Z"
+                                    playing_hours_end: "2019-08-24T14:15:22Z"
+                                    range_bet_low: 0
+                                    range_bet_high: 0
+                                    name: "example.com"
+                                    phone: "string"
+        """
         user: UserModel = UserModel.find_by_id(user_id)
         if not user:
             return {"message": "User not found"}, 400
