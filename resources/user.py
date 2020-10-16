@@ -101,6 +101,41 @@ class User(Resource):
         Edit user endpoint
                ---
                description: Edits user settings
+               tags:
+                - user
+               produces:
+                - application/json
+               parameters:
+               - in: "body"
+                 name: "body"
+                 description: |
+                    User settings to be edited. All fields are optional however if
+                    playing_hours_begin is specified then playing_hours_end
+                    should be specified.\n
+                    Same case occurs with range_bet_low and range_bet_high attributes.
+                 schema:
+                   type: object
+                   properties:
+                     playing_hours_begin:
+                        type: integer
+                        minimum: 0
+                        maximum: 23
+                     playing_hours_end:
+                        type: integer
+                        minimum: 0
+                        maximum: 23
+                     range_bet_low:
+                        type: number
+                        minimum: 0
+                     range_bet_high:
+                        type: number
+                        minimum: 0
+                     phone:
+                        type: string
+                     name:
+                        type: string
+                     password:
+                        type: string
                responses:
                    200:
                        description: User settings edited
