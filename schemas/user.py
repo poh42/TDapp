@@ -30,5 +30,5 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserModel
         load_only = ("password",)
-        dump_only = ("id", "firebase_id")
+        dump_only = ("id", "firebase_id", "created_at", "updated_at")
         load_instance = True
