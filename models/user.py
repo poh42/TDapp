@@ -1,6 +1,9 @@
 from db import db
 from sqlalchemy.sql import func
 from firebase_admin import auth
+from utils.mailgun import Mailgun
+from flask import request, url_for
+from models.confirmation import ConfirmationModel
 
 
 class UserModel(db.Model):
@@ -19,6 +22,14 @@ class UserModel(db.Model):
     range_bet_high = db.Column(db.Numeric(precision=10, scale=2))
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
+
+    confirmation = db.relationship(
+        "ConfirmationModel", lazy="dynamic", cascade="all, delete-orphan"
+    )
+
+    @property
+    def most_recent_confirmation(self) -> "ConfirmationModel":
+        return self.confirmation.order_by(db.desc(ConfirmationModel.expire_at)).first()
 
     @classmethod
     def find_by_id(cls, _id):
@@ -42,3 +53,12 @@ class UserModel(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def send_confirmation_email(self):
+        link = request.url_root[:-1] + url_for(
+            "confirmation", confirmation_id=self.most_recent_confirmation.id
+        )
+        subject = "Registration confirmation"
+        text = f"Please click to confirm your registration: {link}"
+        html = f'<html>Please click to confirm your registration: <a href="{link}">{link}</a></html>'
+        return Mailgun.send_email([self.email], subject, text, html)

@@ -10,6 +10,7 @@ from requests import HTTPError
 
 import simplejson as json
 from models.user import UserModel
+from models.confirmation import ConfirmationModel
 from schemas.user import UserSchema
 from schemas.admin_status import AdminStatusSchema
 import logging
@@ -31,10 +32,14 @@ class UserRegister(Resource):
             )
             user_instance.firebase_id = user_firebase.uid
             user_instance.save()
+            confirmation = ConfirmationModel(user_instance.id)
+            confirmation.save_to_db()
+            user_instance.send_confirmation_email()
         except auth.EmailAlreadyExistsError as e:
             return {"message": "Email is already registered"}, 400
         except Exception as e:
             log.error(e)
+            print(e)
             return {"message": "There was an error creating the user"}, 400
         return (
             {

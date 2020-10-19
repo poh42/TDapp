@@ -1,5 +1,5 @@
 from db import db
-from uuid import uuid4
+from secrets import token_urlsafe
 from time import time
 
 CONFIRMATION_EXPIRATION_DELTA = 1800  # 30 minutes
@@ -18,7 +18,7 @@ class ConfirmationModel(db.Model):
         # Initializes expire_at, confirmed, user_id
         super().__init__(**kwargs)
         self.user_id = user_id
-        self.id = uuid4().hex
+        self.id = token_urlsafe(32)
         self.expire_at = int(time()) + CONFIRMATION_EXPIRATION_DELTA
         self.confirmed = False
 

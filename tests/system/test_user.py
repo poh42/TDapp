@@ -26,23 +26,41 @@ class TestUserEndpoints(BaseAPITestCase):
 
         with self.test_client() as c:
             with patch("firebase_admin.auth.create_user") as patched_create_user:
-                patched_create_user.side_effect = (TestClass(),)
-                data = json.dumps(
-                    dict(email=email, password=password, username=username)
-                )
-                rv = c.post(
-                    "/user/register", data=data, content_type="application/json"
-                )
-                json_data = rv.get_json()
-                self.assertEqual(
-                    "User creation successful",
-                    json_data["message"],
-                    "Message is incorrect",
-                )
-                self.assertIsNotNone(
-                    UserModel.find_by_username(username), "User creation failed"
-                )
-                self.assertEqual(rv.status_code, 201, "Wrong status code")
+                with patch("utils.mailgun.Mailgun.send_email") as send_email:
+                    patched_create_user.side_effect = (TestClass(),)
+                    data = json.dumps(
+                        dict(email=email, password=password, username=username)
+                    )
+                    rv = c.post(
+                        "/user/register", data=data, content_type="application/json"
+                    )
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "User creation successful",
+                        json_data["message"],
+                        "Message is incorrect",
+                    )
+                    self.assertIsNotNone(
+                        UserModel.find_by_username(username), "User creation failed"
+                    )
+                    self.assertEqual(rv.status_code, 201, "Wrong status code")
+                    send_email.assert_called_once()
+                    args, kwargs = send_email.call_args
+                    self.assertEqual(args[0][0], email)
+                    self.assertEqual(
+                        args[1], "Registration confirmation", "Wrong title"
+                    )
+                    self.assertIn(
+                        "Please click to confirm your registration:",
+                        args[2],
+                        "Check if the message being sent is correct",
+                    )
+                    self.assertIn(
+                        "Please click to confirm your registration:",
+                        args[3],
+                        "Check if the message being sent is correct",
+                    )
+                    print(args)
 
     def test_login(self):
         class TestClass:
