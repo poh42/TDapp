@@ -61,19 +61,9 @@ def handle_marshmallow_error(err):
     return jsonify(err.messages), 400
 
 
-@app.route("/docs")
-def send_index_docs():
-    return redirect("/docs/index.html")
-
-
-@app.route("/docs/<path:path>")
-def send_docs(path=None):
-    return send_from_directory("docs", path)
-
-
-api.add_resource(UserRegister, "/register")
-api.add_resource(UserLogin, "/login")
-api.add_resource(SetAdminStatus, "/set_admin/<int:user_id>")
+api.add_resource(UserRegister, "/user/register")
+api.add_resource(UserLogin, "/user/login")
+api.add_resource(SetAdminStatus, "/user/set_admin/<int:user_id>")
 api.add_resource(User, "/user/<int:user_id>")
 
 db.init_app(app)
