@@ -30,7 +30,9 @@ class TestUserEndpoints(BaseAPITestCase):
                 data = json.dumps(
                     dict(email=email, password=password, username=username)
                 )
-                rv = c.post("/user/register", data=data, content_type="application/json")
+                rv = c.post(
+                    "/user/register", data=data, content_type="application/json"
+                )
                 json_data = rv.get_json()
                 self.assertEqual(
                     "User creation successful",
@@ -52,7 +54,9 @@ class TestUserEndpoints(BaseAPITestCase):
                     create_dummy_user()
                     pb.side_effect = (TestClass,)
                     data = json.dumps(dict(email=email, password=password))
-                    rv = c.post("/user/login", data=data, content_type="application/json")
+                    rv = c.post(
+                        "/user/login", data=data, content_type="application/json"
+                    )
                     json_data = rv.get_json()
                     self.assertEqual(rv.status_code, 200, "Invalid status code")
                     self.assertDictEqual(
