@@ -4,6 +4,7 @@ import importlib
 import app
 from resources import user
 from flask_migrate import upgrade, downgrade
+from app import db
 
 
 class BaseAPITestCase(unittest.TestCase):
@@ -19,10 +20,15 @@ class BaseAPITestCase(unittest.TestCase):
 
         def remove_database():
             with self.app_context():
-                try:
-                    downgrade()
-                except:
-                    pass
+
+                connection = db.session.connection()
+                # Based on https://stackoverflow.com/a/13823560/1767047
+                sql = """
+                DROP SCHEMA public CASCADE;
+                CREATE SCHEMA public;
+                """
+                connection.execute(sql, multi=True)
+                db.session.commit()
                 upgrade()
 
         self.test_client = app.app.test_client
