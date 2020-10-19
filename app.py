@@ -11,6 +11,7 @@ from marshmallow import ValidationError
 
 from ma import ma
 from db import db
+from resources.confirmation import Confirmation, ConfirmationByUser
 from resources.user import (
     UserRegister,
     UserLogin,
@@ -65,6 +66,8 @@ api.add_resource(UserRegister, "/user/register")
 api.add_resource(UserLogin, "/user/login")
 api.add_resource(SetAdminStatus, "/user/set_admin/<int:user_id>")
 api.add_resource(User, "/user/<int:user_id>")
+api.add_resource(Confirmation, "/user/confirm/<string:confirmation_id>")
+api.add_resource(ConfirmationByUser, "/confirmation/user/<int:user_id>")
 
 db.init_app(app)
 migrate.init_app(app)
