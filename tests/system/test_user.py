@@ -1,8 +1,8 @@
 from tests.base import BaseAPITestCase
-import unittest
 from unittest.mock import patch, Mock
 import json
 from models.user import UserModel
+from models.confirmation import ConfirmationModel
 
 email = "test@topdog.com"
 password = "Pa55w0rd"
@@ -69,7 +69,10 @@ class TestUserEndpoints(BaseAPITestCase):
         with self.test_client() as c:
             with self.app_context():
                 with patch("fb.pb.auth") as pb:
-                    create_dummy_user()
+                    user = create_dummy_user()
+                    confirmation = ConfirmationModel(user.id)
+                    confirmation.confirmed = True
+                    confirmation.save_to_db()
                     pb.side_effect = (TestClass,)
                     data = json.dumps(dict(email=email, password=password))
                     rv = c.post(
@@ -80,6 +83,20 @@ class TestUserEndpoints(BaseAPITestCase):
                     self.assertDictEqual(
                         {"token": "MyToken"}, json_data, "A token should be returned"
                     )
+
+    def test_login_not_confirmed(self):
+        with self.test_client() as c:
+            with self.app_context():
+                create_dummy_user()
+                data = json.dumps(dict(email=email, password=password))
+                rv = c.post("/user/login", data=data, content_type="application/json")
+                json_data = rv.get_json()
+                self.assertEqual(rv.status_code, 400, "Invalid status code")
+                self.assertEqual(
+                    json_data["message"],
+                    "User not confirmed",
+                    "User is by mistake already confirmed",
+                )
 
     def test_set_admin(self):
         with self.test_client() as c:
