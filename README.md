@@ -1,0 +1,1 @@
+Note: There must be an authorization in order to send user messages

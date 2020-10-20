@@ -21,7 +21,7 @@ class Confirmation(Resource):
 
         confirmation.confirmed = True
         confirmation.save_to_db()
-        headers = {"Content-Type": "application/html"}
+        headers = {"Content-Type": "text/html"}
         return make_response(
             render_template("confirmation_page.html", email=confirmation.user.email),
             200,
