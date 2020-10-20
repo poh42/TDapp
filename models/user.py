@@ -32,25 +32,25 @@ class UserModel(db.Model):
         return self.confirmation.order_by(db.desc(ConfirmationModel.expire_at)).first()
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id) -> "UserModel":
         return cls.query.filter_by(id=_id).first()
 
     @classmethod
-    def find_by_username(cls, username):
+    def find_by_username(cls, username) -> "UserModel":
         return cls.query.filter_by(username=username).first()
 
     @classmethod
-    def find_by_email(cls, email):
+    def find_by_email(cls, email) -> "UserModel":
         return cls.query.filter_by(email=email).first()
 
     @classmethod
-    def find_by_firebase_id(cls, firebase_id):
+    def find_by_firebase_id(cls, firebase_id) -> "UserModel":
         return cls.query.filter_by(firebase_id=firebase_id).first()
 
-    def update_password(self, new_password):
+    def update_password(self, new_password) -> None:
         auth.update_user(self.firebase_id, password=new_password)
 
-    def save(self):
+    def save(self) -> None:
         db.session.add(self)
         db.session.commit()
 
