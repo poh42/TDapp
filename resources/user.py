@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask import request, jsonify
+from flask import request, g
 from firebase_admin import auth
 from marshmallow import ValidationError
 
@@ -130,7 +130,9 @@ class User(Resource):
         errors = user_schema.validate(json_data, partial=True)
         if errors:
             raise ValidationError(errors)
-        if json_data.get("email"):
+        if json_data.get("email") and user.email != json_data["email"]:
+            if UserModel.find_by_email(json_data["email"]):
+                raise ValidationError({"email": "Email already in use"})
             user.email = json_data["email"]
         if json_data.get("name"):
             user.name = json_data["name"]
@@ -142,6 +144,12 @@ class User(Resource):
             user.range_bet_high = json_data["range_bet_high"]
         if json_data.get("phone"):
             user.phone = json_data["phone"]
+        if (
+            json_data.get("is_active", None) is not None
+            and hasattr(g, "claims")
+            and g.claims.get("admin") is True
+        ):
+            user.is_active = json_data["is_active"]
         try:
             user.save()
         except Exception as e:

@@ -1,5 +1,5 @@
 from tests.base import BaseAPITestCase
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, PropertyMock
 import json
 from models.user import UserModel
 from models.confirmation import ConfirmationModel
@@ -163,6 +163,25 @@ class TestUserEndpoints(BaseAPITestCase):
                         "Password should not be in the return data",
                     )
                     self.assertEqual(rv.status_code, 200, "Invalid status code")
+
+    def test_user_settings_is_active(self):
+        data = json.dumps({"is_active": False})
+        with self.test_client() as c:
+            with self.app_context():
+                user = create_dummy_user()
+                with patch("firebase_admin.auth.update_user") as update_user_mock:
+                    from flask import g
+
+                    g.claims = {"admin": True}
+                    rv = c.put(
+                        f"/user/{user.id}", data=data, content_type="application/json"
+                    )
+                    json_data = rv.get_json()
+                    self.assertIn("user", json_data)
+                    update_user_mock.assert_not_called()
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    new_user = UserModel.find_by_id(user.id)
+                    self.assertFalse(new_user.is_active, "Value not changed")
 
     def test_user_get(self):
         with self.test_client() as c:
