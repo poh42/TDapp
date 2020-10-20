@@ -44,7 +44,7 @@ def check_is_admin_or_user_authorized(f):
         if _is_admin():
             return f(*args, **kwargs)
         else:
-            user_id = request.args.get("id", type=int)
+            user_id = request.args.get("user_id", type=int)
             user = UserModel.find_by_firebase_id(g.claims["uid"])
             if not user:
                 return {"message": "User not found"}, 400
