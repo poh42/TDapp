@@ -7,7 +7,7 @@ class ChallengeModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(45), nullable=False)
     name = db.Column(db.String(255), nullable=False)
-    game_id = db.Column(db.Integer, nullable=False)
+    game_id = db.Column(db.Integer, db.ForeignKey("games.id"), nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     buy_in = db.Column(db.Numeric(precision=10, scale=2), nullable=False)
     reward = db.Column(db.Numeric(precision=10, scale=2), nullable=False)
@@ -15,7 +15,7 @@ class ChallengeModel(db.Model):
     due_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
-    # game = db.relationship("GameModel")
+    game = db.relationship("GameModel")
 
     @classmethod
     def find_by_id(cls, _id):

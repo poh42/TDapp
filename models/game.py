@@ -10,6 +10,6 @@ class GameModel(db.Model):
     image = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
-    # challenges = db.relationship(
-    #    "ChallengeModel", lazy="dynamic", cascade="all, delete-orphan"
-    # )
+    challenges = db.relationship(
+        "ChallengeModel", lazy="dynamic", cascade="all, delete-orphan"
+    )
