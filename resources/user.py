@@ -61,6 +61,11 @@ class UserLogin(Resource):
         password = json_data["password"]
         user_instance = UserModel.find_by_email(email)
         if user_instance:
+            if (
+                not user_instance.most_recent_confirmation
+                or not user_instance.most_recent_confirmation.confirmed
+            ):
+                return {"message": "User not confirmed"}, 400
             try:
                 user = pb.auth().sign_in_with_email_and_password(email, password)
                 jwt = user["idToken"]
