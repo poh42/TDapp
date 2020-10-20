@@ -1,4 +1,4 @@
-"""empty message
+"""Adding confirmations table
 
 Revision ID: cb2b414ca670
 Revises: f2c67b529235
