@@ -12,7 +12,7 @@ from marshmallow import ValidationError
 from ma import ma
 from db import db
 from resources.confirmation import Confirmation, ConfirmationByUser
-from resources.challenge import Challenge
+from resources.challenge_ import Challenge
 from resources.user import (
     UserRegister,
     UserLogin,
