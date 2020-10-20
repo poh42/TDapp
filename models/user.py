@@ -22,6 +22,7 @@ class UserModel(db.Model):
     range_bet_high = db.Column(db.Numeric(precision=10, scale=2))
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
+    is_active = db.Column(db.Boolean, default=True)
 
     confirmation = db.relationship(
         "ConfirmationModel", lazy="dynamic", cascade="all, delete-orphan"
