@@ -14,7 +14,7 @@ class Challenge(Resource):
             return {"message": "Challenge not found"}, 404
         return {
             "message": "Challenge found",
-            "challenge": challenge_schema.dumps(challenge),
+            "challenge": challenge_schema.dump(challenge),
         }
 
     @classmethod

@@ -19,7 +19,11 @@ class ChallengeModel(db.Model):
 
     @classmethod
     def find_by_id(cls, _id):
-        cls.query.filter_by(id=_id).first()
+        return cls.query.filter_by(id=_id).first()
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
 
     def delete_from_db(self):
         db.session.delete(self)

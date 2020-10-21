@@ -44,6 +44,7 @@ migrate = Migrate(app, db)
 
 @api.representation("application/json")
 def output_json(data, code, headers=None):
+    print("Simple json")
     resp = make_response(simplejson.dumps(data), code)
     resp.headers.extend(headers or {})
     return resp

@@ -13,3 +13,7 @@ class GameModel(db.Model):
     challenges = db.relationship(
         "ChallengeModel", lazy="dynamic", cascade="all, delete-orphan"
     )
+
+    def save_to_db(self) -> None:
+        db.session.add(self)
+        db.session.commit()
