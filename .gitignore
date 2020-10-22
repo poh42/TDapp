@@ -142,3 +142,5 @@ cython_debug/
 data.db
 fbAdminConfig.json
 fbconfig.json
+
+static/images/
