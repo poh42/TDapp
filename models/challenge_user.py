@@ -14,7 +14,7 @@ class ChallengeUserModel(db.Model):
 
     challenger = db.relationship("UserModel", foreign_keys=[challenger_id])
     challenged = db.relationship("UserModel", foreign_keys=[challenged_id])
-    challenge = db.relationship("Challenge", foreign_keys=[wager_id])
+    challenge = db.relationship("ChallengeModel", foreign_keys=[wager_id])
 
     @classmethod
     def find_by_id(cls, _id):

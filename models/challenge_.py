@@ -1,5 +1,6 @@
 from db import db
 from sqlalchemy.sql import func
+from models.challenge_user import ChallengeUserModel
 
 
 class ChallengeModel(db.Model):
@@ -16,6 +17,9 @@ class ChallengeModel(db.Model):
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
     game = db.relationship("GameModel")
+    challenge_users = db.relationship(
+        "ChallengeUserModel", lazy="dynamic", cascade="all, delete-orphan"
+    )
 
     @classmethod
     def find_by_id(cls, _id):
