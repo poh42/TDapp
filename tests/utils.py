@@ -36,7 +36,6 @@ def create_dummy_challenge(game_id):
     challenge.reward = "100"
     challenge.status = "BEGIN"  # TODO Change this to a more explanatory value
     challenge.save_to_db()
-    print(ChallengeModel.find_by_id(challenge.id))
     return challenge
 
 
