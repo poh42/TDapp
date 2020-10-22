@@ -19,6 +19,9 @@ from resources.user import (
     SetAdminStatus,
     User,
 )
+from flask_uploads import configure_uploads, IMAGES
+from utils.image_helper import IMAGE_SET
+from resources.image import ImageUpload
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
@@ -38,13 +41,13 @@ app.secret_key = os.environ.get("APP_SECRET_KEY")
 app.config.from_object("default_config")
 app.config.from_envvar("APPLICATION_SETTINGS")
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
+configure_uploads(app, IMAGE_SET)
 api = Api(app)
 migrate = Migrate(app, db)
 
 
 @api.representation("application/json")
 def output_json(data, code, headers=None):
-    print("Simple json")
     resp = make_response(simplejson.dumps(data), code)
     resp.headers.extend(headers or {})
     return resp
@@ -71,6 +74,7 @@ api.add_resource(User, "/user/<int:user_id>")
 api.add_resource(Confirmation, "/user/confirm/<string:confirmation_id>")
 api.add_resource(ConfirmationByUser, "/confirmation/user/<int:user_id>")
 api.add_resource(Challenge, "/challenge/<int:challenge_id>")
+api.add_resource(ImageUpload, "/upload/image")
 
 db.init_app(app)
 migrate.init_app(app)
