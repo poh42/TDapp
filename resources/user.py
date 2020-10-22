@@ -142,6 +142,8 @@ class User(Resource):
         if json_data.get("range_bet_low") and json_data.get("range_bet_high"):
             user.range_bet_low = json_data["range_bet_low"]
             user.range_bet_high = json_data["range_bet_high"]
+        if json_data.get("allow_public_challenges", None) is not None:
+            user.allow_public_challenges = json_data["allow_public_challenges"]
         if json_data.get("phone"):
             user.phone = json_data["phone"]
         if (

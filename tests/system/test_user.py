@@ -125,6 +125,7 @@ class TestUserEndpoints(BaseAPITestCase):
                             "name": "Test",
                             "playing_hours_begin": 1,
                             "password": "1234567",
+                            "allow_public_challenges": False,
                         }
                     )
                     rv = c.put(
@@ -158,6 +159,7 @@ class TestUserEndpoints(BaseAPITestCase):
                     self.assertEqual(
                         user_data["name"], "Test", "Name should be equal to test"
                     )
+                    self.assertFalse(user_data["allow_public_challenges"])
                     self.assertFalse(
                         "password" in user_data,
                         "Password should not be in the return data",
