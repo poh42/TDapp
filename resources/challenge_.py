@@ -24,3 +24,10 @@ class Challenge(Resource):
             return {"message": "Challenge not found"}, 404
         challenge.delete_from_db()
         return {"message": "Challenge deleted"}, 200
+
+
+class ChallengeList(Resource):
+    @classmethod
+    def get(cls):
+        challenges = ChallengeModel.query.all()
+        return {"challenges": challenge_schema.dump(challenges, many=True)}

@@ -22,3 +22,12 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 )
                 self.assertIsNone(ChallengeModel.find_by_id(challenge.id))
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
+
+    def test_challenge_list(self):
+        with self.app_context():
+            create_fixtures()
+            with self.test_client() as c:
+                rv = c.get("/challenges")
+                json_data = rv.get_json()
+                self.assertTrue(len(json_data["challenges"]) > 0, "Wrong length")
+                self.assertEqual(rv.status_code, 200)
