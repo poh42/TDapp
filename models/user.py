@@ -23,6 +23,7 @@ class UserModel(db.Model):
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
     is_active = db.Column(db.Boolean, default=True)
+    allow_public_challenges = db.Column(db.Boolean, default=True)
 
     confirmation = db.relationship(
         "ConfirmationModel", lazy="dynamic", cascade="all, delete-orphan"
