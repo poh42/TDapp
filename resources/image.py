@@ -2,8 +2,13 @@ from flask import request
 from flask_restful import Resource
 from schemas.image import ImageSchema
 from utils import image_helper
-from secrets import token_urlsafe
+from secrets import token_hex
 from flask_uploads import UploadNotAllowed
+from utils.file_manager import upload_file_to_bucket
+import os
+import logging
+
+log = logging.getLogger(__name__)
 
 image_schema = ImageSchema()
 
@@ -18,13 +23,20 @@ class ImageUpload(Resource):
         """
         data = image_schema.load(request.files)  # { image: FileStorage }
         folder = "data"  # static/images/user_1
-        name = token_urlsafe()
+        name = token_hex() + image_helper.get_extension(data["image"])
+        bucket = os.getenv("AWS_BUCKET", None)
+        if not bucket:
+            log.warning("Bucket not configured")
+            raise ValueError("Bucket not configured")
         try:
             image_path = image_helper.save_image(
                 data["image"], folder=folder, name=name
             )
+            url = upload_file_to_bucket(
+                bucket, image_helper.get_path(name, folder), data["image"].mimetype
+            )
             basename = image_helper.get_basename(image_path)
-            return {"message": f"Image {basename} uploaded"}, 201
+            return {"message": f"Image {basename} uploaded", "url": url}, 201
         except UploadNotAllowed:
             extension = image_helper.get_extension(data["image"])
             return (

@@ -18,14 +18,16 @@ def make_bucket(name, acl):
     return s3_resource.create_bucket(Bucket=name, ACL=acl)
 
 
-def upload_file_to_bucket(bucket_name, file_path):
+def upload_file_to_bucket(bucket_name, file_path, mime_type):
     session = aws_session()
     s3_resource = session.resource("s3")
     file_dir, file_name = os.path.split(file_path)
 
     bucket = s3_resource.Bucket(bucket_name)
     bucket.upload_file(
-        Filename=file_path, Key=file_name, ExtraArgs={"ACL": "public-read"}
+        Filename=file_path,
+        Key=file_name,
+        ExtraArgs={"ACL": "public-read", "ContentType": mime_type},
     )
 
     s3_url = f"https://{bucket_name}.s3.amazonaws.com/{file_name}"
