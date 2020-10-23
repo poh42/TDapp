@@ -13,6 +13,7 @@ from ma import ma
 from db import db
 from resources.confirmation import Confirmation, ConfirmationByUser
 from resources.challenge_ import Challenge, ChallengeList
+from resources.game import GamesByConsole
 from resources.user import (
     UserRegister,
     UserLogin,
@@ -76,6 +77,7 @@ api.add_resource(ConfirmationByUser, "/confirmation/user/<int:user_id>")
 api.add_resource(Challenge, "/challenge/<int:challenge_id>")
 api.add_resource(ChallengeList, "/challenges")
 api.add_resource(ImageUpload, "/upload/image")
+api.add_resource(GamesByConsole, "/console/<int:console_id>/games")
 
 db.init_app(app)
 migrate.init_app(app)

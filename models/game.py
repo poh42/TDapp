@@ -7,7 +7,7 @@ class GameModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    image = db.Column(db.String(255))
+    image = db.Column(db.String(1000))
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
     challenges = db.relationship(
