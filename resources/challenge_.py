@@ -2,6 +2,8 @@ from models.game import GameModel
 from models.challenge_ import ChallengeModel
 from flask_restful import Resource
 from schemas.challenge_ import ChallengeSchema
+from flask import request
+from datetime import datetime
 
 challenge_schema = ChallengeSchema()
 
@@ -29,5 +31,9 @@ class Challenge(Resource):
 class ChallengeList(Resource):
     @classmethod
     def get(cls):
-        challenges = ChallengeModel.query.all()
-        return {"challenges": challenge_schema.dump(challenges, many=True)}
+        query = ChallengeModel.query
+        print(request.args)
+        if request.args.get("upcoming") == "true":
+            query = query.filter(ChallengeModel.date >= datetime.now())
+
+        return {"challenges": challenge_schema.dump(query.all(), many=True)}

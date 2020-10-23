@@ -1,6 +1,7 @@
 from db import db
 from sqlalchemy.sql import func
 from models.challenge_user import ChallengeUserModel
+from models.results_1v1 import Results1v1Model
 
 
 class ChallengeModel(db.Model):
@@ -19,6 +20,9 @@ class ChallengeModel(db.Model):
     game = db.relationship("GameModel")
     challenge_users = db.relationship(
         "ChallengeUserModel", lazy="dynamic", cascade="all, delete-orphan"
+    )
+    results_1v1 = db.relationship(
+        "Results1v1Model", cascade="all, delete-orphan", uselist=False
     )
 
     @classmethod
