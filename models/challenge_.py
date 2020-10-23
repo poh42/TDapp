@@ -2,6 +2,7 @@ from db import db
 from sqlalchemy.sql import func
 from models.challenge_user import ChallengeUserModel
 from models.results_1v1 import Results1v1Model
+from models.console import ConsoleModel
 
 
 class ChallengeModel(db.Model):
