@@ -4,6 +4,7 @@ from firebase_admin import auth
 from utils.mailgun import Mailgun
 from flask import request, url_for
 from models.confirmation import ConfirmationModel
+from models.user_photo import UserPhotoModel
 
 
 class UserModel(db.Model):
@@ -27,6 +28,10 @@ class UserModel(db.Model):
 
     confirmation = db.relationship(
         "ConfirmationModel", lazy="dynamic", cascade="all, delete-orphan"
+    )
+
+    user_photos = db.relationship(
+        "UserPhotoModel", lazy="dynamic", cascade="all, delete-orphan"
     )
 
     @property
