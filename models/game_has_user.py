@@ -2,6 +2,9 @@ from db import db
 
 
 class GameHasUserModel(db.Model):
+    """
+    NOTE: This is deprecated.
+    """
     __tablename__ = "games_has_users"
 
     game_id = db.Column(db.Integer, db.ForeignKey("games.id"), primary_key=True)
