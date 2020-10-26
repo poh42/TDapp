@@ -32,9 +32,9 @@ class ImageUpload(Resource):
             image_path = image_helper.save_image(
                 data["image"], folder=folder, name=name
             )
-            url = upload_file_to_bucket(
-                bucket, image_helper.get_path(name, folder), data["image"].mimetype
-            )
+            complete_path = image_helper.get_path(name, folder)
+            url = upload_file_to_bucket(bucket, complete_path, data["image"].mimetype)
+            os.unlink(complete_path)
             basename = image_helper.get_basename(image_path)
             return {"message": f"Image {basename} uploaded", "url": url}, 201
         except UploadNotAllowed:
