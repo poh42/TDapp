@@ -8,6 +8,7 @@ from schemas.challenge_ import ChallengeSchema
 from flask import request
 from datetime import datetime
 from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
 
 challenge_schema = ChallengeSchema()
 
@@ -83,3 +84,11 @@ class ChallengeList(Resource):
                 .limit(last_results)
             )
         return {"challenges": challenge_schema.dump(query.all(), many=True)}
+
+
+class ResultsByUser(Resource):
+    @classmethod
+    def get(cls, user_id):
+        data = ChallengeModel.query.join(Results1v1Model).filter(
+            or_(Results1v1Model.player_1_id == user_id, Results1v1Model.player_2_id == user_id)).all()
+        return {"challenges": challenge_schema.dump(data, many=True)}
