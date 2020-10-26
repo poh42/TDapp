@@ -10,3 +10,7 @@ class UserGameModel(db.Model):
     console_id = db.Column(db.Integer, db.ForeignKey("consoles.id"))
     level = db.Column(db.String(45), nullable=False)
     gamertag = db.Column(db.String(255), nullable=False)
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
