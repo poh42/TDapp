@@ -16,7 +16,12 @@ class TestUserEndpoints(BaseAPITestCase):
                 with patch("utils.mailgun.Mailgun.send_email") as send_email:
                     patched_create_user.side_effect = (TestClass(),)
                     data = json.dumps(
-                        dict(email=email, password=password, username=username, avatar=avatar)
+                        dict(
+                            email=email,
+                            password=password,
+                            username=username,
+                            avatar=avatar,
+                        )
                     )
                     rv = c.post(
                         "/user/register", data=data, content_type="application/json"
@@ -28,9 +33,7 @@ class TestUserEndpoints(BaseAPITestCase):
                         "Message is incorrect",
                     )
                     user = UserModel.find_by_username(username)
-                    self.assertIsNotNone(
-                        user, "User creation failed"
-                    )
+                    self.assertIsNotNone(user, "User creation failed")
                     self.assertEqual(user.avatar, avatar, "Avatar not found")
                     self.assertEqual(rv.status_code, 201, "Wrong status code")
                     send_email.assert_called_once()
