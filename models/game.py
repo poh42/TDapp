@@ -1,6 +1,6 @@
 from db import db
 from sqlalchemy.sql import func
-from models.game_has_user import GameHasUserModel
+from models.user_game import UserGameModel
 
 
 class GameModel(db.Model):

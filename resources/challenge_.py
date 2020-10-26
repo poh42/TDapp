@@ -89,6 +89,14 @@ class ChallengeList(Resource):
 class ResultsByUser(Resource):
     @classmethod
     def get(cls, user_id):
-        data = ChallengeModel.query.join(Results1v1Model).filter(
-            or_(Results1v1Model.player_1_id == user_id, Results1v1Model.player_2_id == user_id)).all()
+        data = (
+            ChallengeModel.query.join(Results1v1Model)
+            .filter(
+                or_(
+                    Results1v1Model.player_1_id == user_id,
+                    Results1v1Model.player_2_id == user_id,
+                )
+            )
+            .all()
+        )
         return {"challenges": challenge_schema.dump(data, many=True)}
