@@ -23,6 +23,16 @@ def create_dummy_game():
     game = GameModel()
     game.name = "FIFA"
     game.image = "dummy.jpg"
+    game.is_active = True
+    game.save_to_db()
+    return game
+
+
+def create_dummy_game_not_active():
+    game = GameModel()
+    game.name = "Call of duty"
+    game.image = "dummy.jpg"
+    game.is_active = False
     game.save_to_db()
     return game
 
@@ -44,5 +54,11 @@ def create_dummy_challenge(game_id):
 def create_fixtures():
     user = create_dummy_user()
     game = create_dummy_game()
+    game_not_active = create_dummy_game_not_active()
     challenge = create_dummy_challenge(game.id)
-    return {"user": user, "game": game, "challenge": challenge}
+    return {
+        "user": user,
+        "game": game,
+        "challenge": challenge,
+        "game_not_active": game_not_active,
+    }

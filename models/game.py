@@ -15,6 +15,10 @@ class GameModel(db.Model):
         "ChallengeModel", lazy="dynamic", cascade="all, delete-orphan"
     )
 
+    @classmethod
+    def get_active_games(cls):
+        return cls.query.filter(cls.is_active == True).all()
+
     def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()
