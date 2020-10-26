@@ -8,5 +8,5 @@ class TestIntegrationGame(BaseAPITestCase):
         with self.app_context():
             create_fixtures()
             games = GameModel.get_active_games()
-            self.assertEqual(len(games), 1, "Wrong user len")
+            self.assertEqual(len(games), 1, "Wrong game count")
             self.assertEqual(games[0].name, "FIFA", "Wrong title")
