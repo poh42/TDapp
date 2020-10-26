@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock, PropertyMock
 import json
 from models.user import UserModel
 from models.confirmation import ConfirmationModel
-from tests.utils import create_dummy_user, password, username, email
+from tests.utils import create_dummy_user, password, username, email, avatar
 
 
 class TestUserEndpoints(BaseAPITestCase):
@@ -16,7 +16,7 @@ class TestUserEndpoints(BaseAPITestCase):
                 with patch("utils.mailgun.Mailgun.send_email") as send_email:
                     patched_create_user.side_effect = (TestClass(),)
                     data = json.dumps(
-                        dict(email=email, password=password, username=username)
+                        dict(email=email, password=password, username=username, avatar=avatar)
                     )
                     rv = c.post(
                         "/user/register", data=data, content_type="application/json"
@@ -27,9 +27,11 @@ class TestUserEndpoints(BaseAPITestCase):
                         json_data["message"],
                         "Message is incorrect",
                     )
+                    user = UserModel.find_by_username(username)
                     self.assertIsNotNone(
-                        UserModel.find_by_username(username), "User creation failed"
+                        user, "User creation failed"
                     )
+                    self.assertEqual(user.avatar, avatar, "Avatar not found")
                     self.assertEqual(rv.status_code, 201, "Wrong status code")
                     send_email.assert_called_once()
                     args, kwargs = send_email.call_args

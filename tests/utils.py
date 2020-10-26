@@ -5,6 +5,7 @@ from models.game import GameModel
 email = "test@topdog.com"
 password = "Pa55w0rd"
 username = "asdrubal"
+avatar = "https://avatar.com/1"
 
 
 def create_dummy_user():
@@ -13,6 +14,7 @@ def create_dummy_user():
     user.password = password
     user.username = username
     user.firebase_id = "dummy"
+    user.avatar = avatar
     user.save()
     return user
 

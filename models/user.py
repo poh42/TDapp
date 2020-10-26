@@ -25,6 +25,7 @@ class UserModel(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=func.now())
     is_active = db.Column(db.Boolean, default=True)
     allow_public_challenges = db.Column(db.Boolean, default=True)
+    avatar = db.Column(db.String(255))
 
     confirmation = db.relationship(
         "ConfirmationModel", lazy="dynamic", cascade="all, delete-orphan"
