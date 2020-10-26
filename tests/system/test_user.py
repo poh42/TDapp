@@ -204,3 +204,4 @@ class TestUserEndpoints(BaseAPITestCase):
                 )
                 self.assertEqual(user.id, user_data["id"])
                 self.assertEqual(user.firebase_id, user_data["firebase_id"])
+                self.assertIsNotNone(user.avatar, "Avatar should not be None")
