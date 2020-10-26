@@ -2,6 +2,7 @@ from ma import ma
 from models.user import UserModel
 from marshmallow import fields, validate, validates_schema
 from utils.validation import validate_lower_upper_fields
+from schemas.user_game import UserGameSchema
 
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
@@ -9,6 +10,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     password = fields.String(validate=validate.Length(min=6), required=True)
     playing_hours_begin = fields.Integer(validate=validate.Range(0, 23))
     playing_hours_end = fields.Integer(validate=validate.Range(0, 23))
+    user_games = fields.Nested(UserGameSchema, many=True)
 
     @validates_schema
     def validate_related_fields(self, data, **kwargs):

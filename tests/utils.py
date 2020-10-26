@@ -1,6 +1,7 @@
 from models.challenge_ import ChallengeModel
 from models.user import UserModel
 from models.game import GameModel
+from models.console import ConsoleModel
 
 email = "test@topdog.com"
 password = "Pa55w0rd"
@@ -37,6 +38,13 @@ def create_dummy_game_not_active():
     return game
 
 
+def create_dummy_console():
+    console = ConsoleModel()
+    console.name = "PS Vita"
+    console.save_to_db()
+    return console
+
+
 def create_dummy_challenge(game_id):
     challenge = ChallengeModel()
     challenge.type = "1v1"
@@ -55,10 +63,12 @@ def create_fixtures():
     user = create_dummy_user()
     game = create_dummy_game()
     game_not_active = create_dummy_game_not_active()
+    console = create_dummy_console()
     challenge = create_dummy_challenge(game.id)
     return {
         "user": user,
         "game": game,
         "challenge": challenge,
         "game_not_active": game_not_active,
+        "console": console,
     }

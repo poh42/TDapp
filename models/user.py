@@ -35,6 +35,10 @@ class UserModel(db.Model):
         "UserPhotoModel", lazy="dynamic", cascade="all, delete-orphan"
     )
 
+    user_games = db.relationship(
+        "UserGameModel", lazy="dynamic", cascade="all, delete-orphan"
+    )
+
     @property
     def most_recent_confirmation(self) -> "ConfirmationModel":
         return self.confirmation.order_by(db.desc(ConfirmationModel.expire_at)).first()

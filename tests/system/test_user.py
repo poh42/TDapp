@@ -3,7 +3,15 @@ from unittest.mock import patch, Mock, PropertyMock
 import json
 from models.user import UserModel
 from models.confirmation import ConfirmationModel
-from tests.utils import create_dummy_user, password, username, email, avatar
+from tests.utils import (
+    create_dummy_user,
+    password,
+    username,
+    email,
+    avatar,
+    create_dummy_console,
+    create_dummy_game,
+)
 
 
 class TestUserEndpoints(BaseAPITestCase):
@@ -12,47 +20,59 @@ class TestUserEndpoints(BaseAPITestCase):
             uid = 1
 
         with self.test_client() as c:
-            with patch("firebase_admin.auth.create_user") as patched_create_user:
-                with patch("utils.mailgun.Mailgun.send_email") as send_email:
-                    patched_create_user.side_effect = (TestClass(),)
-                    data = json.dumps(
-                        dict(
-                            email=email,
-                            password=password,
-                            username=username,
-                            avatar=avatar,
+            with self.app_context():
+                console = create_dummy_console()
+                game = create_dummy_game()
+                with patch("firebase_admin.auth.create_user") as patched_create_user:
+                    with patch("utils.mailgun.Mailgun.send_email") as send_email:
+                        patched_create_user.side_effect = (TestClass(),)
+                        data = json.dumps(
+                            dict(
+                                email=email,
+                                password=password,
+                                username=username,
+                                avatar=avatar,
+                                user_games=[
+                                    {
+                                        "console_id": console.id,
+                                        "game_id": game.id,
+                                        "gamertag": "Test",
+                                        "level": "Beginner",
+                                    }
+                                ],
+                            )
                         )
-                    )
-                    rv = c.post(
-                        "/user/register", data=data, content_type="application/json"
-                    )
-                    json_data = rv.get_json()
-                    self.assertEqual(
-                        "User creation successful",
-                        json_data["message"],
-                        "Message is incorrect",
-                    )
-                    user = UserModel.find_by_username(username)
-                    self.assertIsNotNone(user, "User creation failed")
-                    self.assertEqual(user.avatar, avatar, "Avatar not found")
-                    self.assertEqual(rv.status_code, 201, "Wrong status code")
-                    send_email.assert_called_once()
-                    args, kwargs = send_email.call_args
-                    self.assertEqual(args[0][0], email)
-                    self.assertEqual(
-                        args[1], "Registration confirmation", "Wrong title"
-                    )
-                    self.assertIn(
-                        "Please click to confirm your registration:",
-                        args[2],
-                        "Check if the message being sent is correct",
-                    )
-                    self.assertIn(
-                        "Please click to confirm your registration:",
-                        args[3],
-                        "Check if the message being sent is correct",
-                    )
-                    print(args)
+                        rv = c.post(
+                            "/user/register", data=data, content_type="application/json"
+                        )
+                        json_data = rv.get_json()
+                        print(json_data)
+                        self.assertEqual(
+                            "User creation successful",
+                            json_data["message"],
+                            "Message is incorrect",
+                        )
+                        user = UserModel.find_by_username(username)
+                        self.assertIsNotNone(user, "User creation failed")
+                        self.assertEqual(user.avatar, avatar, "Avatar not found")
+                        self.assertEqual(rv.status_code, 201, "Wrong status code")
+                        send_email.assert_called_once()
+                        args, kwargs = send_email.call_args
+                        self.assertEqual(args[0][0], email)
+                        self.assertEqual(
+                            args[1], "Registration confirmation", "Wrong title"
+                        )
+                        self.assertIn(
+                            "Please click to confirm your registration:",
+                            args[2],
+                            "Check if the message being sent is correct",
+                        )
+                        self.assertIn(
+                            "Please click to confirm your registration:",
+                            args[3],
+                            "Check if the message being sent is correct",
+                        )
+                        print(args)
 
     def test_login(self):
         class TestClass:

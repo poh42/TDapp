@@ -7,7 +7,6 @@ class UserGameModel(db.Model):
     console_id = db.Column(db.Integer, db.ForeignKey("consoles.id"))
     game_id = db.Column(db.Integer, db.ForeignKey("games.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    console_id = db.Column(db.Integer, db.ForeignKey("consoles.id"))
     level = db.Column(db.String(45), nullable=False)
     gamertag = db.Column(db.String(255), nullable=False)
 

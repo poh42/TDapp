@@ -11,6 +11,7 @@ from requests import HTTPError
 import simplejson as json
 from models.user import UserModel
 from models.confirmation import ConfirmationModel
+from models.user_game import UserGameModel
 from schemas.user import UserSchema
 from schemas.admin_status import AdminStatusSchema
 import logging
@@ -35,6 +36,19 @@ class UserRegister(Resource):
             confirmation = ConfirmationModel(user_instance.id)
             confirmation.save_to_db()
             user_instance.send_confirmation_email()
+            games_data = json_data.get("user_games")
+            if games_data:
+                user_id = user_instance.id
+                for game in games_data:
+                    game_model = UserGameModel(
+                        user_id=user_id,
+                        console_id=game["console_id"],
+                        game_id=game["game_id"],
+                        level=game["level"],
+                        gamertag=game["gamertag"],
+                    )
+                    game_model.save_to_db()
+
         except auth.EmailAlreadyExistsError as e:
             return {"message": "Email is already registered"}, 400
         except Exception as e:
