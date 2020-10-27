@@ -19,3 +19,7 @@ class Results1v1Model(db.Model):
     player_1 = db.relationship("UserModel", foreign_keys=[player_1_id])
     player_2 = db.relationship("UserModel", foreign_keys=[player_2_id])
     challenge = db.relationship("ChallengeModel")
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()

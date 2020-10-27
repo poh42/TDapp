@@ -90,7 +90,8 @@ class ChallengeList(Resource):
 class ResultsByUser(Resource):
     @classmethod
     def get(cls, user_id):
-        sql = text("""
+        sql = text(
+            """
             select
                 c.id as challenge_id,
                 c."name" as challenge_name,
@@ -115,8 +116,8 @@ class ResultsByUser(Resource):
                 and (rv.player_1_id = :user_id
                 or rv.player_2_id = :user_id)
             order by rv.played DESC
-            """)
+            """
+        )
 
         results = db.engine.execute(sql, user_id=user_id).fetchall()
         return {"message": "Results found", "results": [dict(r) for r in results]}
-

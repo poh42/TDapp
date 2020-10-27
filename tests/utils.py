@@ -2,6 +2,8 @@ from models.challenge_ import ChallengeModel
 from models.user import UserModel
 from models.game import GameModel
 from models.console import ConsoleModel
+from models.results_1v1 import Results1v1Model
+from datetime import datetime
 
 email = "test@topdog.com"
 password = "Pa55w0rd"
@@ -59,16 +61,30 @@ def create_dummy_challenge(game_id):
     return challenge
 
 
+def create_dummy_result(challenge_id, user1_id, user2_id):
+    result_1v1 = Results1v1Model()
+    result_1v1.challenge_id = challenge_id
+    result_1v1.player_1_id = user1_id
+    result_1v1.player_2_id = user2_id
+    result_1v1.score_player_1 = 1
+    result_1v1.score_player_2 = 0
+    result_1v1.played = datetime(2019, 10, 1)
+    result_1v1.save_to_db()
+    return result_1v1
+
+
 def create_fixtures():
     user = create_dummy_user()
     game = create_dummy_game()
     game_not_active = create_dummy_game_not_active()
     console = create_dummy_console()
     challenge = create_dummy_challenge(game.id)
+    result_1v1 = create_dummy_result(challenge.id, user.id, user.id)
     return {
         "user": user,
         "game": game,
         "challenge": challenge,
         "game_not_active": game_not_active,
         "console": console,
+        "result_1v1": result_1v1,
     }
