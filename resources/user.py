@@ -44,7 +44,6 @@ class UserRegister(Resource):
                         user_id=user_id,
                         console_id=game["console_id"],
                         game_id=game["game_id"],
-                        level=game["level"],
                         gamertag=game["gamertag"],
                     )
                     game_model.save_to_db()

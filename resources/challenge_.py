@@ -1,5 +1,6 @@
 from marshmallow import ValidationError
 
+from db import db
 from models.game import GameModel
 from models.results_1v1 import Results1v1Model
 from models.challenge_ import ChallengeModel
@@ -8,7 +9,7 @@ from schemas.challenge_ import ChallengeSchema
 from flask import request
 from datetime import datetime
 from sqlalchemy.orm import joinedload
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 
 challenge_schema = ChallengeSchema()
 
@@ -89,14 +90,33 @@ class ChallengeList(Resource):
 class ResultsByUser(Resource):
     @classmethod
     def get(cls, user_id):
-        data = (
-            ChallengeModel.query.join(Results1v1Model)
-            .filter(
-                or_(
-                    Results1v1Model.player_1_id == user_id,
-                    Results1v1Model.player_2_id == user_id,
-                )
-            )
-            .all()
-        )
-        return {"challenges": challenge_schema.dump(data, many=True)}
+        sql = text("""
+            select
+                c.id as challenge_id,
+                c."name" as challenge_name,
+                g."name" as game_name,
+                rv.played,
+                rv.score_player_1,
+                rv.score_player_2,
+                u1.username as user_1_username,
+                u2.username as user_2_username
+            from
+                results_1v1 rv
+            inner join challenges c on
+                rv.challenge_id = c.id
+            inner join users u1 on
+                rv.player_1_id = u1.id
+            inner join users u2 on
+                rv.player_2_id = u2.id
+            inner join games g on
+                g.id = c.game_id 
+            where
+                rv.played is not null
+                and (rv.player_1_id = :user_id
+                or rv.player_2_id = :user_id)
+            order by rv.played DESC
+            """)
+
+        results = db.engine.execute(sql, user_id=user_id).fetchall()
+        return {"message": "Results found", "results": [dict(r) for r in results]}
+

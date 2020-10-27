@@ -7,7 +7,7 @@ class UserGameModel(db.Model):
     console_id = db.Column(db.Integer, db.ForeignKey("consoles.id"))
     game_id = db.Column(db.Integer, db.ForeignKey("games.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    level = db.Column(db.String(45), nullable=False)
+    level = db.Column(db.String(45), nullable=False, default="beginner")
     gamertag = db.Column(db.String(255), nullable=False)
 
     def save_to_db(self):

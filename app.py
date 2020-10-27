@@ -12,7 +12,7 @@ from marshmallow import ValidationError
 from ma import ma
 from db import db
 from resources.confirmation import Confirmation, ConfirmationByUser
-from resources.challenge_ import Challenge, ChallengeList
+from resources.challenge_ import Challenge, ChallengeList, ResultsByUser
 from resources.game import GamesByConsole
 from resources.user import (
     UserRegister,
@@ -49,7 +49,7 @@ migrate = Migrate(app, db)
 
 @api.representation("application/json")
 def output_json(data, code, headers=None):
-    resp = make_response(simplejson.dumps(data), code)
+    resp = make_response(simplejson.dumps(data, default=str), code)
     resp.headers.extend(headers or {})
     return resp
 
@@ -78,6 +78,7 @@ api.add_resource(Challenge, "/challenge/<int:challenge_id>")
 api.add_resource(ChallengeList, "/challenges")
 api.add_resource(ImageUpload, "/upload/image")
 api.add_resource(GamesByConsole, "/console/<int:console_id>/games")
+api.add_resource(ResultsByUser, "/challenges/<int:user_id>/getResultsUser")
 
 db.init_app(app)
 migrate.init_app(app)

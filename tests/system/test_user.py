@@ -3,6 +3,7 @@ from unittest.mock import patch, Mock, PropertyMock
 import json
 from models.user import UserModel
 from models.confirmation import ConfirmationModel
+from models.user_game import UserGameModel
 from tests.utils import (
     create_dummy_user,
     password,
@@ -37,7 +38,6 @@ class TestUserEndpoints(BaseAPITestCase):
                                         "console_id": console.id,
                                         "game_id": game.id,
                                         "gamertag": "Test",
-                                        "level": "Beginner",
                                     }
                                 ],
                             )
@@ -72,7 +72,17 @@ class TestUserEndpoints(BaseAPITestCase):
                             args[3],
                             "Check if the message being sent is correct",
                         )
-                        print(args)
+                        user_game = UserGameModel.query.filter_by(
+                            user_id=user.id
+                        ).first()
+                        self.assertIsNotNone(user_game, "UserGameModel creation failed")
+                        self.assertEqual(
+                            user_game.console_id, console.id, "Wrong console id"
+                        )
+                        self.assertEqual(user_game.game_id, game.id, "Wrong game id")
+                        self.assertEqual(
+                            user_game.level, "beginner", "Wrong user_game level"
+                        )  # TODO check what should be default level
 
     def test_login(self):
         class TestClass:

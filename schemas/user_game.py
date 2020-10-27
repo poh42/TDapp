@@ -9,5 +9,5 @@ class UserGameSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
         model = UserGameModel
-        dump_only = ("id", "created_at", "updated_at", "user_id")
+        dump_only = ("id", "created_at", "updated_at", "user_id", "level")
         load_instance = True
