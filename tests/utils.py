@@ -21,6 +21,7 @@ def create_dummy_user():
     user.save()
     return user
 
+
 def create_second_user():
     user = UserModel()
     user.email = "test@example.com"

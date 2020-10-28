@@ -14,9 +14,11 @@ from datetime import datetime
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, text
 from schemas.challenge_user import ChallengeUserSchema
+from schemas.results_1v1 import Results1v1Schema
 
 challenge_schema = ChallengeSchema()
 challenge_user_schema = ChallengeUserSchema()
+results_1v1_schema = Results1v1Schema()
 
 
 class Challenge(Resource):
@@ -152,3 +154,12 @@ class ChallengePerson(Resource):
             },
             200,
         )
+
+
+class ChallengeResults(Resource):
+    @classmethod
+    def get(cls, challenge_id):
+        results = Results1v1Model.find_by_challenge_id(challenge_id)
+        if not results:
+            return {"message": "Results not found"}, 400
+        return {"message": "Results found", "results": results_1v1_schema.dump(results)}

@@ -17,6 +17,7 @@ from resources.challenge_ import (
     ChallengeList,
     ResultsByUser,
     ChallengePerson,
+    ChallengeResults,
 )
 from resources.game import GamesByConsole
 from resources.user import (
@@ -85,6 +86,7 @@ api.add_resource(ImageUpload, "/upload/image")
 api.add_resource(GamesByConsole, "/console/<int:console_id>/games")
 api.add_resource(ResultsByUser, "/challenges/<int:user_id>/getResultsUser")
 api.add_resource(ChallengePerson, "/challenge/<int:challenged_id>/create")
+api.add_resource(ChallengeResults, "/challenge/<int:challenge_id>/getResultsChallenge")
 
 db.init_app(app)
 migrate.init_app(app)

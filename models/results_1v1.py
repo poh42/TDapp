@@ -20,6 +20,10 @@ class Results1v1Model(db.Model):
     player_2 = db.relationship("UserModel", foreign_keys=[player_2_id])
     challenge = db.relationship("ChallengeModel")
 
+    @classmethod
+    def find_by_challenge_id(cls, challenge_id):
+        return cls.query.filter_by(challenge_id=challenge_id).first()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

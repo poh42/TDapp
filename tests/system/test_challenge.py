@@ -93,16 +93,18 @@ class TestChallengeEndpoints(BaseAPITestCase):
             challenge = fixtures["challenge"]
             second_user = fixtures["second_user"]
             with self.test_client() as c:
-                g.claims = {
-                    "user_id": "dummy"
-                }
-                data = json.dumps({
-                    "wager_id": challenge.id
-                })
-                rv = c.post(f"/challenge/{second_user.id}/create", data=data, content_type="application/json")
+                g.claims = {"user_id": "dummy"}
+                data = json.dumps({"wager_id": challenge.id})
+                rv = c.post(
+                    f"/challenge/{second_user.id}/create",
+                    data=data,
+                    content_type="application/json",
+                )
                 json_data = rv.get_json()
                 self.assertEqual(rv.status_code, 200)
                 challenge_user = json_data["challenge_user"]
                 self.assertEqual(challenge_user["status"], "OPEN", "Wrong status")
-                self.assertEqual(challenge_user["wager_id"], challenge.id, "Wrong challenge id")
+                self.assertEqual(
+                    challenge_user["wager_id"], challenge.id, "Wrong challenge id"
+                )
                 print("Test", json_data)
