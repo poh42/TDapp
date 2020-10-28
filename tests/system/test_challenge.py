@@ -139,10 +139,12 @@ class TestChallengeEndpoints(BaseAPITestCase):
             g.claims = {"user_id": "dummy"}
             with self.test_client() as c:
                 comment = "This is a comment"
-                data = json.dumps({
-                    "comments": comment
-                })
-                rv = c.post(f"/challenge/{challenge.id}/report", data=data, content_type="application/json")
+                data = json.dumps({"comments": comment})
+                rv = c.post(
+                    f"/challenge/{challenge.id}/report",
+                    data=data,
+                    content_type="application/json",
+                )
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
                 json_data = rv.get_json()
                 dispute = json_data["dispute"]
