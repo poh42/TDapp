@@ -5,6 +5,7 @@ from utils.mailgun import Mailgun
 from flask import request, url_for
 from models.confirmation import ConfirmationModel
 from models.user_photo import UserPhotoModel
+from models.friendship import friendship_table
 
 
 class UserModel(db.Model):
