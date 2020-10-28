@@ -3,6 +3,7 @@ from marshmallow import ValidationError
 from db import db
 from decorators import check_token
 from models.challenge_user import ChallengeUserModel, STATUS_OPEN
+from models.dispute import DisputeModel
 from models.game import GameModel
 from models.results_1v1 import Results1v1Model
 from models.challenge_ import ChallengeModel
@@ -14,11 +15,13 @@ from datetime import datetime
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, text
 from schemas.challenge_user import ChallengeUserSchema
+from schemas.dispute import DisputeSchema
 from schemas.results_1v1 import Results1v1Schema
 
 challenge_schema = ChallengeSchema()
 challenge_user_schema = ChallengeUserSchema()
 results_1v1_schema = Results1v1Schema()
+dispute_schema = DisputeSchema()
 
 
 class Challenge(Resource):
@@ -163,3 +166,21 @@ class ChallengeResults(Resource):
         if not results:
             return {"message": "Results not found"}, 400
         return {"message": "Results found", "results": results_1v1_schema.dump(results)}
+
+
+class ReportChallenge(Resource):
+    @classmethod
+    @check_token
+    def post(cls, challenge_id):
+        json_data = request.get_json()
+        dispute: DisputeModel = dispute_schema.load(json_data)
+        dispute.challenge_id = challenge_id
+        current_user_firebase_id = g.claims.get("user_id", None)
+        if current_user_firebase_id is None:
+            return {"message": "Wrong claims"}, 400
+        dispute.user_id = UserModel.find_by_firebase_id(current_user_firebase_id).id
+        dispute.save_to_db()
+        return (
+            {"message": "Dispute created", "dispute": dispute_schema.dump(dispute)},
+            200,
+        )
