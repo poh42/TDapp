@@ -107,4 +107,3 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 self.assertEqual(
                     challenge_user["wager_id"], challenge.id, "Wrong challenge id"
                 )
-                print("Test", json_data)
