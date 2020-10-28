@@ -107,3 +107,27 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 self.assertEqual(
                     challenge_user["wager_id"], challenge.id, "Wrong challenge id"
                 )
+
+    def test_get_result(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            result = fixtures["result_1v1"]
+            with self.test_client() as c:
+                rv = c.get(
+                    f"/challenge/{result.challenge_id}/getResultsChallenge",
+                    content_type="application/json",
+                )
+                self.assertEqual(rv.status_code, 200, "Wrong status code")
+                json_data = rv.get_json()
+                results = json_data["results"]
+                self.assertEqual(
+                    result.score_player_1,
+                    results["score_player_1"],
+                    "Wrong score for player 1",
+                )
+                self.assertEqual(
+                    result.score_player_2,
+                    results["score_player_2"],
+                    "Wrong score for player 1",
+                )
+                self.assertIn("played", results, "Played should be in the results")
