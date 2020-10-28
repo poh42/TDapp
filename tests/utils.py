@@ -21,6 +21,16 @@ def create_dummy_user():
     user.save()
     return user
 
+def create_second_user():
+    user = UserModel()
+    user.email = "test@example.com"
+    user.password = "1234567"
+    user.username = "user2"
+    user.firebase_id = "dummy_2"
+    user.avatar = "https://avatar.com/2"
+    user.save()
+    return user
+
 
 def create_dummy_game():
     game = GameModel()
@@ -75,6 +85,7 @@ def create_dummy_result(challenge_id, user1_id, user2_id):
 
 def create_fixtures():
     user = create_dummy_user()
+    second_user = create_second_user()
     game = create_dummy_game()
     game_not_active = create_dummy_game_not_active()
     console = create_dummy_console()
@@ -82,6 +93,7 @@ def create_fixtures():
     result_1v1 = create_dummy_result(challenge.id, user.id, user.id)
     return {
         "user": user,
+        "second_user": second_user,
         "game": game,
         "challenge": challenge,
         "game_not_active": game_not_active,

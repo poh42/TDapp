@@ -1,17 +1,22 @@
 from marshmallow import ValidationError
 
 from db import db
+from decorators import check_token
+from models.challenge_user import ChallengeUserModel, STATUS_OPEN
 from models.game import GameModel
 from models.results_1v1 import Results1v1Model
 from models.challenge_ import ChallengeModel
 from flask_restful import Resource
+from models.user import UserModel
 from schemas.challenge_ import ChallengeSchema
-from flask import request
+from flask import request, g
 from datetime import datetime
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, text
+from schemas.challenge_user import ChallengeUserSchema
 
 challenge_schema = ChallengeSchema()
+challenge_user_schema = ChallengeUserSchema()
 
 
 class Challenge(Resource):
@@ -121,3 +126,29 @@ class ResultsByUser(Resource):
 
         results = db.engine.execute(sql, user_id=user_id).fetchall()
         return {"message": "Results found", "results": [dict(r) for r in results]}
+
+
+class ChallengePerson(Resource):
+    @classmethod
+    @check_token
+    def post(cls, challenged_id):
+        challenge_user: ChallengeUserModel = challenge_user_schema.load(
+            request.get_json()
+        )
+        user = UserModel.find_by_id(challenged_id)
+        if not user:
+            return {"message": "User not found"}, 400
+        current_user = g.claims.get("user_id", None)
+        if current_user is None:
+            return {"message": "Wrong claims"}, 400
+        challenge_user.challenger_id = UserModel.find_by_firebase_id(current_user).id
+        challenge_user.challenged_id = challenged_id
+        challenge_user.status = STATUS_OPEN
+        challenge_user.save_to_db()
+        return (
+            {
+                "challenge_user": challenge_user_schema.dump(challenge_user),
+                "message": "User challenged",
+            },
+            200,
+        )

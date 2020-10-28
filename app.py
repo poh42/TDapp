@@ -12,7 +12,12 @@ from marshmallow import ValidationError
 from ma import ma
 from db import db
 from resources.confirmation import Confirmation, ConfirmationByUser
-from resources.challenge_ import Challenge, ChallengeList, ResultsByUser
+from resources.challenge_ import (
+    Challenge,
+    ChallengeList,
+    ResultsByUser,
+    ChallengePerson,
+)
 from resources.game import GamesByConsole
 from resources.user import (
     UserRegister,
@@ -79,6 +84,7 @@ api.add_resource(ChallengeList, "/challenges")
 api.add_resource(ImageUpload, "/upload/image")
 api.add_resource(GamesByConsole, "/console/<int:console_id>/games")
 api.add_resource(ResultsByUser, "/challenges/<int:user_id>/getResultsUser")
+api.add_resource(ChallengePerson, "/challenge/<int:challenged_id>/create")
 
 db.init_app(app)
 migrate.init_app(app)

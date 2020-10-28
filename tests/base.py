@@ -2,14 +2,14 @@ import unittest
 from unittest.mock import patch
 import importlib
 import app
-from resources import user
+from resources import user, challenge_
 from flask_migrate import upgrade, downgrade
 from app import db
 
 
 class BaseAPITestCase(unittest.TestCase):
     def reload_modules(self):
-        modules_to_reload = [app, user]
+        modules_to_reload = [app, user, challenge_]
         for m in modules_to_reload:
             importlib.reload(m)
 

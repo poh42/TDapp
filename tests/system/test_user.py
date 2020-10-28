@@ -46,7 +46,6 @@ class TestUserEndpoints(BaseAPITestCase):
                             "/user/register", data=data, content_type="application/json"
                         )
                         json_data = rv.get_json()
-                        print(json_data)
                         self.assertEqual(
                             "User creation successful",
                             json_data["message"],

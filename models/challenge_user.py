@@ -1,6 +1,10 @@
 from db import db
 from sqlalchemy.sql import func
 
+STATUS_OPEN = "OPEN"
+STATUS_ACCEPTED = "ACCEPTED"
+STATUS_DECLINED = "DECLINED"
+
 
 class ChallengeUserModel(db.Model):
     __tablename__ = "challenge_users"
