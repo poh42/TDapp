@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta
+
+from sqlalchemy import text
+
 from db import db
 from sqlalchemy.sql import func
 from firebase_admin import auth
@@ -75,3 +79,46 @@ class UserModel(db.Model):
         text = f"Please click to confirm your registration: {link}"
         html = f'<html>Please click to confirm your registration: <a href="{link}">{link}</a></html>'
         return Mailgun.send_email([self.email], subject, text, html)
+
+    @classmethod
+    def get_top_earners(cls):
+        sql = """
+        with t as (
+            select SUM(t2.credit_change) as credit_change , t2.user_id from transactions t2
+                    where t2.created_at >= :week_ago
+            group by t2.user_id 
+        ) select u.*, coalesce(t.credit_change, 0) as credit_change from users u
+            left join t on t.user_id = u.id
+          order by COALESCE(t.credit_change, 0) desc
+        """
+        week_ago = datetime.today() - timedelta(days=7)
+        data = db.engine.execute(text(sql), week_ago=week_ago).fetchall()
+        return [dict(d) for d in data]
+
+    @classmethod
+    def filter_users_by_game(cls, title):
+        sql = """
+         select u.* from users u
+            inner join user_games t on t.user_id = u.id
+            inner join games g ON t.game_id = g.id
+         WHERE g.name ILIKE :title
+         order by u.username ASC
+        """
+        data = db.engine.execute(text(sql), title=f"%{title}%").fetchall()
+        return [dict(d) for d in data]
+
+    def filter_by_friends(self):
+        sql = """
+        SELECT u.* from users u
+            INNER JOIN friendships f ON u.id = f.followed_id
+        WHERE f.follower_id = :own_id
+        ORDER BY u.username ASC
+        """
+        data = db.engine.execute(text(sql), own_id=self.id).fetchall()
+        return [dict(d) for d in data]
+
+    @classmethod
+    def get_all_users(cls):
+        sql = "SELECT u.* from users u"
+        data = db.engine.execute(text(sql)).fetchall()
+        return [dict(d) for d in data]

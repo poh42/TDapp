@@ -4,6 +4,7 @@ import json
 from models.user import UserModel
 from models.confirmation import ConfirmationModel
 from models.user_game import UserGameModel
+from flask import g
 from tests.utils import (
     create_dummy_user,
     password,
@@ -12,6 +13,7 @@ from tests.utils import (
     avatar,
     create_dummy_console,
     create_dummy_game,
+    create_fixtures,
 )
 
 
@@ -237,3 +239,45 @@ class TestUserEndpoints(BaseAPITestCase):
                 self.assertEqual(user.id, user_data["id"])
                 self.assertEqual(user.firebase_id, user_data["firebase_id"])
                 self.assertIsNotNone(user.avatar, "Avatar should not be None")
+
+    def test_get_user_list(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            with self.test_client() as c:
+                with self.subTest(get="all"):
+                    rv = c.get("/users", content_type="application/json")
+                    self.assertEqual(rv.status_code, 200)
+                    json_data = rv.get_json()
+                    self.assertTrue(len(json_data["users"]) > 0)
+                with self.subTest(get="friends"):
+                    g.claims = {"user_id": "dummy"}
+                    rv = c.get("/users?friends=true")
+                    self.assertEqual(rv.status_code, 200)
+                    json_data = rv.get_json()
+                    self.assertTrue(len(json_data["users"]) == 1)
+                    self.assertEqual(
+                        json_data["users"][0]["id"],
+                        fixtures["second_user"].id,
+                        "Wrong friend",
+                    )
+                with self.subTest(get="topEarners"):
+                    rv = c.get(
+                        "/users?topEarners=true", content_type="application/json"
+                    )
+                    self.assertEqual(rv.status_code, 200)
+                    json_data = rv.get_json()
+                    self.assertTrue(len(json_data["users"]) > 0)
+                    self.assertEqual(
+                        json_data["users"][0]["credit_change"],
+                        fixtures["transaction"].credit_change,
+                    )
+                with self.subTest(get="game"):
+                    rv = c.get("/users?game=FIF", content_type="application/json")
+                    self.assertEqual(rv.status_code, 200)
+                    json_data = rv.get_json()
+                    self.assertTrue(len(json_data["users"]) == 1)
+                with self.subTest(get="game_not_found"):
+                    rv = c.get("/users?game=not_found")
+                    self.assertEqual(rv.status_code, 200)
+                    json_data = rv.get_json()
+                    self.assertTrue(len(json_data["users"]) == 0)

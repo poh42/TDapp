@@ -19,3 +19,7 @@ class TransactionModel(db.Model):
     type = db.Column(db.String(60), nullable=False)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
