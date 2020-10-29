@@ -5,6 +5,7 @@ from decorators import check_token
 from models.challenge_user import ChallengeUserModel, STATUS_OPEN
 from models.dispute import DisputeModel
 from models.game import GameModel
+from models.transaction import TransactionModel
 from models.results_1v1 import Results1v1Model
 from models.challenge_ import ChallengeModel
 from flask_restful import Resource
