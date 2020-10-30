@@ -149,6 +149,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 json_data = rv.get_json()
                 dispute = json_data["dispute"]
                 self.assertEqual(dispute["comments"], comment, "Wrong comment")
+
     def test_post_challenge(self):
         with self.app_context():
             fixtures = create_fixtures()
@@ -160,18 +161,30 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 "buy_in": 10,
                 "reward": 100,
                 "status": "OPEN",
-                "due_date": "2019-01-01T00:00:00"
+                "due_date": "2019-01-01T00:00:00",
             }
             with self.test_client() as c:
-                rv = c.post("/challenge", data=json.dumps(data), content_type="application/json")
+                rv = c.post(
+                    "/challenge", data=json.dumps(data), content_type="application/json"
+                )
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
                 json_data = rv.get_json()
                 challenge_created = json_data["challenge"]
                 self.assertEqual(challenge_created["type"], data["type"], "Wrong type")
                 self.assertEqual(challenge_created["name"], data["name"], "Wrong name")
-                self.assertEqual(challenge_created["game_id"], data["game_id"], "Wrong game id")
-                self.assertAlmostEqual(challenge_created["buy_in"], data["buy_in"], "Wrong buy in")
-                self.assertAlmostEqual(challenge_created["reward"], data["reward"], "Wrong reward")
+                self.assertEqual(
+                    challenge_created["game_id"], data["game_id"], "Wrong game id"
+                )
+                self.assertAlmostEqual(
+                    challenge_created["buy_in"], data["buy_in"], "Wrong buy in"
+                )
+                self.assertAlmostEqual(
+                    challenge_created["reward"], data["reward"], "Wrong reward"
+                )
                 self.assertEqual(challenge_created["date"], data["date"], "Wrong date")
-                self.assertEqual(challenge_created["due_date"], data["due_date"], "Wrong due_date")
-                self.assertEqual(challenge_created["status"], data["status"], "Wrong type")
+                self.assertEqual(
+                    challenge_created["due_date"], data["due_date"], "Wrong due_date"
+                )
+                self.assertEqual(
+                    challenge_created["status"], data["status"], "Wrong type"
+                )

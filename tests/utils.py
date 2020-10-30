@@ -1,4 +1,5 @@
 from models.challenge_ import ChallengeModel
+from models.confirmation import ConfirmationModel
 from models.transaction import TransactionModel
 from models.user import UserModel
 from models.game import GameModel
@@ -34,6 +35,17 @@ def create_second_user():
     user.username = "user2"
     user.firebase_id = "dummy_2"
     user.avatar = "https://avatar.com/2"
+    user.save()
+    return user
+
+
+def create_login_user():
+    user = UserModel()
+    user.email = "asdr@hotmail.com"
+    user.password = "1234567"
+    user.username = "asdrutest"
+    user.firebase_id = "myLbdKL8dFhipvanv4AnIUaJpqd2"
+    user.avatar = "https://avatar.com/3"
     user.save()
     return user
 
@@ -118,8 +130,16 @@ def create_dummy_transaction(user_id):
     return transaction
 
 
+def create_confirmation_already_confirmed(user_id):
+    confirmation = ConfirmationModel(user_id)
+    confirmation.confirmed = True
+    confirmation.save_to_db()
+    return confirmation
+
+
 def create_fixtures():
     user = create_dummy_user()
+    user_login = create_login_user()
     second_user = create_second_user()
     game = create_dummy_game()
     game_not_active = create_dummy_game_not_active()
@@ -127,8 +147,11 @@ def create_fixtures():
     challenge = create_dummy_challenge(game.id)
     result_1v1 = create_dummy_result(challenge.id, user.id, user.id)
     create_dummy_friendship(user.id, second_user.id)
+    create_dummy_friendship(user_login.id, second_user.id)
     user_game = create_dummy_user_game(game.id, second_user.id, console.id)
     transaction = create_dummy_transaction(second_user.id)
+    transaction2 = create_dummy_transaction(user_login.id)
+    confirmation = create_confirmation_already_confirmed(user_login.id)
     return {
         "user": user,
         "second_user": second_user,
@@ -140,4 +163,6 @@ def create_fixtures():
         "friendship": {"follower_id": user.id, "followed_id": second_user.id},
         "user_game": user_game,
         "transaction": transaction,
+        "transaction2": transaction2,
+        "user_login": user_login,
     }

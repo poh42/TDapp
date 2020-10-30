@@ -77,6 +77,13 @@ def handle_marshmallow_error(err):
     return jsonify(err.messages), 400
 
 
+@app.cli.command("create_fixtures")
+def create_fixtures_command():
+    from tests.utils import create_fixtures
+
+    create_fixtures()
+
+
 api.add_resource(UserRegister, "/user/register")
 api.add_resource(UserLogin, "/user/login")
 api.add_resource(SetAdminStatus, "/user/set_admin/<int:user_id>")
