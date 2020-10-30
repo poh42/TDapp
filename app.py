@@ -19,6 +19,7 @@ from resources.challenge_ import (
     ChallengePerson,
     ChallengeResults,
     ReportChallenge,
+    ChallengePost,
 )
 from resources.game import GamesByConsole
 from resources.user import (
@@ -84,6 +85,7 @@ api.add_resource(UserList, "/users")
 api.add_resource(Confirmation, "/user/confirm/<string:confirmation_id>")
 api.add_resource(ConfirmationByUser, "/confirmation/user/<int:user_id>")
 api.add_resource(Challenge, "/challenge/<int:challenge_id>")
+api.add_resource(ChallengePost, "/challenge")
 api.add_resource(ChallengeList, "/challenges")
 api.add_resource(ImageUpload, "/upload/image")
 api.add_resource(GamesByConsole, "/console/<int:console_id>/games")

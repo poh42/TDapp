@@ -25,6 +25,18 @@ results_1v1_schema = Results1v1Schema()
 dispute_schema = DisputeSchema()
 
 
+class ChallengePost(Resource):
+    @classmethod
+    @check_token
+    def post(cls):
+        challenge = challenge_schema.load(request.get_json())
+        challenge.save_to_db()
+        return {
+            "message": "Challenge created",
+            "challenge": challenge_schema.dump(challenge),
+        }
+
+
 class Challenge(Resource):
     @classmethod
     def get(cls, challenge_id):

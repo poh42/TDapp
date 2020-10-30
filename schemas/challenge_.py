@@ -10,6 +10,7 @@ from schemas.results_1v1 import Results1v1Schema
 class ChallengeSchema(ma.SQLAlchemyAutoSchema):
     results_1v1 = fields.Nested(Results1v1Schema)
     game = fields.Nested(GameSchema)
+    game_id = fields.Integer()
 
     @validates_schema
     def validate_related_fields(self, data, **kwargs):
