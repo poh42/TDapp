@@ -5,7 +5,7 @@ from sqlalchemy import text
 from db import db
 from sqlalchemy.sql import func
 from firebase_admin import auth
-from utils.mailgun import Mailgun
+from utils.email import send_email
 from flask import request, url_for
 from models.confirmation import ConfirmationModel
 from models.user_photo import UserPhotoModel
@@ -78,7 +78,7 @@ class UserModel(db.Model):
         subject = "Registration confirmation"
         text = f"Please click to confirm your registration: {link}"
         html = f'<html>Please click to confirm your registration: <a href="{link}">{link}</a></html>'
-        return Mailgun.send_email([self.email], subject, text, html)
+        return send_email([self.email], subject, text, html)
 
     @classmethod
     def get_top_earners(cls):
