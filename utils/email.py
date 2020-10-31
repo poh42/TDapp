@@ -5,6 +5,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 def send_email(to: List[str], subject: str, text: str, html: str) -> None:
     # TODO this should support html messages
     # Check https://stackoverflow.com/questions/882712/sending-html-email-using-python
@@ -17,16 +18,23 @@ To: %s
 Subject: %s
 
     %s
-    """ % (sent_from, ", ".join(to), subject, text)
+    """ % (
+        sent_from,
+        ", ".join(to),
+        subject,
+        text,
+    )
 
     try:
-        server = smtplib.SMTP_SSL(os.getenv("EMAIL_SMTP_SERVER"), os.getenv("EMAIL_SMTP_PORT"))
+        server = smtplib.SMTP_SSL(
+            os.getenv("EMAIL_SMTP_SERVER"), os.getenv("EMAIL_SMTP_PORT")
+        )
         server.ehlo()
         server.login(email_user, email_password)
         server.sendmail(sent_from, to, email_text)
         server.close()
 
-        print('Email sent!')
+        print("Email sent!")
     except Exception as e:
         print("There was an error sending email", e)
         log.error(e)

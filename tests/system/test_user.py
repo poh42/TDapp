@@ -27,7 +27,7 @@ class TestUserEndpoints(BaseAPITestCase):
                 console = create_dummy_console()
                 game = create_dummy_game()
                 with patch("firebase_admin.auth.create_user") as patched_create_user:
-                    with patch("utils.mailgun.Mailgun.send_email") as send_email:
+                    with patch("models.user.send_email") as send_email:
                         patched_create_user.side_effect = (TestClass(),)
                         data = json.dumps(
                             dict(
