@@ -32,7 +32,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: PlayTopDog/application_backend:latest
+          tags: playtopdog/application_backend:latest
 
       - name: Execute deploy command
         uses: appleboy/ssh-action@master
