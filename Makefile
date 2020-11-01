@@ -24,3 +24,16 @@ up-clean: up
 
 up-build-clean: rm
 up-build-clean: up-build
+
+up-prod:
+	docker-compose -f docker-compose.prod.yml up -d --remove-orphans
+
+stop-prod:
+	docker-compose -f docker-compose.prod.yml stop
+
+build-prod:
+	docker-compose -f docker-compose.prod.yml build
+
+prod: stop-prod
+prod: build-prod
+prod: up-prod
