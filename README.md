@@ -7,7 +7,6 @@ This is the repo that contains the backend of the application written in Python 
 In order to install you must
 
 - Clone the repository using `git clone git@github.com:PlayTopDog/application_backend.git`
-- Create a virtual environment using venv and install the requirements using `pip install -r requirements.txt`
 - Create a new project in firebase if you don't already have one
 - In the config of firebase go to __Project Overview -> General__ and scroll to the bottom
 - You will find a firebase config like the following:
@@ -52,6 +51,10 @@ APPLICATION_SETTINGS=default_config.py
 AWS_ACCESS_KEY_ID=""
 AWS_ACCESS_KEY_SECRET=""
 AWS_BUCKET=""
+EMAIL_USER=""
+EMAIL_PASSWORD=""
+EMAIL_SMTP_SERVER=""
+EMAIL_SMTP_PORT=""
 ```
 - Also create a `.env.test` file that's gonna be used for testing. It's recommended that the `DATABASE_URI` is different for testing
 - Set up a mailgun account and with the Domain and API key
@@ -59,6 +62,31 @@ AWS_BUCKET=""
 
 ## Running the app
 
-To run the APP use `cd [directory of the app] && flask run`
+For the first run:
+``` sh
+make up-build
+```
 
-In order to run the test suite use `python -m unittest discover -s [path of test files] -t [root path of the backend app]`
+For regular executions
+``` sh
+make up
+```
+
+To test
+``` sh
+make test
+```
+
+For more commands, check the `Makefile`
+
+## More development stuff
+
+With the server up, you can visit this sites:
+
+- PGAdmin: To check the database locally without disrupting your local DBs http://localhost:8081
+- MailHog: To check sent mails http://localhost:8025
+- Dozzle: To check Docker logs separately http://localhost:999
+
+# Production
+
+Production deploys itself whenever `develop` is updated. The URL is http://3.15.194.120/

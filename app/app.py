@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, send_from_directory, redirect
 from flask_restful import Api
 from flask_migrate import Migrate, upgrade
@@ -40,11 +39,9 @@ if "unittest" in sys.modules.keys():
     # tests are running
     log.info("Loading .env.test environment variables")
     current_path = os.path.dirname(__file__)
-    load_dotenv(os.path.join(current_path, ".env.test"), verbose=True)
 else:
     # Tests are not running
     log.info("Loading .env environment variables")
-    load_dotenv(".env", verbose=True)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET_KEY")
