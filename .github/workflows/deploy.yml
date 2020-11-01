@@ -15,8 +15,8 @@ jobs:
       - name: Upload files
         uses: appleboy/scp-action@master
         with:
-          host: ec2-3-138-245-30.us-east-2.compute.amazonaws.com
-          username: ubuntu
+          host: ${{ secrets.AWS_DEVELOPMENT_HOST }}
+          username: ${{ secrets.AWS_DEVELOPMENT_USER }}
           key: ${{ secrets.AWS_DEVELOPMENT_PEM }}
           source: "."
           target: "app"
@@ -24,7 +24,7 @@ jobs:
       - name: Execute deploy command
         uses: appleboy/ssh-action@master
         with:
-          host: ec2-3-138-245-30.us-east-2.compute.amazonaws.com
-          username: ubuntu
+          host: ${{ secrets.AWS_DEVELOPMENT_HOST }}
+          username: ${{ secrets.AWS_DEVELOPMENT_USER }}
           key: ${{ secrets.AWS_DEVELOPMENT_PEM }}
           script: ./deploy
