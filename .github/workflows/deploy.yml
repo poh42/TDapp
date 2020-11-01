@@ -1,16 +1,17 @@
 name: Deploy to development
 
 on:
-  push:
+  pull_request:
     branches: [develop]
 
 jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-      - uses: actions/checkout@master
+        uses: actions/checkout@master
 
       - name: Upload files
         uses: appleboy/scp-action@master
