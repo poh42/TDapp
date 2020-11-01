@@ -14,7 +14,6 @@ RUN mkdir /app
 WORKDIR /app
 
 ADD requirements.txt /app
-ADD .env /app
 RUN pip install --upgrade setuptools pip
 RUN pip install -r ./requirements.txt
 RUN apk del .tmp-build-deps
