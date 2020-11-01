@@ -1,0 +1,20 @@
+version: "3.7"
+
+services:
+  # Our own application
+  app:
+    build: .
+    volumes:
+      - ./app:/app
+      - ./.env-test:/app/.env-test
+    env_file: .env-test
+    depends_on:
+      - db-test
+
+  # Our Posrgres DB.
+  db-test:
+    image: postgres:12.4-alpine
+    environment:
+      - POSTGRES_DB=app-test
+      - POSRGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres

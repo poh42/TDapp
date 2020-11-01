@@ -14,7 +14,7 @@ bash:
 	docker-compose -f docker-compose.dev.yml run --rm app /bin/ash
 
 test:
-	docker-compose -f docker-compose.dev.yml run --rm python -m unittest discover -s ./tests -t .
+	docker-compose -f docker-compose.test.yml run --rm app python -m unittest discover -s ./tests -t .
 
 up-build: build
 up-build: up

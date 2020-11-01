@@ -46,7 +46,6 @@ else:
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET_KEY")
 app.config.from_object("default_config")
-print(app.config)
 app.config.from_envvar("APPLICATION_SETTINGS")
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 configure_uploads(app, IMAGE_SET)
