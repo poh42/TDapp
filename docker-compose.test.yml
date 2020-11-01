@@ -6,8 +6,8 @@ services:
     build: .
     volumes:
       - ./app:/app
-      - ./.env-test:/app/.env-test
-    env_file: .env-test
+      - ./.env.test:/app/.env.test
+    env_file: .env.test
     depends_on:
       - db-test
 
