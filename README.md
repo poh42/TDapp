@@ -86,3 +86,7 @@ With the server up, you can visit this sites:
 - PGAdmin: To check the database locally without disrupting your local DBs http://localhost:8081
 - MailHog: To check sent mails http://localhost:8025
 - Dozzle: To check Docker logs separately http://localhost:999
+
+# Production
+
+Production deploys itself whenever `develop` is updated. The URL is http://3.15.194.120/
