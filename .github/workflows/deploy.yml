@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@master
 
       - name: Login to DockerHub Registry
-        run: echo ${{ secrets.DOCKER_GIHTUB_PASSWORD }} | docker login docker.pkg.github.com -u {{ secrets.DOCKER_GITHUB_USER }} --password-stdin
+        run: echo ${{ secrets.DOCKER_GITHUB_PASSWORD }} | docker login -u {{ secrets.DOCKER_GITHUB_USER }} --password-stdin docker.pkg.github.com
 
       - name: Get the version
         id: vars
