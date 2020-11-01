@@ -79,3 +79,10 @@ make test
 
 For more commands, check the `Makefile`
 
+## More development stuff
+
+With the server up, you can visit this sites:
+
+- PGAdmin: To check the database locally without disrupting your local DBs http://localhost:8081
+- MailHog: To check sent mails http://localhost:8025
+- Dozzle: To check Docker logs separately http://localhost:999
