@@ -21,7 +21,7 @@ jobs:
           source: "."
           target: "app"
 
-      - name: executing remote ssh commands using password
+      - name: Execute deploy command
         uses: appleboy/ssh-action@master
         with:
           host: ec2-3-138-245-30.us-east-2.compute.amazonaws.com
