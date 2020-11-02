@@ -147,3 +147,5 @@ static/images/
 
 test.py
 .env-test
+asdru.yml
+/migrations
