@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, make_response, send_from_directory, redirect
 from flask_restful import Api
 from flask_migrate import Migrate, upgrade
+from flask_cors import CORS
 import os
 import sys
 import simplejson
@@ -45,6 +46,7 @@ else:
     log.info("Loading .env environment variables")
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = os.environ.get("APP_SECRET_KEY")
 app.config.from_object("default_config")
 app.config.from_envvar("APPLICATION_SETTINGS")
