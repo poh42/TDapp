@@ -1,5 +1,6 @@
 from models.challenge_ import ChallengeModel
 from models.confirmation import ConfirmationModel
+from models.dispute import DisputeModel
 from models.transaction import TransactionModel
 from models.user import UserModel
 from models.game import GameModel
@@ -137,6 +138,16 @@ def create_confirmation_already_confirmed(user_id):
     return confirmation
 
 
+def create_dispute(user_id, challenge_id):
+    dispute = DisputeModel()
+    dispute.user_id = user_id
+    dispute.challenge_id = challenge_id
+    dispute.status = "OPEN"
+    dispute.comments = "TEST"
+    dispute.save_to_db()
+    return dispute
+
+
 def create_fixtures():
     user = create_dummy_user()
     user_login = create_login_user()
@@ -152,6 +163,7 @@ def create_fixtures():
     transaction = create_dummy_transaction(second_user.id)
     transaction2 = create_dummy_transaction(user_login.id)
     confirmation = create_confirmation_already_confirmed(user_login.id)
+    dispute = create_dispute(user_login.id, challenge.id)
     return {
         "user": user,
         "second_user": second_user,
@@ -165,4 +177,6 @@ def create_fixtures():
         "transaction": transaction,
         "transaction2": transaction2,
         "user_login": user_login,
+        "confirmation": confirmation,
+        "dispute": dispute,
     }

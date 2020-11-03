@@ -19,3 +19,7 @@ class DisputeModel(db.Model):
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
+
+    @classmethod
+    def get_by_challenge_id(cls, challenge_id):
+        return cls.query.filter_by(challenge_id=challenge_id).all()

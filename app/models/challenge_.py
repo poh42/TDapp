@@ -27,6 +27,8 @@ class ChallengeModel(db.Model):
         "Results1v1Model", cascade="all, delete-orphan", uselist=False
     )
 
+    disputes = db.relationship("DisputeModel", cascade="all, delete-orphan")
+
     @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(id=_id).first()

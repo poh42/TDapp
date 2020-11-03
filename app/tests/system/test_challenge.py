@@ -188,3 +188,16 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 self.assertEqual(
                     challenge_created["status"], data["status"], "Wrong type"
                 )
+
+    def test_get_disputes(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            challenge: ChallengeModel = fixtures["challenge"]
+            with self.test_client() as c:
+                rv = c.get(f"/challenge/{challenge.id}/report/dispute")
+                self.assertEqual(rv.status_code, 200, "Wrong status code")
+                json_data = rv.get_json()
+                self.assertTrue(
+                    len(json_data["disputes"]) > 0,
+                    "There should be disputes in the database",
+                )
