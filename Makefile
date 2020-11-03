@@ -13,6 +13,12 @@ down:
 bash:
 	docker-compose -f docker-compose.dev.yml run --rm app /bin/ash
 
+create_fixtures:
+	docker-compose -f docker-compose.dev.yml run --rm app flask create_fixtures
+
+run_migrations:
+	docker-compose -f docker-compose.dev.yml run --rm app flask db upgrade
+
 test:
 	docker-compose -f docker-compose.test.yml run --rm app python -m unittest discover -s ./tests -t .
 
