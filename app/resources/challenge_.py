@@ -197,3 +197,12 @@ class ReportChallenge(Resource):
             {"message": "Dispute created", "dispute": dispute_schema.dump(dispute)},
             200,
         )
+
+
+class GetDisputes(Resource):
+    # TODO maybe marge this with the report challenge endpoint
+    @classmethod
+    @check_token
+    def get(cls, challenge_id):
+        disputes = DisputeModel.get_by_challenge_id(challenge_id)
+        return {"disputes": dispute_schema.dump(disputes, many=True)}
