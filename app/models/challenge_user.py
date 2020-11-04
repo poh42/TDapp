@@ -20,6 +20,18 @@ class ChallengeUserModel(db.Model):
     challenged = db.relationship("UserModel", foreign_keys=[challenged_id])
     challenge = db.relationship("ChallengeModel", foreign_keys=[wager_id])
 
+    @property
+    def declined(self):
+        return self.status == STATUS_DECLINED
+
+    @property
+    def open(self):
+        return self.status == STATUS_OPEN
+
+    @property
+    def accepted(self):
+        return self.status == STATUS_ACCEPTED
+
     @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(id=_id).first()
