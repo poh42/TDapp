@@ -20,6 +20,10 @@ class GameModel(db.Model):
     def get_active_games(cls):
         return cls.query.filter(cls.is_active == True).all()
 
+    @classmethod
+    def get_all_games(cls):
+        return cls.query.all()
+
     def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()

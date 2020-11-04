@@ -21,6 +21,22 @@ def check_token(f):
     return wrap
 
 
+def optional_check_token(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if not request.headers.get("authorization"):
+            return f(*args, **kwargs)
+        try:
+            claims = auth.verify_id_token(request.headers["authorization"])
+            g.claims = claims
+        except:
+            return f(*args, **kwargs)
+        return f(*args, **kwargs)
+
+    wrap.is_optionally_checked_by_token = True
+    return wrap
+
+
 def _is_admin():
     if not hasattr(g, "claims"):
         return False
