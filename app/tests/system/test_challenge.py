@@ -201,3 +201,69 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     len(json_data["disputes"]) > 0,
                     "There should be disputes in the database",
                 )
+
+    def test_challenge_accept(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            challenge_user: ChallengeUserModel = fixtures["challenge_user"]
+            with self.test_client() as c:
+                with self.subTest(shouldAccept=False, msg="Wrong user"):
+                    g.claims = {"user_id": fixtures["user"].firebase_id}
+                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                    self.assertEqual(rv.status_code, 400, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "Cannot accept challenge from a different user",
+                        json_data["message"],
+                        "Wrong message",
+                    )
+                g.claims = {"user_id": fixtures["user_login"].firebase_id}
+                with self.subTest(shouldAccept=True):
+                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                    self.assertEqual(rv.status_code, 200, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "Challenge accepted", json_data["message"], "Wrong message"
+                    )
+                with self.subTest(shouldAccept=False, msg="Challenge accepted"):
+                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                    self.assertEqual(rv.status_code, 400, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "Challenge already accepted",
+                        json_data["message"],
+                        "Wrong message",
+                    )
+
+    def test_challenge_decline(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            challenge_user: ChallengeUserModel = fixtures["challenge_user"]
+            with self.test_client() as c:
+                with self.subTest(shouldAccept=False, msg="Wrong user"):
+                    g.claims = {"user_id": fixtures["user"].firebase_id}
+                    rv = c.post(f"/challenge/{challenge_user.id}/decline")
+                    self.assertEqual(rv.status_code, 400, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "Cannot decline challenge from a different user",
+                        json_data["message"],
+                        "Wrong message",
+                    )
+                g.claims = {"user_id": fixtures["user_login"].firebase_id}
+                with self.subTest(shouldAccept=True):
+                    rv = c.post(f"/challenge/{challenge_user.id}/decline")
+                    self.assertEqual(rv.status_code, 200, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "Challenge declined", json_data["message"], "Wrong message"
+                    )
+                with self.subTest(shouldAccept=False, msg="Challenge declined"):
+                    rv = c.post(f"/challenge/{challenge_user.id}/decline")
+                    self.assertEqual(rv.status_code, 400, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "Challenge already declined",
+                        json_data["message"],
+                        "Wrong message",
+                    )

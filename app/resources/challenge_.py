@@ -224,7 +224,7 @@ class AcceptChallenge(Resource):
         if challenge_user is None:
             return {"message": "Challenge user not found"}, 400
         if challenge_user.accepted:
-            return {"message": "Challenge user already accepted"}, 400
+            return {"message": "Challenge already accepted"}, 400
         if not challenge_user.open:
             return {"message": "Challenge cannot be accepted"}, 400
         if current_user.id != challenge_user.challenged_id:
@@ -249,7 +249,7 @@ class DeclineChallenge(Resource):
         if not challenge_user.open:
             return {"message": "Challenge cannot be declined"}, 400
         if current_user.id != challenge_user.challenged_id:
-            return {"message": "Cannot accept challenge from a different user"}, 400
+            return {"message": "Cannot decline challenge from a different user"}, 400
         challenge_user.status = STATUS_DECLINED
         challenge_user.save_to_db()
         return {"message": "Challenge declined"}, 200
