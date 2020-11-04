@@ -2,7 +2,12 @@ from marshmallow import ValidationError
 
 from db import db
 from decorators import check_token
-from models.challenge_user import ChallengeUserModel, STATUS_OPEN
+from models.challenge_user import (
+    ChallengeUserModel,
+    STATUS_OPEN,
+    STATUS_ACCEPTED,
+    STATUS_DECLINED,
+)
 from models.dispute import DisputeModel
 from models.game import GameModel
 from models.transaction import TransactionModel
@@ -206,3 +211,45 @@ class GetDisputes(Resource):
     def get(cls, challenge_id):
         disputes = DisputeModel.get_by_challenge_id(challenge_id)
         return {"disputes": dispute_schema.dump(disputes, many=True)}
+
+
+class AcceptChallenge(Resource):
+    @classmethod
+    @check_token
+    def post(cls, challenge_user_id):
+        current_user: UserModel = UserModel.find_by_firebase_id(g.claims["user_id"])
+        challenge_user: ChallengeUserModel = ChallengeUserModel.find_by_id(
+            challenge_user_id
+        )
+        if challenge_user is None:
+            return {"message": "Challenge user not found"}, 400
+        if challenge_user.accepted:
+            return {"message": "Challenge user already accepted"}, 400
+        if not challenge_user.open:
+            return {"message": "Challenge cannot be accepted"}, 400
+        if current_user.id != challenge_user.challenged_id:
+            return {"message": "Cannot accept challenge from a different user"}, 400
+        challenge_user.status = STATUS_ACCEPTED
+        challenge_user.save_to_db()
+        return {"message": "Challenge accepted"}, 200
+
+
+class DeclineChallenge(Resource):
+    @classmethod
+    @check_token
+    def post(cls, challenge_user_id):
+        current_user: UserModel = UserModel.find_by_firebase_id(g.claims["user_id"])
+        challenge_user: ChallengeUserModel = ChallengeUserModel.find_by_id(
+            challenge_user_id
+        )
+        if challenge_user is None:
+            return {"message": "Challenge user not found"}, 400
+        if challenge_user.declined:
+            return {"message": "Challenge already declined"}, 400
+        if not challenge_user.open:
+            return {"message": "Challenge cannot be declined"}, 400
+        if current_user.id != challenge_user.challenged_id:
+            return {"message": "Cannot accept challenge from a different user"}, 400
+        challenge_user.status = STATUS_DECLINED
+        challenge_user.save_to_db()
+        return {"message": "Challenge declined"}, 200
