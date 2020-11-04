@@ -17,6 +17,12 @@ password = "Pa55w0rd"
 username = "asdrubal"
 avatar = "https://avatar.com/1"
 
+CALL_OF_DUTY_PHOTO = "https://flashdrive69.s3.amazonaws.com/29b702dcb15472be22798442b42976e8eb2660466b0e5082ce0f29c9e4ae10df.jpeg"
+FIFA_PHOTO = "https://flashdrive69.s3.amazonaws.com/c05359bd42284aff325249862573d56a3403aaecba7ff6e97a08ce690ce8e835.jpg"
+MLB_PHOTO = "https://flashdrive69.s3.amazonaws.com/f6ad72675c8cf43784b56d2f19ff70a9c4cef2b9c9951ac5413733b3f96fd186.jpg"
+NFL_PHOTO = "https://flashdrive69.s3.amazonaws.com/3eef44c2f23474470b273e4f8ddc5e1861a021da86c8c9853f4daf647c368f53.jpg"
+NBA_PHOTO = "https://flashdrive69.s3.amazonaws.com/15473dcd5b937b78d64e859181a7dd921ff639227e5939561cdf276a546d977d.jpg"
+
 
 def create_dummy_user():
     user = UserModel()
@@ -54,7 +60,7 @@ def create_login_user():
 def create_dummy_game():
     game = GameModel()
     game.name = "FIFA"
-    game.image = "dummy.jpg"
+    game.image = FIFA_PHOTO
     game.is_active = True
     game.save_to_db()
     return game
@@ -62,11 +68,41 @@ def create_dummy_game():
 
 def create_dummy_game_not_active():
     game = GameModel()
-    game.name = "Call of duty"
+    game.name = "Inactive game"
     game.image = "dummy.jpg"
     game.is_active = False
     game.save_to_db()
     return game
+
+
+def create_rest_of_games():
+    # MLB The show
+    mlb = GameModel()
+    mlb.name = "MLB The show"
+    mlb.image = MLB_PHOTO
+    mlb.is_active = True
+    mlb.save_to_db()
+
+    # NFL
+    nfl = GameModel()
+    nfl.name = "NFL"
+    nfl.image = NFL_PHOTO
+    nfl.is_active = True
+    nfl.save_to_db()
+
+    # Call of Duty
+    cod = GameModel()
+    cod.name = "Call of Duty"
+    cod.image = CALL_OF_DUTY_PHOTO
+    cod.is_active = True
+    cod.save_to_db()
+
+    # NBA
+    nba = GameModel()
+    nba.name = "NBA"
+    nba.image = NBA_PHOTO
+    nba.is_active = True
+    nba.save_to_db()
 
 
 def create_dummy_console():
@@ -164,6 +200,7 @@ def create_fixtures():
     transaction2 = create_dummy_transaction(user_login.id)
     confirmation = create_confirmation_already_confirmed(user_login.id)
     dispute = create_dispute(user_login.id, challenge.id)
+    create_rest_of_games()
     return {
         "user": user,
         "second_user": second_user,

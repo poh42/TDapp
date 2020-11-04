@@ -22,7 +22,7 @@ from resources.challenge_ import (
     ChallengePost,
     GetDisputes,
 )
-from resources.game import GamesByConsole
+from resources.game import GamesByConsole, Games
 from resources.user import (
     UserRegister,
     UserLogin,
@@ -101,6 +101,7 @@ api.add_resource(ChallengePerson, "/challenge/<int:challenged_id>/create")
 api.add_resource(ChallengeResults, "/challenge/<int:challenge_id>/getResultsChallenge")
 api.add_resource(ReportChallenge, "/challenge/<int:challenge_id>/report")
 api.add_resource(GetDisputes, "/challenge/<int:challenge_id>/report/dispute")
+api.add_resource(Games, "/games")
 
 db.init_app(app)
 migrate.init_app(app)
