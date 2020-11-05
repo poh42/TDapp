@@ -9,6 +9,7 @@ from models.console import ConsoleModel
 from models.results_1v1 import Results1v1Model
 from models.friendship import friendship_table
 from models.user_game import UserGameModel
+from models.challenge_user import ChallengeUserModel, STATUS_OPEN
 from datetime import datetime
 from db import db
 
@@ -196,6 +197,17 @@ def create_dispute(user_id, challenge_id):
     return dispute
 
 
+def create_challenge_user_dummy(challenger_id, challenged_id, wager_id):
+    challenge_user = ChallengeUserModel(
+        challenged_id=challenged_id,
+        challenger_id=challenger_id,
+        wager_id=wager_id,
+        status=STATUS_OPEN,
+    )
+    challenge_user.save_to_db()
+    return challenge_user
+
+
 def create_fixtures():
     user = create_dummy_user()
     user_login = create_login_user()
@@ -212,6 +224,9 @@ def create_fixtures():
     transaction2 = create_dummy_transaction(user_login.id)
     confirmation = create_confirmation_already_confirmed(user_login.id)
     dispute = create_dispute(user_login.id, challenge.id)
+    challenge_user = create_challenge_user_dummy(
+        second_user.id, user_login.id, challenge.id
+    )
     create_rest_of_games(console.id)
     return {
         "user": user,
@@ -228,4 +243,5 @@ def create_fixtures():
         "user_login": user_login,
         "confirmation": confirmation,
         "dispute": dispute,
+        "challenge_user": challenge_user,
     }
