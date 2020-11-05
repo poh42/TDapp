@@ -1,6 +1,7 @@
 from db import db
 from sqlalchemy.sql import func
 
+from models.console import ConsoleModel
 from models.game_has_console import game_has_console_table
 from models.user_game import UserGameModel
 
@@ -23,11 +24,15 @@ class GameModel(db.Model):
 
     @classmethod
     def get_active_games(cls):
-        return cls.query.filter(cls.is_active == True).all()
+        return (
+            cls.query.outerjoin(ConsoleModel, cls.consoles)
+            .filter(cls.is_active == True)
+            .all()
+        )
 
     @classmethod
     def get_all_games(cls):
-        return cls.query.all()
+        return cls.query.outerjoin(ConsoleModel, cls.consoles).all()
 
     def save_to_db(self) -> None:
         db.session.add(self)
