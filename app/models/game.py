@@ -1,5 +1,7 @@
 from db import db
 from sqlalchemy.sql import func
+
+from models.game_has_console import game_has_console_table
 from models.user_game import UserGameModel
 
 
@@ -14,6 +16,9 @@ class GameModel(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     challenges = db.relationship(
         "ChallengeModel", lazy="dynamic", cascade="all, delete-orphan"
+    )
+    consoles = db.relationship(
+        "ConsoleModel", cascade="all", secondary=game_has_console_table
     )
 
     @classmethod
