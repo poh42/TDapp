@@ -1,6 +1,7 @@
 from models.challenge_ import ChallengeModel
 from models.confirmation import ConfirmationModel
 from models.dispute import DisputeModel
+from models.game_has_console import game_has_console_table
 from models.transaction import TransactionModel
 from models.user import UserModel
 from models.game import GameModel
@@ -75,13 +76,14 @@ def create_dummy_game_not_active():
     return game
 
 
-def create_rest_of_games():
+def create_rest_of_games(console_id):
     # MLB The show
     mlb = GameModel()
     mlb.name = "MLB The show"
     mlb.image = MLB_PHOTO
     mlb.is_active = True
     mlb.save_to_db()
+    create_dummy_console_relationship(console_id, mlb.id)
 
     # NFL
     nfl = GameModel()
@@ -89,6 +91,7 @@ def create_rest_of_games():
     nfl.image = NFL_PHOTO
     nfl.is_active = True
     nfl.save_to_db()
+    create_dummy_console_relationship(console_id, nfl.id)
 
     # Call of Duty
     cod = GameModel()
@@ -96,6 +99,7 @@ def create_rest_of_games():
     cod.image = CALL_OF_DUTY_PHOTO
     cod.is_active = True
     cod.save_to_db()
+    create_dummy_console_relationship(console_id, cod.id)
 
     # NBA
     nba = GameModel()
@@ -103,11 +107,12 @@ def create_rest_of_games():
     nba.image = NBA_PHOTO
     nba.is_active = True
     nba.save_to_db()
+    create_dummy_console_relationship(console_id, nba.id)
 
 
 def create_dummy_console():
     console = ConsoleModel()
-    console.name = "PS Vita"
+    console.name = "PS1"
     console.save_to_db()
     return console
 
@@ -141,6 +146,13 @@ def create_dummy_result(challenge_id, user1_id, user2_id):
 def create_dummy_friendship(follower_id, followed_id):
     insert = friendship_table.insert().values(
         follower_id=follower_id, followed_id=followed_id
+    )
+    db.engine.execute(insert)
+
+
+def create_dummy_console_relationship(console_id, game_id):
+    insert = game_has_console_table.insert().values(
+        console_id=console_id, game_id=game_id
     )
     db.engine.execute(insert)
 
@@ -200,7 +212,7 @@ def create_fixtures():
     transaction2 = create_dummy_transaction(user_login.id)
     confirmation = create_confirmation_already_confirmed(user_login.id)
     dispute = create_dispute(user_login.id, challenge.id)
-    create_rest_of_games()
+    create_rest_of_games(console.id)
     return {
         "user": user,
         "second_user": second_user,
