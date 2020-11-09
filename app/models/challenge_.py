@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from db import db
 from sqlalchemy.sql import func
+from sqlalchemy.orm import aliased
 from models.challenge_user import ChallengeUserModel
 from models.results_1v1 import Results1v1Model
 from models.dispute import DisputeModel
@@ -32,6 +35,21 @@ class ChallengeModel(db.Model):
     @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(id=_id).first()
+
+    @classmethod
+    def find_user_challenges(cls, user_id, limit=10, **kwargs):
+        """Finds challenges that are related to a user"""
+        challenge_users = aliased(cls.challenge_users)
+        results_1v1 = aliased(cls.results_1v1)
+        query = cls.query.join(challenge_users).filter(
+            challenge_users.challenged_id == user_id
+        )
+        if kwargs.get("upcoming"):
+            query = query.filter(cls.date >= datetime.now())
+        if kwargs.get("last_results"):
+            query = query.join(results_1v1).order_by(results_1v1.played.desc())
+        query_data = query.limit(limit).all()
+        return query_data
 
     def save_to_db(self):
         db.session.add(self)
