@@ -19,3 +19,9 @@ class ConsoleModel(db.Model):
     @classmethod
     def get_all_consoles(cls):
         return cls.query.all()
+
+    @classmethod
+    def console_id_exists(cls, console_id) -> bool:
+        """Checks if console id exists"""
+        console = cls.query.filter_by(id=console_id).first()
+        return console is not None
