@@ -50,7 +50,9 @@ class TestConsoleEndpoints(BaseAPITestCase):
                     )
 
                 with self.subTest(console_not_found=True):
-                    rv = c.get(f"/console/999999999999999999999999/games") # Non existing console
+                    rv = c.get(
+                        f"/console/999999999999999999999999/games"
+                    )  # Non existing console
                     json_data = rv.get_json()
                     self.assertEqual(rv.status_code, 400, "Wrong status code")
                     self.assertEqual(json_data["message"], "Console not found")
