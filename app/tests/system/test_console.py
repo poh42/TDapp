@@ -18,4 +18,7 @@ class TestConsoleEndpoints(BaseAPITestCase):
                             return True
                     return False
 
-                self.assertTrue(check_console_is_present("PS1"), "PS1 console is not present in the data")
+                self.assertTrue(
+                    check_console_is_present("PS1"),
+                    "PS1 console is not present in the data",
+                )
