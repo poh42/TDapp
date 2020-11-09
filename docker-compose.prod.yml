@@ -12,14 +12,6 @@ services:
     depends_on:
       - db
 
-  # Our Postgres DB.
-  db:
-    image: postgres:12.4-alpine
-    environment:
-      - POSTGRES_DB=app
-      - POSRGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-
   # NGINX to serve the app
   nginx:
     image: nginx:1.19.1
