@@ -4,6 +4,7 @@ from sqlalchemy.sql import func
 STATUS_OPEN = "OPEN"
 STATUS_ACCEPTED = "ACCEPTED"
 STATUS_DECLINED = "DECLINED"
+STATUS_COMPLETED = "COMPLETED"
 
 
 class ChallengeUserModel(db.Model):
@@ -31,6 +32,10 @@ class ChallengeUserModel(db.Model):
     @property
     def accepted(self):
         return self.status == STATUS_ACCEPTED
+
+    @property
+    def completed(self):
+        return self.status == STATUS_COMPLETED
 
     @classmethod
     def find_by_id(cls, _id):
