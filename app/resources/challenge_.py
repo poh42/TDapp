@@ -253,3 +253,30 @@ class DeclineChallenge(Resource):
         challenge_user.status = STATUS_DECLINED
         challenge_user.save_to_db()
         return {"message": "Challenge declined"}, 200
+
+
+class ChallengesByUser(Resource):
+    @classmethod
+    @check_token
+    def get(cls, user_id):
+        kwargs = dict()
+        print(type(request.args))
+        if request.args.get("lastResults", type=int):
+            kwargs["last_results"] = request.args.get("lastResults")
+        if request.args.get("upcoming"):
+            kwargs["upcoming"] = True
+        user = UserModel.find_by_id(user_id)
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if user is None:
+            return {"message": "User not found"}, 400
+        # Remark: We prevent here that the current user appears is unreachable if its property
+        # is_private is set to True
+        if (
+            not g.claims.get("admin")
+            and user.is_private
+            and current_user.id != user.id
+            and not user.is_friend_of_user(current_user.id)
+        ):
+            return {"message": "User challenges for this user are private"}, 400
+        challenges = ChallengeModel.find_user_challenges(user_id, **kwargs)
+        return {"challenges": challenge_schema.dump(challenges, many=True)}, 200

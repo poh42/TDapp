@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 
 from models.challenge_user import ChallengeUserModel
 from tests.base import BaseAPITestCase
@@ -267,3 +268,49 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         json_data["message"],
                         "Wrong message",
                     )
+
+    def test_challenges_users(self):
+        with self.app_context():
+            with self.test_client() as c:
+                fixtures = create_fixtures()
+                user_login = fixtures["user_login"]
+                user_private = fixtures["private_user"]
+                user_public_test = fixtures["user"]
+                with self.subTest("user does not exist"):
+                    claims = {"uid": "test"}
+                    with patch.object(g, "claims", claims, create=True):
+                        rv = c.get("/challenge/999999999999/user")
+                        json_data = rv.get_json()
+                        self.assertEqual(rv.status_code, 400)
+                        self.assertEqual(json_data["message"], "User not found")
+                with self.subTest("user login challenges"):
+                    claims = {"uid": user_login.firebase_id, "admin": False}
+                    with patch.object(g, "claims", claims, create=True):
+                        rv = c.get(f"/challenge/{user_login.id}/user?upcoming=true")
+                        json_data = rv.get_json()
+                        self.assertEqual(rv.status_code, 200)
+                        self.assertTrue(len(json_data["challenges"]) > 0)
+                with self.subTest("user private login challenges"):
+                    claims = {"uid": user_login.firebase_id, "admin": False}
+                    with patch.object(g, "claims", claims, create=True):
+                        rv = c.get(f"/challenge/{user_private.id}/user")
+                        json_data = rv.get_json()
+                        self.assertEqual(rv.status_code, 400)
+                        self.assertEqual(
+                            json_data["message"],
+                            "User challenges for this user are private",
+                        )
+                with self.subTest("user private login as an admin"):
+                    claims = {"uid": user_login.firebase_id, "admin": True}
+                    with patch.object(g, "claims", claims, create=True):
+                        rv = c.get(f"/challenge/{user_private.id}/user?lastResults=10")
+                        json_data = rv.get_json()
+                        self.assertEqual(rv.status_code, 200)
+                        self.assertIn("challenges", json_data)
+                with self.subTest("user get challenges of a public user"):
+                    claims = {"uid": user_login.firebase_id, "admin": False}
+                    with patch.object(g, "claims", claims, create=True):
+                        rv = c.get(f"/challenge/{user_public_test.id}/user")
+                        json_data = rv.get_json()
+                        self.assertEqual(rv.status_code, 200)
+                        self.assertIn("challenges", json_data)

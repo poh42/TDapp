@@ -10,7 +10,7 @@ from models.results_1v1 import Results1v1Model
 from models.friendship import friendship_table
 from models.user_game import UserGameModel
 from models.challenge_user import ChallengeUserModel, STATUS_OPEN
-from datetime import datetime
+from datetime import datetime, timedelta
 from db import db
 
 
@@ -55,6 +55,18 @@ def create_login_user():
     user.username = "asdrutest"
     user.firebase_id = "myLbdKL8dFhipvanv4AnIUaJpqd2"
     user.avatar = "https://avatar.com/3"
+    user.save()
+    return user
+
+
+def create_private_user():
+    user = UserModel()
+    user.email = "private@example.com"
+    user.password = "1234567"
+    user.username = "private"
+    user.firebase_id = "private"
+    user.avatar = "https://avatar.com/4"
+    user.is_private = True
     user.save()
     return user
 
@@ -127,7 +139,24 @@ def create_dummy_challenge(game_id):
     challenge.due_date = "2019-01-01 15:00:00"
     challenge.buy_in = "10"
     challenge.reward = "100"
-    challenge.status = "BEGIN"  # TODO Change this to a more explanatory value
+    challenge.status = "OPEN"
+    challenge.save_to_db()
+    return challenge
+
+
+def create_upcoming_challenge(game_id):
+    challenge = ChallengeModel()
+    challenge.type = "1v1"
+    challenge.name = "Upcoming challenge"
+    challenge.game_id = game_id
+    now = datetime.now()
+    date = now + timedelta(days=7)
+    due_date = now + timedelta(days=10)
+    challenge.date = date
+    challenge.due_date = due_date
+    challenge.buy_in = "10"
+    challenge.reward = "100"
+    challenge.status = "OPEN"
     challenge.save_to_db()
     return challenge
 
@@ -216,6 +245,7 @@ def create_fixtures():
     game_not_active = create_dummy_game_not_active()
     console = create_dummy_console()
     challenge = create_dummy_challenge(game.id)
+    upcoming_challenge = create_upcoming_challenge(game.id)
     result_1v1 = create_dummy_result(challenge.id, user.id, user.id)
     create_dummy_friendship(user.id, second_user.id)
     create_dummy_friendship(user_login.id, second_user.id)
@@ -227,7 +257,11 @@ def create_fixtures():
     challenge_user = create_challenge_user_dummy(
         second_user.id, user_login.id, challenge.id
     )
+    challenge_user_upcoming = create_challenge_user_dummy(
+        second_user.id, user_login.id, upcoming_challenge.id
+    )
     create_rest_of_games(console.id)
+    private_user = create_private_user()
     return {
         "user": user,
         "second_user": second_user,
@@ -244,4 +278,7 @@ def create_fixtures():
         "confirmation": confirmation,
         "dispute": dispute,
         "challenge_user": challenge_user,
+        "upcoming_challenge": upcoming_challenge,
+        "challenge_user_upcoming": challenge_user_upcoming,
+        "private_user": private_user,
     }

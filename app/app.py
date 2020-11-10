@@ -23,6 +23,7 @@ from resources.challenge_ import (
     GetDisputes,
     AcceptChallenge,
     DeclineChallenge,
+    ChallengesByUser,
 )
 from resources.console import ConsoleList
 from resources.game import GamesByConsole, Games
@@ -108,6 +109,7 @@ api.add_resource(Games, "/games")
 api.add_resource(AcceptChallenge, "/challenge/<int:challenge_user_id>/accept")
 api.add_resource(DeclineChallenge, "/challenge/<int:challenge_user_id>/decline")
 api.add_resource(ConsoleList, "/consoles")
+api.add_resource(ChallengesByUser, "/challenge/<int:user_id>/user")
 
 db.init_app(app)
 migrate.init_app(app)
