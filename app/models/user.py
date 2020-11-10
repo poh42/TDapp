@@ -9,7 +9,10 @@ from utils.email import send_email
 from flask import request, url_for
 from models.confirmation import ConfirmationModel
 from models.user_photo import UserPhotoModel
-from models.friendship import friendship_table
+from models.friendship import (
+    friendship_table,
+    is_friend_of_user as is_friend_of_user_internal,
+)
 
 
 class UserModel(db.Model):
@@ -122,3 +125,6 @@ class UserModel(db.Model):
         sql = "SELECT u.* from users u"
         data = db.engine.execute(text(sql)).fetchall()
         return [dict(d) for d in data]
+
+    def is_friend_of_user(self, other_id):
+        return is_friend_of_user_internal(self.id, other_id)
