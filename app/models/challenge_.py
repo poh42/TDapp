@@ -37,7 +37,7 @@ class ChallengeModel(db.Model):
         return cls.query.filter_by(id=_id).first()
 
     @classmethod
-    def find_user_challenges(cls, user_id, limit=10, **kwargs):
+    def find_user_challenges(cls, user_id, **kwargs):
         """Finds challenges that are related to a user"""
         challenge_users = aliased(cls.challenge_users)
         results_1v1 = aliased(cls.results_1v1)
@@ -47,8 +47,13 @@ class ChallengeModel(db.Model):
         if kwargs.get("upcoming"):
             query = query.filter(cls.date >= datetime.now())
         if kwargs.get("last_results"):
-            query = query.join(results_1v1).order_by(results_1v1.played.desc())
-        query_data = query.limit(limit).all()
+            last_results = int(kwargs.get("last_results", 0))
+            query = (
+                query.join(results_1v1)
+                .order_by(results_1v1.played.desc())
+                .limit(last_results)
+            )
+        query_data = query.all()
         return query_data
 
     def save_to_db(self):
