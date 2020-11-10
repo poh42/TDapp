@@ -73,9 +73,15 @@ class TestUserEndpoints(BaseAPITestCase):
                             args[3],
                             "Check if the message being sent is correct",
                         )
-                        user_game = UserGameModel.query.filter_by(
+                        user_games = UserGameModel.query.filter_by(
                             user_id=user.id
-                        ).first()
+                        ).all()
+                        self.assertEqual(
+                            len(user_games),
+                            1,
+                            "More user games were created than intended",
+                        )
+                        user_game = user_games[0]
                         self.assertIsNotNone(user_game, "UserGameModel creation failed")
                         self.assertEqual(
                             user_game.console_id, console.id, "Wrong console id"
