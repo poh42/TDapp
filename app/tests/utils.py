@@ -59,6 +59,18 @@ def create_login_user():
     return user
 
 
+def create_private_user():
+    user = UserModel()
+    user.email = "private@example.com"
+    user.password = "1234567"
+    user.username = "private"
+    user.firebase_id = "private"
+    user.avatar = "https://avatar.com/4"
+    user.is_private = True
+    user.save()
+    return user
+
+
 def create_dummy_game():
     game = GameModel()
     game.name = "FIFA"
@@ -249,6 +261,7 @@ def create_fixtures():
         second_user.id, user_login.id, upcoming_challenge.id
     )
     create_rest_of_games(console.id)
+    private_user = create_private_user()
     return {
         "user": user,
         "second_user": second_user,
@@ -267,4 +280,5 @@ def create_fixtures():
         "challenge_user": challenge_user,
         "upcoming_challenge": upcoming_challenge,
         "challenge_user_upcoming": challenge_user_upcoming,
+        "private_user": private_user,
     }
