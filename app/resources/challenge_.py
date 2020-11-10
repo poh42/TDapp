@@ -277,6 +277,6 @@ class ChallengesByUser(Resource):
             and current_user.id != user.id
             and not user.is_friend_of_user(current_user.id)
         ):
-            return {"message", "User challenges for this user are private"}, 400
+            return {"message": "User challenges for this user are private"}, 400
         challenges = ChallengeModel.find_user_challenges(user_id, **kwargs)
         return {"challenges": challenge_schema.dump(challenges, many=True)}, 200
