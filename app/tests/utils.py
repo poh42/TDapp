@@ -245,6 +245,9 @@ def create_fixtures():
     challenge_user = create_challenge_user_dummy(
         second_user.id, user_login.id, challenge.id
     )
+    challenge_user_upcoming = create_challenge_user_dummy(
+        second_user.id, user_login.id, upcoming_challenge.id
+    )
     create_rest_of_games(console.id)
     return {
         "user": user,
@@ -263,4 +266,5 @@ def create_fixtures():
         "dispute": dispute,
         "challenge_user": challenge_user,
         "upcoming_challenge": upcoming_challenge,
+        "challenge_user_upcoming": challenge_user_upcoming,
     }
