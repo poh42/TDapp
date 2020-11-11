@@ -6,10 +6,11 @@ from marshmallow import fields
 class BaseUserGameSchema(ma.SQLAlchemyAutoSchema):
     game_id = fields.Integer(required=True)
     console_id = fields.Integer(required=True)
+    level = fields.String()
 
     class Meta:
         model = UserGameModel
-        dump_only = ("id", "created_at", "updated_at", "user_id", "level")
+        dump_only = ("id", "created_at", "updated_at", "user_id")
 
 
 class UserGameSchema(BaseUserGameSchema):
