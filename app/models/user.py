@@ -128,3 +128,9 @@ class UserModel(db.Model):
 
     def is_friend_of_user(self, other_id):
         return is_friend_of_user_internal(self.id, other_id)
+
+    def add_friend(self, other_id):
+        insert = friendship_table.insert().values(
+            follower_id=self.id, followed_id=other_id
+        )
+        db.engine.execute(insert)

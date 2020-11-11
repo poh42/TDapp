@@ -4,6 +4,7 @@ from firebase_admin import auth
 from marshmallow import ValidationError
 
 from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
+from models.friendship import friendship_table
 from schemas.user_game import BaseUserGameSchema
 from utils.claims import set_is_admin
 from fb import pb
@@ -194,3 +195,13 @@ class UserGamesLibrary(Resource):
             setattr(instance, key, value)
         instance.save_to_db()
         return {"user_game": schema.dump(instance)}, 200
+
+
+class AddFriend(Resource):
+    @check_token
+    def post(self, user_id):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if current_user.is_friend_of_user(user_id):
+            return {"message": "You are already a friend of this user"}, 400
+        current_user.add_friend(user_id)
+        return {"message": "You are now a friend of this user"}, 201
