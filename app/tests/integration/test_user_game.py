@@ -13,13 +13,17 @@ class TestIntegrationGame(BaseAPITestCase):
             console = fixtures["console"]
             game = fixtures["game"]
             with self.subTest(state="transient"):
-                instance = UserGameModel.get_user_game_instance(user_login.id, game.id, console.id)
+                instance = UserGameModel.get_user_game_instance(
+                    user_login.id, game.id, console.id
+                )
                 instance.gamertag = "testtag"
                 state = inspect(instance)
                 self.assertTrue(state.transient, "Object should be transient")
                 instance.save_to_db()
             with self.subTest(state="persistent"):
-                instance = UserGameModel.get_user_game_instance(user_login.id, game.id, console.id)
+                instance = UserGameModel.get_user_game_instance(
+                    user_login.id, game.id, console.id
+                )
                 state = inspect(instance)
                 self.assertFalse(state.transient, "Object should be transient")
                 self.assertTrue(state.persistent, "Object should be persistent")
