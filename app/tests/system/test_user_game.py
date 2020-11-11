@@ -13,7 +13,10 @@ class TestUserGameEndpoints(BaseAPITestCase):
             console = fixtures["console"]
             game = fixtures["game"]
             gamertag = "test"
-            data = dict(console_id=console.id, game_id=game.id, gamertag=gamertag)
+            level = "newbie"
+            data = dict(
+                console_id=console.id, game_id=game.id, gamertag=gamertag, level=level
+            )
             with self.test_client() as c:
                 rv = c.put(
                     f"/user/{user.id}/addToLibrary",
@@ -21,12 +24,13 @@ class TestUserGameEndpoints(BaseAPITestCase):
                     content_type="application/json",
                 )
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
+                instance = UserGameModel.query.filter_by(
+                    console_id=console.id,
+                    user_id=user.id,
+                    game_id=game.id,
+                    gamertag=gamertag,
+                ).first()
                 self.assertIsNotNone(
-                    UserGameModel.query.filter_by(
-                        console_id=console.id,
-                        user_id=user.id,
-                        game_id=game.id,
-                        gamertag=gamertag,
-                    ).first(),
-                    "User game model was not saved",
+                    instance, "User game model was not saved",
                 )
+                self.assertEqual(instance.level, level, "Levels are not equal")
