@@ -4,6 +4,7 @@ from firebase_admin import auth
 from marshmallow import ValidationError
 
 from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
+from schemas.user_game import BaseUserGameSchema
 from utils.claims import set_is_admin
 from fb import pb
 from requests import HTTPError
@@ -177,3 +178,19 @@ class UserList(Resource):
         if game_title:
             return {"users": UserModel.filter_users_by_game(game_title)}, 200
         return {"users": UserModel.get_all_users()}, 200
+
+
+class UserGamesLibrary(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin_or_user_authorized
+    def put(cls, user_id):
+        schema = BaseUserGameSchema()
+        data: dict = schema.load(request.get_json())
+        game_id = data.get("game_id")
+        console_id = data.get("console_id")
+        instance = UserGameModel.get_user_game_instance(user_id, game_id, console_id)
+        for key, value in data.items():
+            setattr(instance, key, value)
+        instance.save_to_db()
+        return {"user_game": schema.dump(instance)}, 200

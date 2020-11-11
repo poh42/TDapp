@@ -3,11 +3,15 @@ from models.user_game import UserGameModel
 from marshmallow import fields
 
 
-class UserGameSchema(ma.SQLAlchemyAutoSchema):
-    game_id = fields.Integer()
-    console_id = fields.Integer()
+class BaseUserGameSchema(ma.SQLAlchemyAutoSchema):
+    game_id = fields.Integer(required=True)
+    console_id = fields.Integer(required=True)
 
     class Meta:
         model = UserGameModel
         dump_only = ("id", "created_at", "updated_at", "user_id", "level")
+
+
+class UserGameSchema(BaseUserGameSchema):
+    class Meta(BaseUserGameSchema.Meta):
         load_instance = True
