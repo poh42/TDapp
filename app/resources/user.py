@@ -194,3 +194,13 @@ class UserGamesLibrary(Resource):
             setattr(instance, key, value)
         instance.save_to_db()
         return {"user_game": schema.dump(instance)}, 200
+
+
+class AddFriend(Resource):
+    @check_token
+    def post(self, user_id):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if current_user.is_friend_of_user(user_id):
+            return {"message": "You are already a friend of this user"}, 400
+        current_user.add_friend(user_id)
+        return {"message": "You are now a friend of this user"}, 201

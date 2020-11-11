@@ -34,6 +34,7 @@ from resources.user import (
     User,
     UserList,
     UserGamesLibrary,
+    AddFriend,
 )
 from flask_uploads import configure_uploads, IMAGES
 from utils.image_helper import IMAGE_SET
@@ -112,6 +113,7 @@ api.add_resource(DeclineChallenge, "/challenge/<int:challenge_user_id>/decline")
 api.add_resource(ConsoleList, "/consoles")
 api.add_resource(ChallengesByUser, "/challenge/<int:user_id>/user")
 api.add_resource(UserGamesLibrary, "/user/<int:user_id>/addToLibrary")
+api.add_resource(AddFriend, "/user/<int:user_id>/addFriend")
 
 db.init_app(app)
 migrate.init_app(app)
