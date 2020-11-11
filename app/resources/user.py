@@ -4,7 +4,6 @@ from firebase_admin import auth
 from marshmallow import ValidationError
 
 from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
-from models.friendship import friendship_table
 from schemas.user_game import BaseUserGameSchema
 from utils.claims import set_is_admin
 from fb import pb
