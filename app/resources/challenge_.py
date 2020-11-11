@@ -260,7 +260,6 @@ class ChallengesByUser(Resource):
     @check_token
     def get(cls, user_id):
         kwargs = dict()
-        print(type(request.args))
         if request.args.get("lastResults", type=int):
             kwargs["last_results"] = request.args.get("lastResults")
         if request.args.get("upcoming"):
