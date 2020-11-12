@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import text
+from sqlalchemy import text, and_, or_
 
 from db import db
 from sqlalchemy.sql import func
@@ -134,3 +134,18 @@ class UserModel(db.Model):
             follower_id=self.id, followed_id=other_id
         )
         db.engine.execute(insert)
+
+    def remove_friend(self, other_id):
+        remove = friendship_table.delete().where(
+            or_(
+                and_(
+                    friendship_table.c.follower_id == self.id,
+                    friendship_table.c.followed_id == other_id,
+                ),
+                and_(
+                    friendship_table.c.follower_id == other_id,
+                    friendship_table.c.followed_id == self.id,
+                ),
+            )
+        )
+        db.engine.execute(remove)
