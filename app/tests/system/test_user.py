@@ -1,3 +1,4 @@
+from models.invite import InviteModel
 from tests.base import BaseAPITestCase
 from unittest.mock import patch, Mock
 import json
@@ -353,4 +354,45 @@ class TestUserEndpoints(BaseAPITestCase):
                         self.assertEqual(rv.status_code, 400, "Wrong status code")
                         self.assertEqual(
                             json_data["message"], "You are not a friend of this user",
+                        )
+
+    def test_add_user_invite(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user_login = fixtures["user_login"]
+            user_to_invite = fixtures["user"]
+            claims = {"uid": user_login.firebase_id}
+            with self.test_client() as c:
+                with patch.object(g, "claims", claims, create=True):
+                    with self.subTest("Creating an invitation"):
+                        # Let's check if an invitation already exists
+                        self.assertFalse(
+                            InviteModel.is_already_invited(
+                                user_login.id, user_to_invite.id
+                            ),
+                            "This should be false",
+                        )
+                        rv = c.post(
+                            f"/user/invites/{user_to_invite.id}/create",
+                            content_type="application/json",
+                        )
+                        json_data = rv.get_json()
+                        self.assertEqual(json_data["message"], "Added invite")
+                        self.assertEqual(rv.status_code, 201, "Wrong status code")
+                        self.assertTrue(
+                            InviteModel.is_already_invited(
+                                user_login.id, user_to_invite.id
+                            ),
+                            "This should be True",
+                        )
+                    with self.subTest("Invitation already created"):
+                        rv = c.post(
+                            f"/user/invites/{user_to_invite.id}/create",
+                            content_type="application/json",
+                        )
+                        self.assertEqual(rv.status_code, 400)
+                        json_data = rv.get_json()
+                        self.assertEqual(
+                            json_data["message"],
+                            "You already have an invitation to this user in place",
                         )

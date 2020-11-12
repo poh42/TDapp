@@ -41,7 +41,9 @@ class InviteModel(db.Model):
         """Checks if the user inviting has already invited another user"""
         return (
             cls.query.filter_by(
-                user_inviting_id=user_inviting_id, user_invited_id=user_invited_id
+                user_inviting_id=user_inviting_id,
+                user_invited_id=user_invited_id,
+                status=STATUS_PENDING,
             ).first()
             is not None
         )

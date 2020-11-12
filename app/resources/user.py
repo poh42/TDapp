@@ -224,8 +224,11 @@ class AddUserInvite(Resource):
             return {"message": "User not found"}, 404
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         if InviteModel.is_already_invited(current_user.id, user_id):
-            return {"You already have an invitation to this user in place"}, 400
+            return (
+                {"message": "You already have an invitation to this user in place"},
+                400,
+            )
         # TODO check if there's already a friendship
-        invite = InviteModel(user_inviting=current_user.id, user_invited=user_id)
+        invite = InviteModel(user_inviting_id=current_user.id, user_invited_id=user_id)
         invite.save_to_db()
         return {"message": "Added invite"}, 201
