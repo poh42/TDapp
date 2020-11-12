@@ -228,7 +228,8 @@ class AddUserInvite(Resource):
                 {"message": "You already have an invitation to this user in place"},
                 400,
             )
-        # TODO check if there's already a friendship
+        if current_user.is_friend_of_user(user_id):
+            return {"message": "You already are a friend of this user"}, 400
         invite = InviteModel(user_inviting_id=current_user.id, user_invited_id=user_id)
         invite.save_to_db()
         return {"message": "Added invite"}, 201
@@ -237,9 +238,15 @@ class AddUserInvite(Resource):
 class DeclineInvite(Resource):
     @check_token
     def post(self, invite_id):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         invite: InviteModel = InviteModel.find_by_id(invite_id)
         if invite is None:
             return {"message": "Invite not found"}, 400
+        if not (
+            invite.user_invited_id == current_user.id
+            or invite.user_inviting == current_user.id
+        ):
+            return {"message": "Can't reject other user's invite"}, 400
         invite.reject()
         invite.save_to_db()
         return {"message": "Invite declined"}, 200
@@ -249,9 +256,12 @@ class AcceptInvite(Resource):
     @check_token
     def post(self, invite_id):
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
-
         invite: InviteModel = InviteModel.find_by_id(invite_id)
         if invite is None:
             return {"message": "Invite not found"}, 400
+        if invite.user_invited_id != current_user.id:
+            return {"message": "Can't accept other user's invite"}, 400
         invite.accept()
         invite.save_to_db()
+        current_user.add_friend(invite.user_invited_id)
+        return {"message": "Friendship added"}, 201

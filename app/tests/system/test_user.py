@@ -399,22 +399,29 @@ class TestUserEndpoints(BaseAPITestCase):
                             "You already have an invitation to this user in place",
                         )
 
-    def test_decline_challenge(self):
+    def test_decline_invite(self):
         with self.app_context():
             fixtures = create_fixtures()
+            user_login = fixtures["user_login"]
             invite = fixtures["invite"]
-            with self.test_client() as c:
-                self.assertFalse(
-                    invite.rejected,
-                    "Before the test, the invite should not be rejected",
-                )
-                rv = c.post(
-                    f"/user/invites/{invite.id}/reject", content_type="application/json"
-                )
-                self.assertEqual(rv.status_code, 200, "Wrong status code")
-                json_data = rv.get_json()
-                self.assertEqual(
-                    json_data["message"], "Invite declined", "Wrong message returned"
-                )
-                new_invite = InviteModel.find_by_id(invite.id)
-                self.assertTrue(new_invite.rejected, "Invite should be rejected")
+            claims = {"uid": user_login.firebase_id}
+            with patch.object(g, "claims", claims, create=True):
+                with self.test_client() as c:
+                    self.assertFalse(
+                        invite.rejected,
+                        "Before the test, the invite should not be rejected",
+                    )
+                    rv = c.post(
+                        f"/user/invites/{invite.id}/reject",
+                        content_type="application/json",
+                    )
+                    json_data = rv.get_json()
+                    print(json_data)
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    self.assertEqual(
+                        json_data["message"],
+                        "Invite declined",
+                        "Wrong message returned",
+                    )
+                    new_invite = InviteModel.find_by_id(invite.id)
+                    self.assertTrue(new_invite.rejected, "Invite should be rejected")
