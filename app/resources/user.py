@@ -4,6 +4,7 @@ from firebase_admin import auth
 from marshmallow import ValidationError
 
 from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
+from models.invite import InviteModel
 from schemas.user_game import BaseUserGameSchema
 from utils.claims import set_is_admin
 from fb import pb
@@ -214,3 +215,17 @@ class RemoveFriend(Resource):
             return {"message": "You are not a friend of this user"}, 400
         current_user.remove_friend(user_id)
         return {"message": "Friend removed"}, 200
+
+
+class AddUserInvite(Resource):
+    @check_token
+    def post(self, user_id):
+        if not UserModel.find_by_id(user_id):
+            return {"message": "User not found"}, 404
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if InviteModel.is_already_invited(current_user.id, user_id):
+            return {"You already have an invitation to this user in place"}, 400
+        # TODO check if there's already a friendship
+        invite = InviteModel(user_inviting=current_user.id, user_invited=user_id)
+        invite.save_to_db()
+        return {"message": "Added invite"}, 201
