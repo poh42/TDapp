@@ -1,3 +1,5 @@
+import unittest
+
 from models.invite import InviteModel
 from tests.base import BaseAPITestCase
 from unittest.mock import patch, Mock
@@ -333,7 +335,7 @@ class TestUserEndpoints(BaseAPITestCase):
             claims = {"uid": user_login.firebase_id}
             with self.test_client() as c:
                 with patch.object(g, "claims", claims, create=True):
-                    with self.subTest("register a friendship"):
+                    with self.subTest("removing a friendship"):
                         rv = c.post(
                             f"/user/{user_to_befriend.id}/deleteFriend",
                             content_type="application/json",
@@ -345,7 +347,7 @@ class TestUserEndpoints(BaseAPITestCase):
                             "Friendship relationship was removed",
                         )
                         self.assertEqual(json_data["message"], "Friend removed")
-                    with self.subTest("already friends"):
+                    with self.subTest("trying to delete an already deleted friendship"):
                         rv = c.post(
                             f"/user/{user_to_befriend.id}/deleteFriend",
                             content_type="application/json",
@@ -396,3 +398,23 @@ class TestUserEndpoints(BaseAPITestCase):
                             json_data["message"],
                             "You already have an invitation to this user in place",
                         )
+
+    def test_decline_challenge(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            invite = fixtures["invite"]
+            with self.test_client() as c:
+                self.assertFalse(
+                    invite.rejected,
+                    "Before the test, the invite should not be rejected",
+                )
+                rv = c.post(
+                    f"/user/invites/{invite.id}/reject", content_type="application/json"
+                )
+                self.assertEqual(rv.status_code, 200, "Wrong status code")
+                json_data = rv.get_json()
+                self.assertEqual(
+                    json_data["message"], "Invite declined", "Wrong message returned"
+                )
+                new_invite = InviteModel.find_by_id(invite.id)
+                self.assertTrue(new_invite.rejected, "Invite should be rejected")

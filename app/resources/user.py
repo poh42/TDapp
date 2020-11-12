@@ -242,4 +242,4 @@ class DeclineInvite(Resource):
             return {"message": "Invite not found"}, 400
         invite.reject()
         invite.save_to_db()
-        return {"message": "Invited declined"}, 200
+        return {"message": "Invite declined"}, 200
