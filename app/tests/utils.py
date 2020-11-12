@@ -2,6 +2,7 @@ from models.challenge_ import ChallengeModel
 from models.confirmation import ConfirmationModel
 from models.dispute import DisputeModel
 from models.game_has_console import game_has_console_table
+from models.invite import InviteModel
 from models.transaction import TransactionModel
 from models.user import UserModel
 from models.game import GameModel
@@ -237,6 +238,12 @@ def create_challenge_user_dummy(challenger_id, challenged_id, wager_id):
     return challenge_user
 
 
+def create_invite(inviting_id, invited_id):
+    invite = InviteModel(user_inviting_id=inviting_id, user_invited_id=invited_id)
+    invite.save_to_db()
+    return invite
+
+
 def create_fixtures():
     user = create_dummy_user()
     user_login = create_login_user()
@@ -262,6 +269,7 @@ def create_fixtures():
     )
     create_rest_of_games(console.id)
     private_user = create_private_user()
+    invite = create_invite(second_user.id, user_login.id)
     return {
         "user": user,
         "second_user": second_user,
@@ -281,4 +289,5 @@ def create_fixtures():
         "upcoming_challenge": upcoming_challenge,
         "challenge_user_upcoming": challenge_user_upcoming,
         "private_user": private_user,
+        "invite": invite,
     }

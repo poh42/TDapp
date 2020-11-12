@@ -232,3 +232,14 @@ class AddUserInvite(Resource):
         invite = InviteModel(user_inviting_id=current_user.id, user_invited_id=user_id)
         invite.save_to_db()
         return {"message": "Added invite"}, 201
+
+
+class DeclineInvite(Resource):
+    @check_token
+    def post(self, invite_id):
+        invite: InviteModel = InviteModel.find_by_id(invite_id)
+        if invite is None:
+            return {"message": "Invite not found"}, 400
+        invite.reject()
+        invite.save_to_db()
+        return {"message": "Invited declined"}, 200

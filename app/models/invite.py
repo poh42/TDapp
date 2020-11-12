@@ -20,6 +20,10 @@ class InviteModel(db.Model):
     user_inviting = db.relationship("UserModel", foreign_keys=[user_inviting_id])
     user_invited = db.relationship("UserModel", foreign_keys=[user_invited_id])
 
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
+
     @property
     def pending(self):
         return self.status == STATUS_PENDING
@@ -47,3 +51,11 @@ class InviteModel(db.Model):
             ).first()
             is not None
         )
+
+    def reject(self):
+        """Sets status of invite to rejected"""
+        self.status = STATUS_REJECTED
+
+    def accept(self):
+        """Sets status of invite to accepted"""
+        self.status = STATUS_ACCEPTED
