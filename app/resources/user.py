@@ -263,5 +263,5 @@ class AcceptInvite(Resource):
             return {"message": "Can't accept other user's invite"}, 400
         invite.accept()
         invite.save_to_db()
-        current_user.add_friend(invite.user_invited_id)
+        current_user.add_friend(invite.user_inviting_id)
         return {"message": "Friendship added"}, 201

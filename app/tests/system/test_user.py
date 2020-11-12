@@ -425,3 +425,25 @@ class TestUserEndpoints(BaseAPITestCase):
                     )
                     new_invite = InviteModel.find_by_id(invite.id)
                     self.assertTrue(new_invite.rejected, "Invite should be rejected")
+    def test_accept_invite(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user_login = fixtures["user_login"]
+            invite: InviteModel = fixtures["invite"]
+            claims = {"uid": user_login.firebase_id}
+            with patch.object(g, "claims", claims, create=True):
+                with self.test_client() as c:
+                    self.assertFalse(invite.accepted)
+                    self.assertFalse(invite.rejected)
+                    self.assertTrue(invite.pending)
+                    rv = c.post(
+                        f"/user/invites/{invite.id}/accept",
+                        content_type="application/json",
+                    )
+                    json_data = rv.get_json()
+                    self.assertEqual(rv.status_code, 201, "Wrong status code")
+                    self.assertEqual(json_data["message"], "Friendship added")
+                    new_invite = InviteModel.find_by_id(invite.id)
+                    self.assertTrue(new_invite.accepted)
+                    self.assertFalse(new_invite.rejected)
+                    self.assertFalse(new_invite.pending)

@@ -175,10 +175,8 @@ def create_dummy_result(challenge_id, user1_id, user2_id):
 
 
 def create_dummy_friendship(follower_id, followed_id):
-    insert = friendship_table.insert().values(
-        follower_id=follower_id, followed_id=followed_id
-    )
-    db.engine.execute(insert)
+    user = UserModel.find_by_id(follower_id)
+    user.add_friend(followed_id)
 
 
 def create_dummy_console_relationship(console_id, game_id):
@@ -254,11 +252,10 @@ def create_fixtures():
     challenge = create_dummy_challenge(game.id)
     upcoming_challenge = create_upcoming_challenge(game.id)
     result_1v1 = create_dummy_result(challenge.id, user.id, user.id)
-    create_dummy_friendship(user.id, second_user.id)
-    create_dummy_friendship(user_login.id, second_user.id)
     user_game = create_dummy_user_game(game.id, second_user.id, console.id)
     transaction = create_dummy_transaction(second_user.id)
     transaction2 = create_dummy_transaction(user_login.id)
+    create_dummy_friendship(user.id, second_user.id)
     confirmation = create_confirmation_already_confirmed(user_login.id)
     dispute = create_dispute(user_login.id, challenge.id)
     challenge_user = create_challenge_user_dummy(
@@ -278,7 +275,6 @@ def create_fixtures():
         "game_not_active": game_not_active,
         "console": console,
         "result_1v1": result_1v1,
-        "friendship": {"follower_id": user.id, "followed_id": second_user.id},
         "user_game": user_game,
         "transaction": transaction,
         "transaction2": transaction2,
