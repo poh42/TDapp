@@ -322,3 +322,35 @@ class TestUserEndpoints(BaseAPITestCase):
                             json_data["message"],
                             "You are already a friend of this user",
                         )
+
+    def test_remove_friend(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user_login = fixtures["user_login"]
+            user_to_befriend = fixtures["user"]
+            user_login.add_friend(user_to_befriend.id)
+            claims = {"uid": user_login.firebase_id}
+            with self.test_client() as c:
+                with patch.object(g, "claims", claims, create=True):
+                    with self.subTest("register a friendship"):
+                        rv = c.post(
+                            f"/user/{user_to_befriend.id}/deleteFriend",
+                            content_type="application/json",
+                        )
+                        json_data = rv.get_json()
+                        self.assertEqual(rv.status_code, 200, "Wrong status code")
+                        self.assertFalse(
+                            user_login.is_friend_of_user(user_to_befriend.id),
+                            "Friendship relationship was removed",
+                        )
+                        self.assertEqual(json_data["message"], "Friend removed")
+                    with self.subTest("already friends"):
+                        rv = c.post(
+                            f"/user/{user_to_befriend.id}/deleteFriend",
+                            content_type="application/json",
+                        )
+                        json_data = rv.get_json()
+                        self.assertEqual(rv.status_code, 400, "Wrong status code")
+                        self.assertEqual(
+                            json_data["message"], "You are not a friend of this user",
+                        )

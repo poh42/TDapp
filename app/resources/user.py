@@ -204,3 +204,13 @@ class AddFriend(Resource):
             return {"message": "You are already a friend of this user"}, 400
         current_user.add_friend(user_id)
         return {"message": "You are now a friend of this user"}, 201
+
+
+class RemoveFriend(Resource):
+    @check_token
+    def post(self, user_id):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if not current_user.is_friend_of_user(user_id):
+            return {"message": "You are not a friend of this user"}, 400
+        current_user.remove_friend(user_id)
+        return {"message": "Friend removed"}, 200
