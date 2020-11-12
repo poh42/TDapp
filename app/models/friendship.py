@@ -10,8 +10,12 @@ friendship_table = db.Table(
 
 
 def is_friend_of_user(user_1_id, user_2_id):
-    sql = "SELECT 1 from friendships f WHERE f.follower_id = :user_1_id AND f.followed_id = :user_2_id LIMIT 1"
+    sql = (
+        "SELECT 1 from friendships f WHERE "
+        "(f.follower_id = :user_1_id AND f.followed_id = :user_2_id) "
+        "OR (f.follower_id = :user_2_id AND f.followed_id = :user_1_id) LIMIT 2"
+    )
     results = db.engine.execute(
         text(sql), user_1_id=user_1_id, user_2_id=user_2_id
     ).fetchall()
-    return len(results) > 0
+    return len(results) == 2

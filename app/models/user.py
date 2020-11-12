@@ -131,7 +131,10 @@ class UserModel(db.Model):
 
     def add_friend(self, other_id):
         insert = friendship_table.insert().values(
-            follower_id=self.id, followed_id=other_id
+            [
+                dict(follower_id=self.id, followed_id=other_id),
+                dict(follower_id=other_id, followed_id=self.id),
+            ]
         )
         db.engine.execute(insert)
 

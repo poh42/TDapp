@@ -243,3 +243,15 @@ class DeclineInvite(Resource):
         invite.reject()
         invite.save_to_db()
         return {"message": "Invite declined"}, 200
+
+
+class AcceptInvite(Resource):
+    @check_token
+    def post(self, invite_id):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+
+        invite: InviteModel = InviteModel.find_by_id(invite_id)
+        if invite is None:
+            return {"message": "Invite not found"}, 400
+        invite.accept()
+        invite.save_to_db()

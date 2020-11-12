@@ -121,6 +121,7 @@ api.add_resource(RemoveFriend, "/user/<int:user_id>/deleteFriend")
 api.add_resource(AddUserInvite, "/user/invites/<int:user_id>/create")
 api.add_resource(DeclineInvite, "/user/invites/<int:invite_id>/reject")
 
+
 db.init_app(app)
 migrate.init_app(app)
 
