@@ -39,6 +39,7 @@ from resources.user import (
     AddUserInvite,
     DeclineInvite,
     AcceptInvite,
+    GetInvites,
 )
 from flask_uploads import configure_uploads, IMAGES
 from utils.image_helper import IMAGE_SET
@@ -122,6 +123,7 @@ api.add_resource(RemoveFriend, "/user/<int:user_id>/deleteFriend")
 api.add_resource(AddUserInvite, "/user/invites/<int:user_id>/create")
 api.add_resource(DeclineInvite, "/user/invites/<int:invite_id>/reject")
 api.add_resource(AcceptInvite, "/user/invites/<int:invite_id>/accept")
+api.add_resource(GetInvites, "/user/invites")
 
 db.init_app(app)
 migrate.init_app(app)

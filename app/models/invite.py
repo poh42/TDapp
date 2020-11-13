@@ -1,4 +1,5 @@
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 
 from db import db
 
@@ -50,6 +51,14 @@ class InviteModel(db.Model):
                 status=STATUS_PENDING,
             ).first()
             is not None
+        )
+
+    @classmethod
+    def get_user_invites(cls, user_id, status=STATUS_PENDING):
+        return (
+            cls.query.options(joinedload(cls.user_inviting))
+            .filter_by(user_invited_id=user_id, status=status)
+            .all()
         )
 
     def reject(self):

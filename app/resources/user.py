@@ -5,6 +5,7 @@ from marshmallow import ValidationError
 
 from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
 from models.invite import InviteModel
+from schemas.invite import InviteSchema
 from schemas.user_game import BaseUserGameSchema
 from utils.claims import set_is_admin
 from fb import pb
@@ -265,3 +266,12 @@ class AcceptInvite(Resource):
         invite.save_to_db()
         current_user.add_friend(invite.user_inviting_id)
         return {"message": "Friendship added"}, 201
+
+
+class GetInvites(Resource):
+    @classmethod
+    @check_token
+    def get(cls):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        invites = InviteModel.get_user_invites(current_user.id)
+        return {"invites": InviteSchema().dump(invites, many=True)}

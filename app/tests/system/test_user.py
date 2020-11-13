@@ -448,3 +448,22 @@ class TestUserEndpoints(BaseAPITestCase):
                     self.assertTrue(new_invite.accepted)
                     self.assertFalse(new_invite.rejected)
                     self.assertFalse(new_invite.pending)
+
+    def test_get_user_invites(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user_login = fixtures["user_login"]
+            claims = {"uid": user_login.firebase_id}
+            with patch.object(g, "claims", claims, create=True):
+                with self.test_client() as c:
+                    rv = c.get(f"/user/invites")
+                    self.assertEqual(rv.status_code, 200)
+                    json_data = rv.get_json()
+                    invites = json_data["invites"]
+                    self.assertEqual(len(invites), 1, "Wrong invite length")
+                    invite = invites[0]
+                    self.assertIn(
+                        "user_inviting",
+                        invite,
+                        "User invite is not on the user_invited endpoint",
+                    )
