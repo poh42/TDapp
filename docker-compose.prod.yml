@@ -9,8 +9,6 @@ services:
       - ./.env:/app/.env
     command: flask run --host 0.0.0.0
     env_file: .env
-    depends_on:
-      - db
 
   # NGINX to serve the app
   nginx:
