@@ -425,6 +425,7 @@ class TestUserEndpoints(BaseAPITestCase):
                     )
                     new_invite = InviteModel.find_by_id(invite.id)
                     self.assertTrue(new_invite.rejected, "Invite should be rejected")
+
     def test_accept_invite(self):
         with self.app_context():
             fixtures = create_fixtures()
