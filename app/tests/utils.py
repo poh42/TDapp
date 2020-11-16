@@ -2,6 +2,7 @@ from models.challenge_ import ChallengeModel
 from models.confirmation import ConfirmationModel
 from models.dispute import DisputeModel
 from models.game_has_console import game_has_console_table
+from models.invite import InviteModel
 from models.transaction import TransactionModel
 from models.user import UserModel
 from models.game import GameModel
@@ -174,10 +175,8 @@ def create_dummy_result(challenge_id, user1_id, user2_id):
 
 
 def create_dummy_friendship(follower_id, followed_id):
-    insert = friendship_table.insert().values(
-        follower_id=follower_id, followed_id=followed_id
-    )
-    db.engine.execute(insert)
+    user = UserModel.find_by_id(follower_id)
+    user.add_friend(followed_id)
 
 
 def create_dummy_console_relationship(console_id, game_id):
@@ -237,6 +236,12 @@ def create_challenge_user_dummy(challenger_id, challenged_id, wager_id):
     return challenge_user
 
 
+def create_invite(inviting_id, invited_id):
+    invite = InviteModel(user_inviting_id=inviting_id, user_invited_id=invited_id)
+    invite.save_to_db()
+    return invite
+
+
 def create_fixtures():
     user = create_dummy_user()
     user_login = create_login_user()
@@ -247,11 +252,10 @@ def create_fixtures():
     challenge = create_dummy_challenge(game.id)
     upcoming_challenge = create_upcoming_challenge(game.id)
     result_1v1 = create_dummy_result(challenge.id, user.id, user.id)
-    create_dummy_friendship(user.id, second_user.id)
-    create_dummy_friendship(user_login.id, second_user.id)
     user_game = create_dummy_user_game(game.id, second_user.id, console.id)
     transaction = create_dummy_transaction(second_user.id)
     transaction2 = create_dummy_transaction(user_login.id)
+    create_dummy_friendship(user.id, second_user.id)
     confirmation = create_confirmation_already_confirmed(user_login.id)
     dispute = create_dispute(user_login.id, challenge.id)
     challenge_user = create_challenge_user_dummy(
@@ -262,6 +266,7 @@ def create_fixtures():
     )
     create_rest_of_games(console.id)
     private_user = create_private_user()
+    invite = create_invite(second_user.id, user_login.id)
     return {
         "user": user,
         "second_user": second_user,
@@ -270,7 +275,6 @@ def create_fixtures():
         "game_not_active": game_not_active,
         "console": console,
         "result_1v1": result_1v1,
-        "friendship": {"follower_id": user.id, "followed_id": second_user.id},
         "user_game": user_game,
         "transaction": transaction,
         "transaction2": transaction2,
@@ -281,4 +285,5 @@ def create_fixtures():
         "upcoming_challenge": upcoming_challenge,
         "challenge_user_upcoming": challenge_user_upcoming,
         "private_user": private_user,
+        "invite": invite,
     }

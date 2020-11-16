@@ -4,6 +4,8 @@ from firebase_admin import auth
 from marshmallow import ValidationError
 
 from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
+from models.invite import InviteModel, STATUS_PENDING
+from schemas.invite import InviteSchema
 from schemas.user_game import BaseUserGameSchema
 from utils.claims import set_is_admin
 from fb import pb
@@ -214,3 +216,92 @@ class RemoveFriend(Resource):
             return {"message": "You are not a friend of this user"}, 400
         current_user.remove_friend(user_id)
         return {"message": "Friend removed"}, 200
+
+
+class AddUserInvite(Resource):
+    @check_token
+    def post(self, user_id):
+        if not UserModel.find_by_id(user_id):
+            return {"message": "User not found"}, 404
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if InviteModel.is_already_invited(current_user.id, user_id):
+            return (
+                {"message": "You already have an invitation to this user in place"},
+                400,
+            )
+        if current_user.is_friend_of_user(user_id):
+            return {"message": "You already are a friend of this user"}, 400
+        invite = InviteModel(user_inviting_id=current_user.id, user_invited_id=user_id)
+        invite.save_to_db()
+        return {"message": "Added invite"}, 201
+
+
+class DeclineInvite(Resource):
+    @check_token
+    def post(self, invite_id):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        invite: InviteModel = InviteModel.find_by_id(invite_id)
+        if invite is None:
+            return {"message": "Invite not found"}, 400
+        if not (
+            invite.user_invited_id == current_user.id
+            or invite.user_inviting == current_user.id
+        ):
+            return {"message": "Can't reject other user's invite"}, 400
+        invite.reject()
+        invite.save_to_db()
+        return {"message": "Invite declined"}, 200
+
+
+class AcceptInvite(Resource):
+    @check_token
+    def post(self, invite_id):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        invite: InviteModel = InviteModel.find_by_id(invite_id)
+        if invite is None:
+            return {"message": "Invite not found"}, 400
+        if invite.user_invited_id != current_user.id:
+            return {"message": "Can't accept other user's invite"}, 400
+        invite.accept()
+        invite.save_to_db()
+        current_user.add_friend(invite.user_inviting_id)
+        return {"message": "Friendship added"}, 201
+
+
+class GetInvites(Resource):
+    @classmethod
+    @check_token
+    def get(cls):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        status = request.args.get("status", STATUS_PENDING)
+        invites = InviteModel.get_user_invites(current_user.id, status=status)
+        return {"invites": InviteSchema().dump(invites, many=True)}
+
+
+class UserFriends(Resource):
+    @classmethod
+    def get(cls, user_id):
+        user = UserModel.find_by_id(user_id)
+        if user is None:
+            return {"message": "User not found"}, 400
+        friends = user.get_friends()
+        return {"friends": user_schema.dump(friends, many=True)}
+
+
+class IsFriend(Resource):
+    @classmethod
+    def get(cls, user_1_id, user_2_id):
+        user1 = UserModel.find_by_id(user_1_id)
+        user2 = UserModel.find_by_id(user_2_id)
+        if user1 is None and user2 is None:
+            return {"message": "Users not found"}, 400
+        if user1 is None:
+            return {"message": f"User {user_1_id} not found"}, 400
+        if user2 is None:
+            return {"message": f"User {user_2_id} not found"}, 400
+        is_friend = user1.is_friend_of_user(user_2_id)
+        if is_friend:
+            message = f"User {user_1_id} is friend of {user_2_id}"
+        else:
+            message = f"User {user_1_id} is not friend of {user_2_id}"
+        return {"is_friend": is_friend, "message": message}, 200

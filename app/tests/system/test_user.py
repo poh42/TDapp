@@ -1,3 +1,6 @@
+import unittest
+
+from models.invite import InviteModel
 from tests.base import BaseAPITestCase
 from unittest.mock import patch, Mock
 import json
@@ -332,7 +335,7 @@ class TestUserEndpoints(BaseAPITestCase):
             claims = {"uid": user_login.firebase_id}
             with self.test_client() as c:
                 with patch.object(g, "claims", claims, create=True):
-                    with self.subTest("register a friendship"):
+                    with self.subTest("removing a friendship"):
                         rv = c.post(
                             f"/user/{user_to_befriend.id}/deleteFriend",
                             content_type="application/json",
@@ -344,7 +347,7 @@ class TestUserEndpoints(BaseAPITestCase):
                             "Friendship relationship was removed",
                         )
                         self.assertEqual(json_data["message"], "Friend removed")
-                    with self.subTest("already friends"):
+                    with self.subTest("trying to delete an already deleted friendship"):
                         rv = c.post(
                             f"/user/{user_to_befriend.id}/deleteFriend",
                             content_type="application/json",
@@ -354,3 +357,150 @@ class TestUserEndpoints(BaseAPITestCase):
                         self.assertEqual(
                             json_data["message"], "You are not a friend of this user",
                         )
+
+    def test_add_user_invite(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user_login = fixtures["user_login"]
+            user_to_invite = fixtures["user"]
+            claims = {"uid": user_login.firebase_id}
+            with self.test_client() as c:
+                with patch.object(g, "claims", claims, create=True):
+                    with self.subTest("Creating an invitation"):
+                        # Let's check if an invitation already exists
+                        self.assertFalse(
+                            InviteModel.is_already_invited(
+                                user_login.id, user_to_invite.id
+                            ),
+                            "This should be false",
+                        )
+                        rv = c.post(
+                            f"/user/invites/{user_to_invite.id}/create",
+                            content_type="application/json",
+                        )
+                        json_data = rv.get_json()
+                        self.assertEqual(json_data["message"], "Added invite")
+                        self.assertEqual(rv.status_code, 201, "Wrong status code")
+                        self.assertTrue(
+                            InviteModel.is_already_invited(
+                                user_login.id, user_to_invite.id
+                            ),
+                            "This should be True",
+                        )
+                    with self.subTest("Invitation already created"):
+                        rv = c.post(
+                            f"/user/invites/{user_to_invite.id}/create",
+                            content_type="application/json",
+                        )
+                        self.assertEqual(rv.status_code, 400)
+                        json_data = rv.get_json()
+                        self.assertEqual(
+                            json_data["message"],
+                            "You already have an invitation to this user in place",
+                        )
+
+    def test_decline_invite(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user_login = fixtures["user_login"]
+            invite = fixtures["invite"]
+            claims = {"uid": user_login.firebase_id}
+            with patch.object(g, "claims", claims, create=True):
+                with self.test_client() as c:
+                    self.assertFalse(
+                        invite.rejected,
+                        "Before the test, the invite should not be rejected",
+                    )
+                    rv = c.post(
+                        f"/user/invites/{invite.id}/reject",
+                        content_type="application/json",
+                    )
+                    json_data = rv.get_json()
+                    print(json_data)
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    self.assertEqual(
+                        json_data["message"],
+                        "Invite declined",
+                        "Wrong message returned",
+                    )
+                    new_invite = InviteModel.find_by_id(invite.id)
+                    self.assertTrue(new_invite.rejected, "Invite should be rejected")
+
+    def test_accept_invite(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user_login = fixtures["user_login"]
+            invite: InviteModel = fixtures["invite"]
+            claims = {"uid": user_login.firebase_id}
+            with patch.object(g, "claims", claims, create=True):
+                with self.test_client() as c:
+                    self.assertFalse(invite.accepted)
+                    self.assertFalse(invite.rejected)
+                    self.assertTrue(invite.pending)
+                    rv = c.post(
+                        f"/user/invites/{invite.id}/accept",
+                        content_type="application/json",
+                    )
+                    json_data = rv.get_json()
+                    self.assertEqual(rv.status_code, 201, "Wrong status code")
+                    self.assertEqual(json_data["message"], "Friendship added")
+                    new_invite = InviteModel.find_by_id(invite.id)
+                    self.assertTrue(new_invite.accepted)
+                    self.assertFalse(new_invite.rejected)
+                    self.assertFalse(new_invite.pending)
+
+    def test_get_user_invites(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user_login = fixtures["user_login"]
+            claims = {"uid": user_login.firebase_id}
+            with patch.object(g, "claims", claims, create=True):
+                with self.test_client() as c:
+                    rv = c.get(f"/user/invites")
+                    self.assertEqual(rv.status_code, 200)
+                    json_data = rv.get_json()
+                    invites = json_data["invites"]
+                    self.assertEqual(len(invites), 1, "Wrong invite length")
+                    invite = invites[0]
+                    self.assertIn(
+                        "user_inviting",
+                        invite,
+                        "User invite is not on the user_invited endpoint",
+                    )
+
+    def test_get_friends(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user = fixtures["user"]
+            # We add this friend here so we don't make other tests to fail
+            user.add_friend(fixtures["user_login"].id)
+            with self.test_client() as c:
+                rv = c.get(f"/user/{user.id}/friends", content_type="application/json")
+                self.assertEqual(rv.status_code, 200)
+                json_data = rv.get_json()
+                self.assertEqual(
+                    len(json_data["friends"]), 2, "Wrong number of friends"
+                )
+
+    def test_is_friend_of(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user = fixtures["user"]
+            user2 = fixtures["second_user"]
+            with self.test_client() as c:
+                with self.subTest(is_friend=True):
+                    rv = c.get(f"/user/isFriend/{user.id}/{user2.id}")
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    json_data = rv.get_json()
+                    self.assertTrue(json_data["is_friend"], "Friend should be true")
+                with self.subTest(is_friend=True, reversed_order=True):
+                    rv = c.get(f"/user/isFriend/{user2.id}/{user.id}")
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    json_data = rv.get_json()
+                    self.assertTrue(json_data["is_friend"], "Friend should be true")
+                user.remove_friend(user2.id)
+                with self.subTest(is_friend=False):
+                    rv = c.get(f"/user/isFriend/{user.id}/{user2.id}")
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    json_data = rv.get_json()
+                    self.assertFalse(json_data["is_friend"], "Friend should be false")
