@@ -4,7 +4,7 @@ from firebase_admin import auth
 from marshmallow import ValidationError
 
 from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
-from models.invite import InviteModel
+from models.invite import InviteModel, STATUS_PENDING
 from schemas.invite import InviteSchema
 from schemas.user_game import BaseUserGameSchema
 from utils.claims import set_is_admin
@@ -273,5 +273,6 @@ class GetInvites(Resource):
     @check_token
     def get(cls):
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
-        invites = InviteModel.get_user_invites(current_user.id)
+        status = request.args.get("status", STATUS_PENDING)
+        invites = InviteModel.get_user_invites(current_user.id, status=status)
         return {"invites": InviteSchema().dump(invites, many=True)}
