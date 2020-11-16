@@ -40,7 +40,8 @@ from resources.user import (
     DeclineInvite,
     AcceptInvite,
     GetInvites,
-    UserFriends, IsFriend,
+    UserFriends,
+    IsFriend,
 )
 from flask_uploads import configure_uploads, IMAGES
 from utils.image_helper import IMAGE_SET

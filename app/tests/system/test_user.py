@@ -481,3 +481,26 @@ class TestUserEndpoints(BaseAPITestCase):
                 self.assertEqual(
                     len(json_data["friends"]), 2, "Wrong number of friends"
                 )
+
+    def test_is_friend_of(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user = fixtures["user"]
+            user2 = fixtures["second_user"]
+            with self.test_client() as c:
+                with self.subTest(is_friend=True):
+                    rv = c.get(f"/user/isFriend/{user.id}/{user2.id}")
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    json_data = rv.get_json()
+                    self.assertTrue(json_data["is_friend"], "Friend should be true")
+                with self.subTest(is_friend=True, reversed_order=True):
+                    rv = c.get(f"/user/isFriend/{user2.id}/{user.id}")
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    json_data = rv.get_json()
+                    self.assertTrue(json_data["is_friend"], "Friend should be true")
+                user.remove_friend(user2.id)
+                with self.subTest(is_friend=False):
+                    rv = c.get(f"/user/isFriend/{user.id}/{user2.id}")
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    json_data = rv.get_json()
+                    self.assertFalse(json_data["is_friend"], "Friend should be false")
