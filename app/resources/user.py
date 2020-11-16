@@ -286,3 +286,22 @@ class UserFriends(Resource):
             return {"message": "User not found"}, 400
         friends = user.get_friends()
         return {"friends": user_schema.dump(friends, many=True)}
+
+
+class IsFriend(Resource):
+    @classmethod
+    def get(cls, user_1_id, user_2_id):
+        user1 = UserModel.find_by_id(user_1_id)
+        user2 = UserModel.find_by_id(user_2_id)
+        if user1 is None and user2 is None:
+            return {"message": "Users not found"}, 400
+        if user1 is None:
+            return {"message": f"User {user_1_id} not found"}, 400
+        if user2 is None:
+            return {"message": f"User {user_2_id} not found"}, 400
+        is_friend = user1.is_friend_of_user(user_2_id)
+        if is_friend:
+            message = f"User {user_1_id} is friend of {user_2_id}"
+        else:
+            message = f"User {user_1_id} is not friend of {user_2_id}"
+        return {"is_friend": is_friend, "message": message}, 200
