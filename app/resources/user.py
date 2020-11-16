@@ -276,3 +276,13 @@ class GetInvites(Resource):
         status = request.args.get("status", STATUS_PENDING)
         invites = InviteModel.get_user_invites(current_user.id, status=status)
         return {"invites": InviteSchema().dump(invites, many=True)}
+
+
+class UserFriends(Resource):
+    @classmethod
+    def get(cls, user_id):
+        user = UserModel.find_by_id(user_id)
+        if user is None:
+            return {"message": "User not found"}, 400
+        friends = user.get_friends()
+        return {"friends": user_schema.dump(friends, many=True)}

@@ -152,3 +152,17 @@ class UserModel(db.Model):
             )
         )
         db.engine.execute(remove)
+
+    def get_friends(self):
+        """Gets friends of user"""
+        sql = """
+           select u.* from users u
+             inner join friendships f on f.followed_id = u.id
+           where f.follower_id = :id
+        """
+        query = (
+            db.session.query(self.__class__)
+            .from_statement(text(sql))
+            .params(id=self.id)
+        )
+        return query.all()
