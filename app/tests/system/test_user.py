@@ -467,3 +467,17 @@ class TestUserEndpoints(BaseAPITestCase):
                         invite,
                         "User invite is not on the user_invited endpoint",
                     )
+
+    def test_get_friends(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            user = fixtures["user"]
+            # We add this friend here so we don't make other tests to fail
+            user.add_friend(fixtures["user_login"].id)
+            with self.test_client() as c:
+                rv = c.get(f"/user/{user.id}/friends", content_type="application/json")
+                self.assertEqual(rv.status_code, 200)
+                json_data = rv.get_json()
+                self.assertEqual(
+                    len(json_data["friends"]), 2, "Wrong number of friends"
+                )
