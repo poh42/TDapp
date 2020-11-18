@@ -1,3 +1,5 @@
+import json
+
 from tests.base import BaseAPITestCase
 from tests.utils import create_fixtures
 from unittest.mock import patch
@@ -32,3 +34,32 @@ class TestGameEndpoints(BaseAPITestCase):
                             every_game_is_active,
                             "There should not be any non active games in the response",
                         )
+
+    def test_add_game(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            console = fixtures["console"]
+            post_data = {
+                "image": "image_url_here",
+                "name": "Test",
+                "consoles": [{"id": console.id}],
+            }
+            with self.test_client() as c:
+                rv = c.post(
+                    "/games",
+                    data=json.dumps(post_data),
+                    content_type="application/json",
+                )
+                json_data = rv.get_json()
+                self.assertEqual(rv.status_code, 201, "Wrong status code")
+                self.assertEqual(json_data["message"], "Game saved", "Wrong message")
+                game_data = json_data["game"]
+                self.assertTrue(game_data["is_active"], "Should be true")
+                self.assertEqual(game_data["name"], "Test", "Wrong name")
+                self.assertEqual(game_data["image"], "image_url_here", "Wrong url")
+                self.assertIn(
+                    "consoles", game_data, "Consoles not present in game data"
+                )
+                self.assertEqual(len(game_data["consoles"]), 1, "Wrong len")
+                console_data = game_data["consoles"][0]
+                self.assertEqual(console.name, console_data["name"], "Wrong name")

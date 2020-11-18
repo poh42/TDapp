@@ -1,10 +1,15 @@
+from flask import request
 from flask_restful import Resource
 from sqlalchemy.sql import text
 from db import db
-from decorators import optional_check_token
+from decorators import (
+    optional_check_token,
+    check_token,
+    check_is_admin,
+)
 from models.console import ConsoleModel
 from models.game import GameModel
-from schemas.game import GameSchema
+from schemas.game import GameSchema, BaseGameSchema
 from utils.claims import get_claims, is_admin
 
 game_schema = GameSchema()
@@ -38,3 +43,12 @@ class Games(Resource):
         else:
             games = GameModel.get_active_games()
         return {"message": "Games found", "games": game_schema.dump(games, many=True)}
+
+    @classmethod
+    @check_token
+    @check_is_admin
+    def post(cls):
+        # Based on https://github.com/marshmallow-code/marshmallow-sqlalchemy/issues/298#issuecomment-614923691
+        game = BaseGameSchema().load(request.get_json(), session=db.session)
+        game.save_to_db()
+        return {"message": "Game saved", "game": game_schema.dump(game)}, 201

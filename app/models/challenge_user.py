@@ -2,6 +2,7 @@ from db import db
 from sqlalchemy.sql import func
 
 STATUS_OPEN = "OPEN"
+STATUS_READY = "READY"
 STATUS_ACCEPTED = "ACCEPTED"
 STATUS_DECLINED = "DECLINED"
 STATUS_COMPLETED = "COMPLETED"
