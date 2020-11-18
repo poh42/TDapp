@@ -1,5 +1,6 @@
 import json
 
+from models.game import GameModel
 from tests.base import BaseAPITestCase
 from tests.utils import create_fixtures
 from unittest.mock import patch
@@ -69,4 +70,8 @@ class TestGameEndpoints(BaseAPITestCase):
             fixtures = create_fixtures()
             game = fixtures["game"]
             with self.test_client() as c:
-                # rv = c.delete
+                rv = c.delete(f"/games/{game.id}")
+                json_data = rv.get_json()
+                self.assertEqual(rv.status_code, 200, "Wrong status code")
+                self.assertIsNone(GameModel.find_by_id(game.id))
+                self.assertEqual(json_data["message"], "Game deleted")

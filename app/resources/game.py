@@ -63,4 +63,4 @@ class Game(Resource):
         if game is None:
             return {"message": "Game not found"}, 400
         game.delete_from_db()
-        return {"message": "Game deleted", "game": game_schema.dump(game)}, 400
+        return {"message": "Game deleted", "game": game_schema.dump(game)}, 200
