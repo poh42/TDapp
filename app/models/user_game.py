@@ -15,6 +15,8 @@ class UserGameModel(db.Model):
     level = db.Column(db.String(45), nullable=False, default="beginner")
     gamertag = db.Column(db.String(255), nullable=False)
 
+    game = db.relationship("GameModel", back_populates="user_games")
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

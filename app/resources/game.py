@@ -52,3 +52,15 @@ class Games(Resource):
         game = BaseGameSchema().load(request.get_json(), session=db.session)
         game.save_to_db()
         return {"message": "Game saved", "game": game_schema.dump(game)}, 201
+
+
+class Game(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin
+    def delete(cls, game_id):
+        game: GameModel = GameModel.find_by_id(game_id)
+        if game is None:
+            return {"message": "Game not found"}, 400
+        game.delete_from_db()
+        return {"message": "Game deleted", "game": game_schema.dump(game)}, 400

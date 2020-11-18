@@ -10,7 +10,7 @@ class ConsoleModel(db.Model):
     name = db.Column(db.String(255), unique=True)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
-    games = db.relationship("GameModel", secondary=game_has_console_table)
+    games = db.relationship("GameModel", secondary=game_has_console_table, back_populates="consoles")
 
     def save_to_db(self):
         db.session.add(self)

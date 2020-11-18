@@ -26,7 +26,7 @@ from resources.challenge_ import (
     ChallengesByUser,
 )
 from resources.console import ConsoleList
-from resources.game import GamesByConsole, Games
+from resources.game import GamesByConsole, Games, Game
 from resources.user import (
     UserRegister,
     UserLogin,
@@ -115,6 +115,7 @@ api.add_resource(ChallengeResults, "/challenge/<int:challenge_id>/getResultsChal
 api.add_resource(ReportChallenge, "/challenge/<int:challenge_id>/report")
 api.add_resource(GetDisputes, "/challenge/<int:challenge_id>/report/dispute")
 api.add_resource(Games, "/games")
+api.add_resource(Game, "/games/<int:game_id>")
 api.add_resource(AcceptChallenge, "/challenge/<int:challenge_user_id>/accept")
 api.add_resource(DeclineChallenge, "/challenge/<int:challenge_user_id>/decline")
 api.add_resource(ConsoleList, "/consoles")

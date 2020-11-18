@@ -63,3 +63,10 @@ class TestGameEndpoints(BaseAPITestCase):
                 self.assertEqual(len(game_data["consoles"]), 1, "Wrong len")
                 console_data = game_data["consoles"][0]
                 self.assertEqual(console.name, console_data["name"], "Wrong name")
+
+    def test_delete_game(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            game = fixtures["game"]
+            with self.test_client() as c:
+                # rv = c.delete
