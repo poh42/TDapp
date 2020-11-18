@@ -36,9 +36,17 @@ class ChallengePost(Resource):
     def post(cls):
         challenge = challenge_schema.load(request.get_json())
         challenge.save_to_db()
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        challenge_user = ChallengeUserModel(
+            wager_id=challenge.id,
+            challenged_id=current_user.id,
+            status=STATUS_ACCEPTED,
+        )
+        challenge_user.save_to_db()
         return {
             "message": "Challenge created",
             "challenge": challenge_schema.dump(challenge),
+            "challenge_user": challenge_user_schema.dump(challenge_user),
         }
 
 

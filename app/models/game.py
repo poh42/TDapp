@@ -19,8 +19,13 @@ class GameModel(db.Model):
         "ChallengeModel", lazy="dynamic", cascade="all, delete-orphan"
     )
     consoles = db.relationship(
-        "ConsoleModel", cascade="all", secondary=game_has_console_table
+        "ConsoleModel",
+        cascade="all",
+        secondary=game_has_console_table,
+        back_populates="games",
     )
+
+    user_games = db.relationship("UserGameModel", cascade="all, delete-orphan",)
 
     @classmethod
     def get_active_games(cls):
@@ -34,6 +39,20 @@ class GameModel(db.Model):
     def get_all_games(cls):
         return cls.query.outerjoin(ConsoleModel, cls.consoles).all()
 
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
+
     def save_to_db(self) -> None:
+        """Saves game model to database"""
         db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        """Deletes game from database"""
+        remove = game_has_console_table.delete().where(
+            game_has_console_table.c.game_id == self.id
+        )
+        db.engine.execute(remove)
+        db.session.delete(self)
         db.session.commit()
