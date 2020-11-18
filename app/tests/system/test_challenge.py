@@ -165,9 +165,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 "due_date": "2019-01-01T00:00:00",
             }
             with self.test_client() as c:
-                g.claims = {
-                    "uid": fixtures["user_login"].firebase_id
-                }
+                g.claims = {"uid": fixtures["user_login"].firebase_id}
                 rv = c.post(
                     "/challenge", data=json.dumps(data), content_type="application/json"
                 )
@@ -192,9 +190,17 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 self.assertEqual(
                     challenge_created["status"], data["status"], "Wrong type"
                 )
-                self.assertIn("challenge_user", json_data, "Challenge user is not part of the response as it should be")
+                self.assertIn(
+                    "challenge_user",
+                    json_data,
+                    "Challenge user is not part of the response as it should be",
+                )
                 challenge_user = json_data["challenge_user"]
-                self.assertEqual(challenge_user["wager_id"], challenge_created["id"], "Challenge user was created with wrong id")
+                self.assertEqual(
+                    challenge_user["wager_id"],
+                    challenge_created["id"],
+                    "Challenge user was created with wrong id",
+                )
                 self.assertEqual(challenge_user["status"], "ACCEPTED", "Wrong status")
 
     def test_get_disputes(self):
