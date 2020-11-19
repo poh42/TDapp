@@ -157,6 +157,10 @@ class User(Resource):
             and g.claims.get("admin") is True
         ):
             user.is_active = json_data["is_active"]
+        if json_data.get("dob"):
+            user.dob = json_data["dob"]
+        if json_data.get("last_name"):
+            user.last_name = json_data["last_name"]
         try:
             user.save()
         except Exception as e:

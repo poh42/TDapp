@@ -172,9 +172,11 @@ class TestUserEndpoints(BaseAPITestCase):
                             "phone": "885",
                             "email": "asdr@hotmail.com",
                             "name": "Test",
+                            "last_name": "Another test",
                             "playing_hours_begin": 1,
                             "password": "1234567",
                             "is_private": True,
+                            "dob": "1990-01-01",
                         }
                     )
                     rv = c.put(
@@ -207,6 +209,14 @@ class TestUserEndpoints(BaseAPITestCase):
                     )
                     self.assertEqual(
                         user_data["name"], "Test", "Name should be equal to test"
+                    )
+                    self.assertEqual(
+                        user_data["last_name"],
+                        "Another test",
+                        "Name should be equal to Another test",
+                    )
+                    self.assertEqual(
+                        user_data["dob"], "1990-01-01", "Date should be correct"
                     )
                     self.assertTrue(user_data["is_private"])
                     self.assertFalse(
