@@ -74,7 +74,7 @@ class UserLogin(Resource):
             try:
                 user = pb.auth().sign_in_with_email_and_password(email, password)
                 jwt = user["idToken"]
-                return {"token": jwt}, 200
+                return {"token": jwt, "user": user_schema.dump(user_instance)}, 200
             except HTTPError as e:
                 try:
                     error_data = json.loads(e.strerror)
