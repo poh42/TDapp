@@ -21,6 +21,7 @@ class UserModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255))
     phone = db.Column(db.String(255))
     username = db.Column(db.String(80), unique=True, nullable=False)
     firebase_id = db.Column(db.String(255), unique=True, nullable=False)
@@ -34,6 +35,7 @@ class UserModel(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     is_private = db.Column(db.Boolean, default=False)
     avatar = db.Column(db.String(255))
+    dob = db.Column(db.Date)
 
     confirmation = db.relationship(
         "ConfirmationModel", lazy="dynamic", cascade="all, delete-orphan"
