@@ -92,9 +92,10 @@ def handle_marshmallow_error(err):
 
 @app.cli.command("create_fixtures")
 def create_fixtures_command():
-    from tests.utils import create_fixtures
-
+    from sample_database.main import create_fixtures
+    print("Creating fixtures")
     create_fixtures()
+    print("Fixtures saved successfully")
 
 
 @app.cli.command("delete_database")
