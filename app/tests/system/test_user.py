@@ -113,8 +113,11 @@ class TestUserEndpoints(BaseAPITestCase):
                     )
                     json_data = rv.get_json()
                     self.assertEqual(rv.status_code, 200, "Invalid status code")
-                    self.assertDictEqual(
-                        {"token": "MyToken"}, json_data, "A token should be returned"
+                    self.assertEqual(
+                        json_data["token"], "MyToken", "A token should be provided"
+                    )
+                    self.assertIn(
+                        "user", json_data, "User should be present in the body"
                     )
 
     def test_login_not_confirmed(self):
