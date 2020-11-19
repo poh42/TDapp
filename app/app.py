@@ -97,6 +97,24 @@ def create_fixtures_command():
     create_fixtures()
 
 
+@app.cli.command("delete_database")
+def delete_database_command():
+    val = input(
+        "Do you really want to delete the database? Type CONFIRM if you want it: "
+    )
+    if val == "CONFIRM":
+        connection = db.session.connection()
+        sql = """
+                DROP SCHEMA public CASCADE;
+                CREATE SCHEMA public;
+        """
+        connection.execute(sql, multi=True)
+        db.session.commit()
+        print("Data deleted")
+    else:
+        print("Won't delete the database")
+
+
 api.add_resource(UserRegister, "/user/register")
 api.add_resource(UserLogin, "/user/login")
 api.add_resource(SetAdminStatus, "/user/set_admin/<int:user_id>")
