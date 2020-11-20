@@ -3,6 +3,7 @@ from sample_database.game import save as save_games
 from sample_database.game_has_console import save as save_game_has_consoles
 from sample_database.user import save as save_users
 from sample_database.friendship import save as save_friendships
+from sample_database.user_game import save as save_user_games
 
 
 def create_fixtures():
@@ -11,10 +12,12 @@ def create_fixtures():
     game_has_consoles = save_game_has_consoles(games, consoles)
     users = save_users()
     friendships = save_friendships(users)
+    user_games = save_user_games(games, users, consoles)
     return {
         "consoles": consoles,
         "games": games,
         "game_has_consoles": game_has_consoles,
         "users": users,
         "friendships": friendships,
+        "user_games": user_games,
     }
