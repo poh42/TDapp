@@ -86,9 +86,11 @@ class UserLogin(Resource):
                         return {"message": "Invalid password"}, 400
                     else:
                         return {"message": "There was an error logging in"}, 400
-                except:
+                except Exception as e:
+                    print(e)
                     return {"message": "There was an error logging in"}, 400
             except Exception as e:
+                print(e)
                 log.error(e.__class__.__name__)
                 log.error(e)
                 return {"message": "There was an error logging in"}, 400
@@ -138,7 +140,7 @@ class User(Resource):
         if json_data.get("email") and user.email != json_data["email"]:
             if UserModel.find_by_email(json_data["email"]):
                 raise ValidationError({"email": "Email already in use"})
-            user.email = json_data["email"]
+            user.update_email(json_data["email"])
         if json_data.get("name"):
             user.name = json_data["name"]
         if json_data.get("playing_hours_begin") and json_data.get("playing_hours_end"):

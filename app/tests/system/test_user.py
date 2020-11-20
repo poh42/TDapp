@@ -2,7 +2,7 @@ import unittest
 
 from models.invite import InviteModel
 from tests.base import BaseAPITestCase
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, call
 import json
 from models.user import UserModel
 from models.confirmation import ConfirmationModel
@@ -184,9 +184,11 @@ class TestUserEndpoints(BaseAPITestCase):
                     )
                     json_data = rv.get_json()
                     user_data = json_data["user"]
-                    update_user_mock.assert_called_once_with(
-                        user.firebase_id, password="1234567"
-                    )
+                    calls = [
+                        call(user.firebase_id, email="asdr@hotmail.com"),
+                        call(user.firebase_id, password="1234567"),
+                    ]
+                    update_user_mock.assert_has_calls(calls)
                     self.assertEqual(
                         user_data["range_bet_low"], 100, "Range bet low should be 100"
                     )
