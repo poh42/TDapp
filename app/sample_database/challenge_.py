@@ -51,4 +51,3 @@ def get_challenges(games):
         },
     }
     return challenges
-

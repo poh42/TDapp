@@ -19,7 +19,6 @@ class ChallengeModel(db.Model):
     __tablename__ = "challenges"
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(45), nullable=False)
-    name = db.Column(db.String(255), nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey("games.id"), nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     buy_in = db.Column(db.Numeric(precision=10, scale=2), nullable=False)

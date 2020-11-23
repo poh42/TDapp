@@ -130,7 +130,6 @@ class ResultsByUser(Resource):
             """
             select
                 c.id as challenge_id,
-                c."name" as challenge_name,
                 g."name" as game_name,
                 rv.played,
                 rv.score_player_1,
