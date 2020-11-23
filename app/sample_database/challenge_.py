@@ -4,6 +4,7 @@ from models.challenge_ import (
     STATUS_PENDING,
     STATUS_OPEN,
     STATUS_REJECTED,
+    ChallengeModel,
 )
 
 
@@ -11,6 +12,7 @@ def get_challenges(games):
     challenges = {
         "maureen_asdrubal_1": {
             "game_id": games["fifa20"].id,
+            "type": "1v1",
             "buy_in": 25,
             "reward": 25,
             "status": STATUS_COMPLETED,
@@ -19,6 +21,7 @@ def get_challenges(games):
         },
         "roger_tomas": {
             "game_id": games["pga_2k21"].id,
+            "type": "1v1",
             "buy_in": 30,
             "reward": 30,
             "status": STATUS_ACCEPTED,
@@ -28,6 +31,7 @@ def get_challenges(games):
         "phil_ryan": {
             "game_id": games["madden21"].id,
             "buy_in": 20,
+            "type": "1v1",
             "reward": 20,
             "status": STATUS_PENDING,
             "date": "2020-12-01 00:00:00",
@@ -35,6 +39,7 @@ def get_challenges(games):
         },
         "noah": {
             "game_id": games["rocket_league"].id,
+            "type": "1v1",
             "buy_in": 30,
             "reward": 30,
             "status": STATUS_OPEN,
@@ -43,6 +48,7 @@ def get_challenges(games):
         },
         "maureen_asdrubal_2": {
             "game_id": games["fifa20"].id,
+            "type": "1v1",
             "buy_in": 100,
             "reward": 100,
             "status": STATUS_REJECTED,
@@ -51,3 +57,17 @@ def get_challenges(games):
         },
     }
     return challenges
+
+
+def create_challenge(challenge_data):
+    challenge = ChallengeModel(**challenge_data)
+    challenge.save_to_db()
+    return challenge
+
+
+def save(games):
+    challenges = get_challenges(games)
+    ret_val = dict()
+    for key, item in challenges.items():
+        ret_val[key] = create_challenge(item)
+    return ret_val
