@@ -8,6 +8,12 @@ from models.results_1v1 import Results1v1Model
 from models.dispute import DisputeModel
 from models.console import ConsoleModel
 
+STATUS_COMPLETED = "COMPLETED"
+STATUS_ACCEPTED = "ACCEPTED"
+STATUS_PENDING = "PENDING"
+STATUS_OPEN = "OPEN"
+STATUS_REJECTED = "REJECTED"
+
 
 class ChallengeModel(db.Model):
     __tablename__ = "challenges"
