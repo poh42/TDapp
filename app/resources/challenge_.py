@@ -285,4 +285,21 @@ class ChallengesByUser(Resource):
         ):
             return {"message": "User challenges for this user are private"}, 400
         challenges = ChallengeModel.find_user_challenges(user_id, **kwargs)
+        challenge_schema = ChallengeSchema(
+            only=(
+                "game",
+                "game.consoles",
+                "type",
+                "date",
+                "buy_in",
+                "reward",
+                "status",
+                "due_date",
+                "created_at",
+                "updated_at",
+                "challenge_users",
+                "results_1v1"
+            ),
+            exclude=("results_1v1.player_1","results_1v1.player_2"),
+        )
         return {"challenges": challenge_schema.dump(challenges, many=True)}, 200
