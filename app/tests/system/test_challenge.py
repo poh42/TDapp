@@ -35,7 +35,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
             data = json.dumps(
                 {
                     "type": "1v1",
-                    "name": "Edited",
                     "buy_in": 100,
                     "reward": 1000,
                     "status": "ended",
@@ -52,7 +51,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 challenge_edited = json_data["challenge"]
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
                 self.assertEqual(challenge_edited["type"], "1v1", "Wrong type")
-                self.assertEqual(challenge_edited["name"], "Edited", "Wrong name")
                 self.assertAlmostEqual(challenge_edited["buy_in"], 100, "Wrong buy in")
                 self.assertAlmostEqual(challenge_edited["reward"], 1000, "Wrong reward")
                 self.assertEqual(
@@ -82,9 +80,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 self.assertEqual(len(results), 1, "Wrong number of results")
                 self.assertEqual(
                     results[0]["challenge_id"], challenge.id, "Wrong challenge id"
-                )
-                self.assertEqual(
-                    results[0]["challenge_name"], challenge.name, "Wrong challenge name"
                 )
                 self.assertEqual(results[0]["game_name"], "FIFA", "Wrong game name")
 
@@ -156,7 +151,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
             fixtures = create_fixtures()
             data = {
                 "type": "Test",
-                "name": "",
                 "game_id": fixtures["game"].id,
                 "date": "2019-01-01T00:00:00",
                 "buy_in": 10,
@@ -173,7 +167,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 json_data = rv.get_json()
                 challenge_created = json_data["challenge"]
                 self.assertEqual(challenge_created["type"], data["type"], "Wrong type")
-                self.assertEqual(challenge_created["name"], data["name"], "Wrong name")
                 self.assertEqual(
                     challenge_created["game_id"], data["game_id"], "Wrong game id"
                 )

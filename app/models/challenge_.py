@@ -8,12 +8,17 @@ from models.results_1v1 import Results1v1Model
 from models.dispute import DisputeModel
 from models.console import ConsoleModel
 
+STATUS_COMPLETED = "COMPLETED"
+STATUS_ACCEPTED = "ACCEPTED"
+STATUS_PENDING = "PENDING"
+STATUS_OPEN = "OPEN"
+STATUS_REJECTED = "REJECTED"
+
 
 class ChallengeModel(db.Model):
     __tablename__ = "challenges"
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(45), nullable=False)
-    name = db.Column(db.String(255), nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey("games.id"), nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     buy_in = db.Column(db.Numeric(precision=10, scale=2), nullable=False)

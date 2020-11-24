@@ -69,7 +69,13 @@ class UserModel(db.Model):
     def find_by_firebase_id(cls, firebase_id) -> "UserModel":
         return cls.query.filter_by(firebase_id=firebase_id).first()
 
+    def update_email(self, email) -> None:
+        """Sets a new email"""
+        self.email = email
+        auth.update_user(self.firebase_id, email=email)
+
     def update_password(self, new_password) -> None:
+        """Sets a new password"""
         auth.update_user(self.firebase_id, password=new_password)
 
     def save(self) -> None:

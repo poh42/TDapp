@@ -92,9 +92,29 @@ def handle_marshmallow_error(err):
 
 @app.cli.command("create_fixtures")
 def create_fixtures_command():
-    from tests.utils import create_fixtures
+    from sample_database.main import create_fixtures
 
+    print("Creating fixtures")
     create_fixtures()
+    print("Fixtures saved successfully")
+
+
+@app.cli.command("delete_database")
+def delete_database_command():
+    val = input(
+        "Do you really want to delete the database? Type CONFIRM if you want it: "
+    )
+    if val == "CONFIRM":
+        connection = db.session.connection()
+        sql = """
+                DROP SCHEMA public CASCADE;
+                CREATE SCHEMA public;
+        """
+        connection.execute(sql, multi=True)
+        db.session.commit()
+        print("Data deleted")
+    else:
+        print("Won't delete the database")
 
 
 api.add_resource(UserRegister, "/user/register")
