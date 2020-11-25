@@ -2,6 +2,7 @@ from ma import ma
 from models.challenge_ import ChallengeModel
 from marshmallow import fields, validate, validates_schema
 
+from schemas.challenge_user import ChallengeUserSchema
 from schemas.game import GameSchema
 from utils.validation import validate_lower_upper_fields
 from schemas.results_1v1 import Results1v1Schema
@@ -11,6 +12,7 @@ class ChallengeSchema(ma.SQLAlchemyAutoSchema):
     results_1v1 = fields.Nested(Results1v1Schema)
     game = fields.Nested(GameSchema)
     game_id = fields.Integer()
+    challenge_users = fields.Nested(ChallengeUserSchema, many=True)
 
     @validates_schema
     def validate_related_fields(self, data, **kwargs):
