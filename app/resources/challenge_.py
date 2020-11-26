@@ -197,16 +197,19 @@ class ReportChallenge(Resource):
     @classmethod
     @check_token
     def post(cls, challenge_id):
-        challenge = ChallengeModel.find_by_id(challenge_id)
+        challenge: ChallengeModel = ChallengeModel.find_by_id(challenge_id)
         if challenge is None:
             return {"message": "Challenge not found"}, 400
-        json_data = request.get_json()
-        dispute: DisputeModel = dispute_schema.load(json_data)
-        dispute.challenge_id = challenge_id
         current_user_firebase_id = g.claims.get("user_id", None)
         if current_user_firebase_id is None:
             return {"message": "Wrong claims"}, 400
-        dispute.user_id = UserModel.find_by_firebase_id(current_user_firebase_id).id
+        user = UserModel.find_by_firebase_id(current_user_firebase_id)
+        if not challenge.user_can_report_challenge(user.id):
+            return {"message": "This user cannot report this challenge"}, 400
+        json_data = request.get_json()
+        dispute: DisputeModel = dispute_schema.load(json_data)
+        dispute.challenge_id = challenge_id
+        dispute.user_id = user.id
         dispute.save_to_db()
         return (
             {"message": "Dispute created", "dispute": dispute_schema.dump(dispute)},
