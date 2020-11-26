@@ -298,8 +298,35 @@ class ChallengesByUser(Resource):
                 "created_at",
                 "updated_at",
                 "challenge_users",
-                "results_1v1"
+                "results_1v1",
             ),
-            exclude=("results_1v1.player_1","results_1v1.player_2"),
+            exclude=(
+                "results_1v1.player_1",
+                "results_1v1.player_2",
+                # challenge users
+                "challenge_users.challenged.user_games",
+                "challenge_users.challenged.is_private",
+                "challenge_users.challenged.dob",
+                "challenge_users.challenged.is_active",
+                "challenge_users.challenged.phone",
+                "challenge_users.challenged.range_bet_low",
+                "challenge_users.challenged.playing_hours_begin",
+                "challenge_users.challenged.playing_hours_end",
+                "challenge_users.challenged.range_bet_high",
+                "challenge_users.challenged.accepted_terms",
+                # winner
+                "results_1v1.winner.firebase_id",
+                "results_1v1.winner.user_games",
+                "results_1v1.winner.is_private",
+                "results_1v1.winner.dob",
+                "results_1v1.winner.is_active",
+                "results_1v1.winner.phone",
+                "results_1v1.winner.range_bet_low",
+                "results_1v1.winner.playing_hours_begin",
+                "results_1v1.winner.playing_hours_end",
+                "results_1v1.winner.range_bet_high",
+                "results_1v1.winner.accepted_terms",
+                "results_1v1.winner.firebase_id",
+            ),
         )
         return {"challenges": challenge_schema.dump(challenges, many=True)}, 200

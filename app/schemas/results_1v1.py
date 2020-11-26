@@ -7,6 +7,7 @@ from schemas.user import UserSchema
 class Results1v1Schema(ma.SQLAlchemyAutoSchema):
     player_1 = fields.Nested(UserSchema)
     player_2 = fields.Nested(UserSchema)
+    winner = fields.Nested(UserSchema)
 
     class Meta:
         model = Results1v1Model
