@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from sqlalchemy import text
+
 from db import db
 from sqlalchemy.sql import func
 from sqlalchemy.orm import aliased
@@ -68,3 +70,15 @@ class ChallengeModel(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
+
+    def user_can_report_challenge(self, user_id):
+        """Checks if a user can report a challenge or not"""
+        sql = """
+        select 1 from challenge_users cu
+            where cu.challenged_id = :user_id and cu.wager_id = :challenge_id
+            and cu.status not in ('REJECTED', 'FINISHED', 'COMPLETED', 'SOLVED') limit 1
+        """
+        data = db.engine.execute(
+            text(sql), user_id=user_id, challenge_id=self.id
+        ).fetchone()
+        return data is not None
