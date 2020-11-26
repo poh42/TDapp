@@ -197,6 +197,9 @@ class ReportChallenge(Resource):
     @classmethod
     @check_token
     def post(cls, challenge_id):
+        challenge = ChallengeModel.find_by_id(challenge_id)
+        if challenge is None:
+            return {"message": "Challenge not found"}, 400
         json_data = request.get_json()
         dispute: DisputeModel = dispute_schema.load(json_data)
         dispute.challenge_id = challenge_id
