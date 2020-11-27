@@ -291,7 +291,15 @@ class UserFriends(Resource):
         if user is None:
             return {"message": "User not found"}, 400
         friends = user.get_friends()
-        return {"friends": user_schema.dump(friends, many=True)}
+        user_schema_friends = UserSchema(only=(
+            "id",
+            "is_active",
+            "name",
+            "last_name",
+            "username",
+            "avatar"
+        ))
+        return {"friends": user_schema_friends.dump(friends, many=True)}
 
 
 class IsFriend(Resource):
