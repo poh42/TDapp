@@ -131,20 +131,44 @@ class TestChallengeEndpoints(BaseAPITestCase):
     def test_create_dispute(self):
         with self.app_context():
             fixtures = create_fixtures()
-            challenge = fixtures["challenge"]
-            g.claims = {"user_id": "dummy"}
+            challenge = fixtures["upcoming_challenge"]
+            user = fixtures["user_login"]
+            g.claims = {"user_id": user.firebase_id}
             with self.test_client() as c:
-                comment = "This is a comment"
-                data = json.dumps({"comments": comment})
-                rv = c.post(
-                    f"/challenge/{challenge.id}/report",
-                    data=data,
-                    content_type="application/json",
-                )
-                self.assertEqual(rv.status_code, 200, "Wrong status code")
-                json_data = rv.get_json()
-                dispute = json_data["dispute"]
-                self.assertEqual(dispute["comments"], comment, "Wrong comment")
+                with self.subTest("Good report"):
+                    comment = "This is a comment"
+                    data = json.dumps({"comments": comment})
+                    rv = c.post(
+                        f"/challenge/{challenge.id}/report",
+                        data=data,
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    json_data = rv.get_json()
+                    dispute = json_data["dispute"]
+                    self.assertEqual(dispute["comments"], comment, "Wrong comment")
+
+                with self.subTest("wrong challenge id"):
+                    rv = c.post(
+                        f"/challenge/3000/report",
+                        data=data,
+                        content_type="application/json",
+                    )
+                    json_data = rv.get_json()
+                    self.assertEqual(rv.status_code, 400, "Wrong status code")
+                    self.assertEqual(json_data["message"], "Challenge not found")
+                with self.subTest("Challenge belongs to other user"):
+                    g.claims = {"user_id": "dummy"}
+                    rv = c.post(
+                        f"/challenge/{challenge.id}/report",
+                        data=data,
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 400)
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        json_data["message"], "This user cannot report this challenge"
+                    )
 
     def test_post_challenge(self):
         with self.app_context():
