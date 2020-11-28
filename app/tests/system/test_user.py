@@ -249,7 +249,8 @@ class TestUserEndpoints(BaseAPITestCase):
     def test_user_get(self):
         with self.test_client() as c:
             with self.app_context():
-                user = create_dummy_user()
+                fixtures = create_fixtures()
+                user = fixtures["user"]
                 g.claims = {"uid": user.firebase_id}
                 rv = c.get(f"/user/{user.id}", content_type="application/json")
                 json_data = rv.get_json()
@@ -265,6 +266,15 @@ class TestUserEndpoints(BaseAPITestCase):
                 self.assertEqual(user.id, user_data["id"])
                 self.assertEqual(user.firebase_id, user_data["firebase_id"])
                 self.assertIsNotNone(user.avatar, "Avatar should not be None")
+                with self.subTest("Private user"):
+                    private_user = fixtures["private_user"]
+                    rv = c.get(f"/user/{private_user.id}", content_type="application/json")
+                    json_data = rv.get_json()
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    user_data = json_data["user"]
+                    self.assertNotIn("dob", user_data)
+                    self.assertNotIn("phone", user_data)
+
 
     def test_get_user_list(self):
         with self.app_context():
