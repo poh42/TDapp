@@ -15,7 +15,7 @@ import simplejson as json
 from models.user import UserModel
 from models.confirmation import ConfirmationModel
 from models.user_game import UserGameModel
-from schemas.user import UserSchema
+from schemas.user import UserSchema, USER_PUBLIC_FIELDS
 from schemas.admin_status import AdminStatusSchema
 import logging
 
@@ -115,9 +115,13 @@ class SetAdminStatus(Resource):
 class User(Resource):
     @classmethod
     @check_token
-    @check_is_admin_or_user_authorized
     def get(cls, user_id):
         user = UserModel.find_by_id(user_id)
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if not user.can_show_all_info(current_user.id):
+            user_schema = UserSchema(only=USER_PUBLIC_FIELDS)
+        else:
+            user_schema = UserSchema()
         if not user:
             return {"message": "User not found"}, 400
         return {"message": "User found", "user": user_schema.dump(user)}
@@ -291,14 +295,9 @@ class UserFriends(Resource):
         if user is None:
             return {"message": "User not found"}, 400
         friends = user.get_friends()
-        user_schema_friends = UserSchema(only=(
-            "id",
-            "is_active",
-            "name",
-            "last_name",
-            "username",
-            "avatar"
-        ))
+        user_schema_friends = UserSchema(
+            only=("id", "is_active", "name", "last_name", "username", "avatar")
+        )
         return {"friends": user_schema_friends.dump(friends, many=True)}
 
 
