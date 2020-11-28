@@ -250,6 +250,7 @@ class TestUserEndpoints(BaseAPITestCase):
         with self.test_client() as c:
             with self.app_context():
                 user = create_dummy_user()
+                g.claims = {"uid": user.firebase_id}
                 rv = c.get(f"/user/{user.id}", content_type="application/json")
                 json_data = rv.get_json()
                 user_data = json_data["user"]

@@ -49,6 +49,17 @@ class UserModel(db.Model):
         "UserGameModel", lazy="dynamic", cascade="all, delete-orphan"
     )
 
+    # Based on
+    # https://blog.ramosly.com/sqlalchemy-orm-setting-up-self-referential-many-to-many-relationships-866c97d9308b
+    friends = db.relationship(
+        "UserModel",
+        secondary=friendship_table,
+        primaryjoin=id == friendship_table.c.follower_id,
+        secondaryjoin=id == friendship_table.c.followed_id,
+        backref=db.backref("children"),
+        lazy="dynamic",
+    )
+
     @property
     def most_recent_confirmation(self) -> "ConfirmationModel":
         return self.confirmation.order_by(db.desc(ConfirmationModel.expire_at)).first()
@@ -174,3 +185,11 @@ class UserModel(db.Model):
             .params(id=self.id)
         )
         return query.all()
+
+    def can_show_all_info(self, other_id) -> bool:
+        """Returns if a user can show all the data"""
+        if self.id == other_id:
+            return True
+        if self.is_private and not self.is_friend_of_user(other_id):
+            return False
+        return True
