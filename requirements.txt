@@ -40,7 +40,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.20
 pycryptodome==3.4.3
-https://github.com/peanutshawny/Pyrebase/archive/patch-1.zip
+git+https://github.com/peanutshawny/Pyrebase.git@patch-1#egg=Pyrebase
 python-dateutil==2.8.1
 python-dotenv==0.14.0
 python-editor==1.0.4
