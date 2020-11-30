@@ -533,3 +533,14 @@ class TestUserEndpoints(BaseAPITestCase):
                     self.assertEqual(rv.status_code, 200, "Wrong status code")
                     json_data = rv.get_json()
                     self.assertFalse(json_data["is_friend"], "Friend should be false")
+
+    def test_get_public_user_list(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            with self.test_client() as c:
+                rv = c.get("/users/public")
+                self.assertEqual(rv.status_code, 200, "Wrong status code")
+                json_data = rv.get_json()
+                self.assertGreater(
+                    len(json_data["users"]), 0, "User should be returned"
+                )

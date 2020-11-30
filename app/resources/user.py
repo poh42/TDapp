@@ -190,6 +190,12 @@ class UserList(Resource):
         return {"users": UserModel.get_all_users()}, 200
 
 
+class PublicUserList(Resource):
+    @classmethod
+    def get(cls):
+        return {"users": UserModel.get_public_users()}
+
+
 class TopEarners(Resource):
     @classmethod
     @check_token
