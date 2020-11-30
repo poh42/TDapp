@@ -180,8 +180,6 @@ class UserList(Resource):
     @classmethod
     @check_token
     def get(cls):
-        if request.args.get("topEarners"):
-            return {"users": UserModel.get_top_earners()}, 200
         if request.args.get("friends"):
             claims = g.claims
             current_user = UserModel.find_by_firebase_id(claims["user_id"])
@@ -190,6 +188,13 @@ class UserList(Resource):
         if game_title:
             return {"users": UserModel.filter_users_by_game(game_title)}, 200
         return {"users": UserModel.get_all_users()}, 200
+
+
+class TopEarners(Resource):
+    @classmethod
+    @check_token
+    def get(cls):
+        return {"users": UserModel.get_top_earners()}, 200
 
 
 class UserGamesLibrary(Resource):

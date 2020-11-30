@@ -268,13 +268,14 @@ class TestUserEndpoints(BaseAPITestCase):
                 self.assertIsNotNone(user.avatar, "Avatar should not be None")
                 with self.subTest("Private user"):
                     private_user = fixtures["private_user"]
-                    rv = c.get(f"/user/{private_user.id}", content_type="application/json")
+                    rv = c.get(
+                        f"/user/{private_user.id}", content_type="application/json"
+                    )
                     json_data = rv.get_json()
                     self.assertEqual(rv.status_code, 200, "Wrong status code")
                     user_data = json_data["user"]
                     self.assertNotIn("dob", user_data)
                     self.assertNotIn("phone", user_data)
-
 
     def test_get_user_list(self):
         with self.app_context():
@@ -296,17 +297,6 @@ class TestUserEndpoints(BaseAPITestCase):
                         fixtures["second_user"].id,
                         "Wrong friend",
                     )
-                with self.subTest(get="topEarners"):
-                    rv = c.get(
-                        "/users?topEarners=true", content_type="application/json"
-                    )
-                    self.assertEqual(rv.status_code, 200)
-                    json_data = rv.get_json()
-                    self.assertTrue(len(json_data["users"]) > 0)
-                    self.assertEqual(
-                        json_data["users"][0]["credit_change"],
-                        fixtures["transaction"].credit_change,
-                    )
                 with self.subTest(get="game"):
                     rv = c.get("/users?game=FIF", content_type="application/json")
                     self.assertEqual(rv.status_code, 200)
@@ -317,6 +307,19 @@ class TestUserEndpoints(BaseAPITestCase):
                     self.assertEqual(rv.status_code, 200)
                     json_data = rv.get_json()
                     self.assertTrue(len(json_data["users"]) == 0)
+
+    def test_top_earners(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            with self.test_client() as c:
+                rv = c.get("/users/topEarners", content_type="application/json")
+                self.assertEqual(rv.status_code, 200)
+                json_data = rv.get_json()
+                self.assertTrue(len(json_data["users"]) > 0)
+                self.assertEqual(
+                    json_data["users"][0]["credit_change"],
+                    fixtures["transaction"].credit_change,
+                )
 
     def test_add_friend(self):
         with self.app_context():
