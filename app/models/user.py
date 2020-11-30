@@ -193,3 +193,14 @@ class UserModel(db.Model):
         if self.is_private and not self.is_friend_of_user(other_id):
             return False
         return True
+
+    @classmethod
+    def get_public_users(cls):
+        """Returns a list of users, this is used for the public user list"""
+        sql = """
+        SELECT u.id, u.name, u.last_name, u.avatar, u.username
+            FROM users u
+        ORDER BY u.id ASC
+        """
+        results = db.engine.execute(text(sql)).fetchall()
+        return [dict(r) for r in results]
