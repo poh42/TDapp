@@ -39,8 +39,7 @@ class ChallengePost(Resource):
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         challenge_user = ChallengeUserModel(
             wager_id=challenge.id,
-            challenged_id=current_user.id,
-            status=STATUS_ACCEPTED,
+            challenger_id=current_user.id,
         )
         challenge_user.save_to_db()
         return {
