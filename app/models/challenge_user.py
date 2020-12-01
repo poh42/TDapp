@@ -16,7 +16,8 @@ class ChallengeUserModel(db.Model):
     challenger_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     challenged_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     wager_id = db.Column(db.Integer, db.ForeignKey("challenges.id"), nullable=False)
-    status = db.Column(db.String(45), nullable=False)
+    status_challenger = db.Column(db.String(45), nullable=False)
+    status_challenged = db.Column(db.String(45), nullable=False)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
 
@@ -26,7 +27,7 @@ class ChallengeUserModel(db.Model):
 
     @property
     def declined(self):
-        return self.status == STATUS_DECLINED
+        return self.status_challenged == STATUS_DECLINED
 
     @property
     def open(self):

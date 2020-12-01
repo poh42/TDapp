@@ -10,7 +10,7 @@ from models.console import ConsoleModel
 from models.results_1v1 import Results1v1Model
 from models.friendship import friendship_table
 from models.user_game import UserGameModel
-from models.challenge_user import ChallengeUserModel, STATUS_OPEN
+from models.challenge_user import ChallengeUserModel, STATUS_OPEN, STATUS_PENDING
 from datetime import datetime, timedelta
 from db import db
 
@@ -230,7 +230,8 @@ def create_challenge_user_dummy(challenger_id, challenged_id, wager_id):
         challenged_id=challenged_id,
         challenger_id=challenger_id,
         wager_id=wager_id,
-        status=STATUS_OPEN,
+        status_challenger=STATUS_OPEN,
+        status_challenged=STATUS_PENDING,
     )
     challenge_user.save_to_db()
     return challenge_user
