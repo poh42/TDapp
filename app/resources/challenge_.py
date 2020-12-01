@@ -242,7 +242,7 @@ class AcceptChallenge(Resource):
             return {"message": "Challenge cannot be accepted"}, 400
         if current_user.id != challenge_user.challenged_id:
             return {"message": "Cannot accept challenge from a different user"}, 400
-        challenge_user.status = STATUS_ACCEPTED
+        challenge_user.status_challenged = STATUS_ACCEPTED
         challenge_user.save_to_db()
         return {"message": "Challenge accepted"}, 200
 
