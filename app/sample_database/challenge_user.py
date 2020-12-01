@@ -15,59 +15,40 @@ def get_challenge_users(challenges, users):
             "challenger_id": users["maureen"].id,
             "challenged_id": users["asdrubal"].id,
             "wager_id": challenges["maureen_asdrubal_1"].id,
-            "status": STATUS_COMPLETED,
-        },
-        {
-            "challenger_id": users["maureen"].id,
-            "challenged_id": users["maureen"].id,
-            "wager_id": challenges["maureen_asdrubal_1"].id,
-            "status": STATUS_COMPLETED,
+            "status_challenger": STATUS_COMPLETED,
+            "status_challenged": STATUS_COMPLETED,
         },
         # Roger vs Tomas, PGA, Dec 12, Accepted, 30 Credits
         {
             "challenger_id": users["roger"].id,
-            "challenged_id": users["roger"].id,
-            "wager_id": challenges["roger_tomas"].id,
-            "status": STATUS_OPEN,
-        },
-        {
-            "challenger_id": users["roger"].id,
             "challenged_id": users["tomas"].id,
             "wager_id": challenges["roger_tomas"].id,
-            "status": STATUS_ACCEPTED,
+            "status_challenger": STATUS_OPEN,
+            "status_challenged": STATUS_ACCEPTED
         },
         # Phil vs Ryan, Dec 1st, Pending, 20 credits
         {
             "challenger_id": users["phil"].id,
-            "challenged_id": users["phil"].id,
-            "wager_id": challenges["phil_ryan"].id,
-            "status": STATUS_OPEN,
-        },
-        {
-            "challenger_id": users["phil"].id,
             "challenged_id": users["ryan"].id,
             "wager_id": challenges["phil_ryan"].id,
-            "status": STATUS_PENDING,
+            "status_challenger": STATUS_OPEN,
+            "status_challenged": STATUS_PENDING,
         },
         # Noah, Rocket League, Jan 21, Open, 30 credits
         {
             "challenger_id": users["noah"].id,
-            "challenged_id": users["noah"].id,
+            "challenged_id": None,
             "wager_id": challenges["noah"].id,
-            "status": STATUS_OPEN,
+            "status_challenger": STATUS_OPEN,
+            "status_challenged": None
         },
         # Maureen vs Asdrubal FIFA 20, Nov 3rd, Rejected, 100 Credits
         {
             "challenger_id": users["maureen"].id,
-            "challenged_id": users["maureen"].id,
-            "wager_id": challenges["maureen_asdrubal_2"].id,
-            "status": STATUS_OPEN,
-        },
-        {
-            "challenger_id": users["maureen"].id,
             "challenged_id": users["asdrubal"].id,
             "wager_id": challenges["maureen_asdrubal_2"].id,
-            "status": STATUS_REJECTED,
+            "status_challenger": STATUS_OPEN,
+            "status_challenged": STATUS_REJECTED,
         },
     )
 
