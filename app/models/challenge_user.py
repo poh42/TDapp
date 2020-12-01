@@ -31,15 +31,15 @@ class ChallengeUserModel(db.Model):
 
     @property
     def open(self):
-        return self.status == STATUS_OPEN
+        return self.status_challenger == STATUS_OPEN
 
     @property
     def accepted(self):
-        return self.status == STATUS_ACCEPTED
+        return self.status_challenged == STATUS_ACCEPTED
 
     @property
     def completed(self):
-        return self.status == STATUS_COMPLETED
+        return self.status_challenger == STATUS_COMPLETED and self.status_challenged == STATUS_COMPLETED
 
     @classmethod
     def find_by_id(cls, _id):
