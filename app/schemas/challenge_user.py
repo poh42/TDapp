@@ -18,5 +18,12 @@ class ChallengeUserSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
         model = ChallengeUserModel
-        dump_only = ("id", "created_at", "updated_at", "challenger_id", "status")
+        dump_only = (
+            "id",
+            "created_at",
+            "updated_at",
+            "challenger_id",
+            "status_challenged",
+            "status_challenger",
+        )
         load_instance = True

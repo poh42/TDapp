@@ -13,11 +13,11 @@ STATUS_REJECTED = "REJECTED"
 class ChallengeUserModel(db.Model):
     __tablename__ = "challenge_users"
     id = db.Column(db.Integer, primary_key=True)
-    challenger_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    challenged_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    challenger_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    challenged_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     wager_id = db.Column(db.Integer, db.ForeignKey("challenges.id"), nullable=False)
-    status_challenger = db.Column(db.String(45), nullable=False)
-    status_challenged = db.Column(db.String(45), nullable=False)
+    status_challenger = db.Column(db.String(45), nullable=False, default=STATUS_OPEN)
+    status_challenged = db.Column(db.String(45), nullable=True)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
 
@@ -39,7 +39,10 @@ class ChallengeUserModel(db.Model):
 
     @property
     def completed(self):
-        return self.status_challenger == STATUS_COMPLETED and self.status_challenged == STATUS_COMPLETED
+        return (
+            self.status_challenger == STATUS_COMPLETED
+            and self.status_challenged == STATUS_COMPLETED
+        )
 
     @classmethod
     def find_by_id(cls, _id):
