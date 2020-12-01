@@ -99,7 +99,9 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 json_data = rv.get_json()
                 self.assertEqual(rv.status_code, 200)
                 challenge_user = json_data["challenge_user"]
-                self.assertEqual(challenge_user["status"], "OPEN", "Wrong status")
+                self.assertEqual(
+                    challenge_user["status_challenger"], "OPEN", "Wrong status"
+                )
                 self.assertEqual(
                     challenge_user["wager_id"], challenge.id, "Wrong challenge id"
                 )
@@ -218,7 +220,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     challenge_created["id"],
                     "Challenge user was created with wrong id",
                 )
-                self.assertEqual(challenge_user["status"], "ACCEPTED", "Wrong status")
+                self.assertEqual(challenge_user["status_challenger"], "OPEN", "Wrong status")
 
     def test_get_disputes(self):
         with self.app_context():

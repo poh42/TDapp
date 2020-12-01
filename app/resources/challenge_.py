@@ -39,8 +39,7 @@ class ChallengePost(Resource):
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         challenge_user = ChallengeUserModel(
             wager_id=challenge.id,
-            challenged_id=current_user.id,
-            status=STATUS_ACCEPTED,
+            challenger_id=current_user.id,
         )
         challenge_user.save_to_db()
         return {
@@ -242,7 +241,7 @@ class AcceptChallenge(Resource):
             return {"message": "Challenge cannot be accepted"}, 400
         if current_user.id != challenge_user.challenged_id:
             return {"message": "Cannot accept challenge from a different user"}, 400
-        challenge_user.status = STATUS_ACCEPTED
+        challenge_user.status_challenged = STATUS_ACCEPTED
         challenge_user.save_to_db()
         return {"message": "Challenge accepted"}, 200
 
@@ -263,7 +262,7 @@ class DeclineChallenge(Resource):
             return {"message": "Challenge cannot be declined"}, 400
         if current_user.id != challenge_user.challenged_id:
             return {"message": "Cannot decline challenge from a different user"}, 400
-        challenge_user.status = STATUS_DECLINED
+        challenge_user.status_challenged = STATUS_DECLINED
         challenge_user.save_to_db()
         return {"message": "Challenge declined"}, 200
 
