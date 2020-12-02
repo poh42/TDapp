@@ -109,7 +109,12 @@ class UserModel(db.Model):
             select SUM(t2.credit_change) as credit_change , t2.user_id from transactions t2
                     where t2.created_at >= :week_ago
             group by t2.user_id 
-        ) select u.*, coalesce(t.credit_change, 0) as credit_change from users u
+        ) select
+            u.id,
+            u.username,
+            u.is_active,
+            u.avatar,
+             coalesce(t.credit_change, 0) as credit_change from users u
             left join t on t.user_id = u.id
           order by COALESCE(t.credit_change, 0) desc
         """
