@@ -6,6 +6,17 @@ from schemas.user_game import UserGameSchema
 
 USER_PUBLIC_FIELDS = ("id", "user_games", "username", "friends", "avatar")
 
+FIELDS_TO_EXCLUDE = (
+    "playing_hours_begin",
+    "playing_hours_end",
+    "dob",
+    "phone",
+    "firebase_id",
+    "accepted_terms",
+    "range_bet_low",
+    "range_bet_high",
+)
+
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     email = fields.Email(required=True)
@@ -16,18 +27,8 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     friends = fields.Nested(
         "self",
         many=True,
-        exclude=(
-            "friends",  # This exclude avoids infinite recursion
-            "playing_hours_begin",
-            "playing_hours_end",
-            "dob",
-            "phone",
-            "firebase_id",
-            "accepted_terms",
-            "range_bet_low",
-            "range_bet_high",
-            "is_private",
-        ),
+        exclude=("friends", "is_private",)  # This exclude avoids infinite recursion
+        + FIELDS_TO_EXCLUDE,
     )
 
     @validates_schema
