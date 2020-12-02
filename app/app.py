@@ -34,7 +34,6 @@ from resources.user import (
     User,
     UserList,
     UserGamesLibrary,
-    AddFriend,
     RemoveFriend,
     AddUserInvite,
     DeclineInvite,
@@ -145,7 +144,6 @@ api.add_resource(DeclineChallenge, "/challenge/<int:challenge_user_id>/decline")
 api.add_resource(ConsoleList, "/consoles")
 api.add_resource(ChallengesByUser, "/challenge/<int:user_id>/user")
 api.add_resource(UserGamesLibrary, "/user/<int:user_id>/addToLibrary")
-api.add_resource(AddFriend, "/user/<int:user_id>/addFriend")
 api.add_resource(RemoveFriend, "/user/<int:user_id>/deleteFriend")
 api.add_resource(AddUserInvite, "/user/invites/<int:user_id>/create")
 api.add_resource(DeclineInvite, "/user/invites/<int:invite_id>/reject")
