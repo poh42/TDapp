@@ -220,7 +220,9 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     challenge_created["id"],
                     "Challenge user was created with wrong id",
                 )
-                self.assertEqual(challenge_user["status_challenger"], "OPEN", "Wrong status")
+                self.assertEqual(
+                    challenge_user["status_challenger"], "OPEN", "Wrong status"
+                )
 
     def test_get_disputes(self):
         with self.app_context():

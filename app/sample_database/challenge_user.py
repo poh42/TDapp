@@ -24,7 +24,7 @@ def get_challenge_users(challenges, users):
             "challenged_id": users["tomas"].id,
             "wager_id": challenges["roger_tomas"].id,
             "status_challenger": STATUS_OPEN,
-            "status_challenged": STATUS_ACCEPTED
+            "status_challenged": STATUS_ACCEPTED,
         },
         # Phil vs Ryan, Dec 1st, Pending, 20 credits
         {
@@ -40,7 +40,7 @@ def get_challenge_users(challenges, users):
             "challenged_id": None,
             "wager_id": challenges["noah"].id,
             "status_challenger": STATUS_OPEN,
-            "status_challenged": None
+            "status_challenged": None,
         },
         # Maureen vs Asdrubal FIFA 20, Nov 3rd, Rejected, 100 Credits
         {
