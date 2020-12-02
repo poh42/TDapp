@@ -23,10 +23,10 @@ from sqlalchemy import or_, text
 from schemas.challenge_user import ChallengeUserSchema
 from schemas.dispute import DisputeSchema
 from schemas.results_1v1 import Results1v1Schema
+from utils.schema import get_fields_user_to_exclude
 
 challenge_schema = ChallengeSchema()
 challenge_user_schema = ChallengeUserSchema()
-results_1v1_schema = Results1v1Schema()
 dispute_schema = DisputeSchema()
 
 
@@ -186,6 +186,24 @@ class ChallengeResults(Resource):
     @classmethod
     def get(cls, challenge_id):
         results = Results1v1Model.find_by_challenge_id(challenge_id)
+        fields_to_exclude_winner = get_fields_user_to_exclude(
+            "winner",
+            additional=(
+                "friends",
+                "avatar",
+                "user_games",
+                "username",
+                "created_at",
+                "updated_at",
+                "accepted_terms",
+                "email",
+                "is_active",
+                "is_private",
+            ),
+        )
+        results_1v1_schema = Results1v1Schema(
+            exclude=fields_to_exclude_winner + ("player_1.friends", "player_2.friends")
+        )
         if not results:
             return {"message": "Results not found"}, 400
         return {"message": "Results found", "results": results_1v1_schema.dump(results)}
