@@ -245,6 +245,11 @@ class AddUserInvite(Resource):
         if not UserModel.find_by_id(user_id):
             return {"message": "User not found"}, 404
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if int(current_user.id) == int(user_id):
+            return (
+                {"message": "Cannot invite the same user you are using for login"},
+                400,
+            )
         if InviteModel.is_already_invited(current_user.id, user_id):
             return (
                 {"message": "You already have an invitation to this user in place"},

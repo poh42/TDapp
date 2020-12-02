@@ -395,6 +395,17 @@ class TestUserEndpoints(BaseAPITestCase):
             claims = {"uid": user_login.firebase_id}
             with self.test_client() as c:
                 with patch.object(g, "claims", claims, create=True):
+                    with self.subTest("Inviting oneself"):
+                        rv = c.post(
+                            f"/user/invites/{user_login.id}/create",
+                            content_type="application/json",
+                        )
+                        self.assertEqual(rv.status_code, 400, "Wrong status code")
+                        json_data = rv.get_json()
+                        self.assertEqual(
+                            json_data["message"],
+                            "Cannot invite the same user you are using for login",
+                        )
                     with self.subTest("Creating an invitation"):
                         # Let's check if an invitation already exists
                         self.assertFalse(
