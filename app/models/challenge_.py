@@ -33,7 +33,9 @@ class ChallengeModel(db.Model):
     due_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
+    console_id = db.Column(db.Integer, db.ForeignKey("consoles.id"), nullable=True)
     game = db.relationship("GameModel")
+    console = db.relationship("ConsoleModel")
     challenge_users = db.relationship(
         "ChallengeUserModel", lazy="dynamic", cascade="all, delete-orphan"
     )
