@@ -11,6 +11,7 @@ consoles = {
     "playstation": {"name": "Play Station"},
     "xbox": {"name": "XBox"},
     "pc": {"name": "PC"},
+    "cross-platform": {"name": "Cross Platform"},
 }
 
 

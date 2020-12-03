@@ -15,6 +15,7 @@ def wager_must_exist(data):
 class ChallengeUserSchema(ma.SQLAlchemyAutoSchema):
     wager_id = fields.Integer(required=True, validate=wager_must_exist)
     challenged = fields.Nested("UserSchema")
+    challenger = fields.Nested("UserSchema")
 
     class Meta:
         model = ChallengeUserModel
