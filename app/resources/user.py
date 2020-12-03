@@ -198,7 +198,6 @@ class PublicUserList(Resource):
 
 class TopEarners(Resource):
     @classmethod
-    @check_token
     def get(cls):
         return {"users": UserModel.get_top_earners()}, 200
 
