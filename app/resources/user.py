@@ -3,7 +3,12 @@ from flask import request, g
 from firebase_admin import auth
 from marshmallow import ValidationError
 
-from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
+from decorators import (
+    check_token,
+    check_is_admin,
+    check_is_admin_or_user_authorized,
+    optional_check_token,
+)
 from models.invite import InviteModel, STATUS_PENDING
 from schemas.invite import InviteSchema
 from schemas.user_game import BaseUserGameSchema
@@ -211,8 +216,27 @@ class PublicUserList(Resource):
 
 class TopEarners(Resource):
     @classmethod
+    @optional_check_token
     def get(cls):
-        return {"users": UserModel.get_top_earners()}, 200
+        top_earners = UserModel.get_top_earners()
+        if not is_admin():
+            ret_val = []
+            for u in top_earners:
+                user = pick_from_dict(
+                    u,
+                    (
+                        "id",
+                        "email",
+                        "username",
+                        "avatar",
+                        "name",
+                        "last_name",
+                        "credit_change",
+                    ),
+                )
+                ret_val.append(user)
+            top_earners = ret_val
+        return {"users": top_earners}, 200
 
 
 class UserGamesLibrary(Resource):
