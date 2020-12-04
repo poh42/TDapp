@@ -1,6 +1,9 @@
+import json
+
 from models.console import ConsoleModel
 from tests.base import BaseAPITestCase
 from tests.utils import create_fixtures
+from flask import g
 
 
 class TestConsoleEndpoints(BaseAPITestCase):
@@ -56,3 +59,26 @@ class TestConsoleEndpoints(BaseAPITestCase):
                     json_data = rv.get_json()
                     self.assertEqual(rv.status_code, 400, "Wrong status code")
                     self.assertEqual(json_data["message"], "Console not found")
+
+    def test_create_console(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            data = {"name": "Console_Test"}
+            g.claims = {"uid": fixtures["user_login"].id}
+            with self.test_client() as c:
+                with self.subTest("Creating console"):
+                    rv = c.post(
+                        "/consoles",
+                        data=json.dumps(data),
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 201, "Wrong status code")
+                with self.subTest("Console already exists"):
+                    rv = c.post(
+                        "/consoles",
+                        data=json.dumps(data),
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 400, "Wrong status code")
+                    json_data = rv.get_json()
+                    self.assertEqual(json_data["message"], "Console already exists")

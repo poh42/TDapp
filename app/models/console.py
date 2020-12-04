@@ -27,3 +27,9 @@ class ConsoleModel(db.Model):
         """Checks if console id exists"""
         console = cls.query.filter_by(id=console_id).first()
         return console is not None
+
+    @classmethod
+    def console_name_exists(cls, console_name) -> bool:
+        """Checks if the console name already exists"""
+        console = cls.query.filter_by(name=console_name).first()
+        return console is not None
