@@ -183,6 +183,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 "reward": 100,
                 "status": "OPEN",
                 "due_date": "2019-01-01T00:00:00",
+                "console_id": fixtures["console"].id,
             }
             with self.test_client() as c:
                 g.claims = {"uid": fixtures["user_login"].firebase_id}
