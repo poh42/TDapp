@@ -3,11 +3,16 @@ from flask import request, g
 from firebase_admin import auth
 from marshmallow import ValidationError
 
-from decorators import check_token, check_is_admin, check_is_admin_or_user_authorized
+from decorators import (
+    check_token,
+    check_is_admin,
+    check_is_admin_or_user_authorized,
+    optional_check_token,
+)
 from models.invite import InviteModel, STATUS_PENDING
 from schemas.invite import InviteSchema
 from schemas.user_game import BaseUserGameSchema
-from utils.claims import set_is_admin
+from utils.claims import set_is_admin, is_admin
 from fb import pb
 from requests import HTTPError
 
@@ -18,6 +23,8 @@ from models.user_game import UserGameModel
 from schemas.user import UserSchema, USER_PUBLIC_FIELDS
 from schemas.admin_status import AdminStatusSchema
 import logging
+
+from utils.pick import pick_from_dict
 
 log = logging.getLogger(__name__)
 
@@ -183,11 +190,22 @@ class UserList(Resource):
         if request.args.get("friends"):
             claims = g.claims
             current_user = UserModel.find_by_firebase_id(claims["user_id"])
-            return {"users": current_user.filter_by_friends()}, 200
-        game_title = request.args.get("game")
-        if game_title:
-            return {"users": UserModel.filter_users_by_game(game_title)}, 200
-        return {"users": UserModel.get_all_users()}, 200
+            users = current_user.filter_by_friends()
+        elif request.args.get("game"):
+            game_title = request.args.get("game")
+            users = UserModel.filter_users_by_game(game_title)
+        else:
+            users = UserModel.get_all_users()
+        if is_admin():
+            return {"users": users}, 200
+        else:
+            ret_val = []
+            for u in users:
+                user = pick_from_dict(
+                    u, ("id", "email", "username", "avatar", "name", "last_name")
+                )
+                ret_val.append(user)
+            return {"users": ret_val}, 200
 
 
 class PublicUserList(Resource):
@@ -198,8 +216,27 @@ class PublicUserList(Resource):
 
 class TopEarners(Resource):
     @classmethod
+    @optional_check_token
     def get(cls):
-        return {"users": UserModel.get_top_earners()}, 200
+        top_earners = UserModel.get_top_earners()
+        if not is_admin():
+            ret_val = []
+            for u in top_earners:
+                user = pick_from_dict(
+                    u,
+                    (
+                        "id",
+                        "email",
+                        "username",
+                        "avatar",
+                        "name",
+                        "last_name",
+                        "credit_change",
+                    ),
+                )
+                ret_val.append(user)
+            top_earners = ret_val
+        return {"users": top_earners}, 200
 
 
 class UserGamesLibrary(Resource):

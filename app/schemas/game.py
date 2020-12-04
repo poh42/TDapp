@@ -4,6 +4,7 @@ from ma import ma
 from marshmallow_sqlalchemy.fields import Nested
 from models.game import GameModel
 from schemas.console import ConsoleSchema
+from marshmallow import fields
 
 
 class BaseGameSchema(ma.SQLAlchemyAutoSchema):

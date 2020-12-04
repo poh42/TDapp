@@ -120,8 +120,7 @@ class ChallengeList(Resource):
             )
         challenge_schema = ChallengeSchema(
             only=(
-                "game",
-                "game.consoles",
+                "game.name",
                 "type",
                 "date",
                 "buy_in",
@@ -152,6 +151,7 @@ class ChallengeList(Resource):
                 "challenge_users.challenged.firebase_id",
                 "challenge_users.challenged.created_at",
                 "challenge_users.challenged.updated_at",
+                "challenge_users.challenged.email",
                 # challenger users
                 "challenge_users.challenger.user_games",
                 "challenge_users.challenger.is_private",
@@ -167,6 +167,7 @@ class ChallengeList(Resource):
                 "challenge_users.challenger.firebase_id",
                 "challenge_users.challenger.created_at",
                 "challenge_users.challenger.updated_at",
+                "challenge_users.challenger.email",
                 # winner
                 "results_1v1.winner.firebase_id",
                 "results_1v1.winner.user_games",
@@ -180,6 +181,12 @@ class ChallengeList(Resource):
                 "results_1v1.winner.range_bet_high",
                 "results_1v1.winner.accepted_terms",
                 "results_1v1.winner.firebase_id",
+                "results_1v1.winner.email",
+                "results_1v1.winner.created_at",
+                "results_1v1.winner.updated_at",
+                "results_1v1.winner.friends",
+                # games
+                "game.consoles",
             ),
         )
         return {"challenges": challenge_schema.dump(query.all(), many=True)}
