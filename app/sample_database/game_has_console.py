@@ -25,14 +25,10 @@ def get_relationships(games, consoles):
         # Mario Kart Deluxe
         {"game": games["mario_kart"], "console": consoles["xbox"]},
         # COD Modern Warfare
-        {"game": games["cod_modern_warfare"], "console": consoles["playstation"]},
-        {"game": games["cod_modern_warfare"], "console": consoles["xbox"]},
         {"game": games["cod_modern_warfare"], "console": consoles["cross-platform"]},
         # PGA 2k21
         {"game": games["pga_2k21"], "console": consoles["xbox"]},
         # COD Cold War
-        {"game": games["cod_cold_war"], "console": consoles["playstation"]},
-        {"game": games["cod_cold_war"], "console": consoles["xbox"]},
         {"game": games["cod_cold_war"], "console": consoles["cross-platform"]},
         # Madden 21
         {"game": games["madden21"], "console": consoles["xbox"]},
