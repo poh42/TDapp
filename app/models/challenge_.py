@@ -34,6 +34,7 @@ class ChallengeModel(db.Model):
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
     console_id = db.Column(db.Integer, db.ForeignKey("consoles.id"), nullable=True)
+    is_direct = db.Column(db.Boolean, default=False)
     game = db.relationship("GameModel")
     console = db.relationship("ConsoleModel")
     challenge_users = db.relationship(
