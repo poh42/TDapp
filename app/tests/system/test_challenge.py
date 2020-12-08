@@ -357,7 +357,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 g.claims = {"uid": fixtures["user_login"].firebase_id}
                 rv = c.get("/challenges/direct")
                 json_data = rv.get_json()
-                print(json_data)
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
                 challenges = json_data["challenges"]
                 self.assertEqual(fixtures["direct_challenge"].id, challenges[0]["id"])
