@@ -242,6 +242,7 @@ def create_invite(inviting_id, invited_id):
     invite.save_to_db()
     return invite
 
+
 def create_direct_challenge(game_id):
     challenge = ChallengeModel(
         type="1v1",
@@ -255,6 +256,7 @@ def create_direct_challenge(game_id):
     )
     challenge.save_to_db()
     return challenge
+
 
 def create_fixtures():
     user = create_dummy_user()

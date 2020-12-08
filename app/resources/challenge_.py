@@ -450,6 +450,7 @@ class DirectChallenges(Resource):
         challenges = ChallengeModel.get_direct_challenges(current_user.id)
         challenge_schema = ChallengeSchema(
             only=(
+                "id",
                 "game",
                 "game.consoles",
                 "type",
