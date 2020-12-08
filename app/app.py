@@ -24,6 +24,7 @@ from resources.challenge_ import (
     AcceptChallenge,
     DeclineChallenge,
     ChallengesByUser,
+    DirectChallenges,
 )
 from resources.console import ConsoleList
 from resources.game import GamesByConsole, Games, Game
@@ -151,6 +152,7 @@ api.add_resource(AcceptInvite, "/user/invites/<int:invite_id>/accept")
 api.add_resource(GetInvites, "/user/invites")
 api.add_resource(UserFriends, "/user/<int:user_id>/friends")
 api.add_resource(IsFriend, "/user/isFriend/<int:user_1_id>/<int:user_2_id>")
+api.add_resource(DirectChallenges, "/challenges/direct")
 
 
 db.init_app(app)

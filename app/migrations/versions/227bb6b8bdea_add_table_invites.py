@@ -28,8 +28,14 @@ def upgrade():
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True
         ),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(["user_invited_id"], ["users.id"],),
-        sa.ForeignKeyConstraint(["user_inviting_id"], ["users.id"],),
+        sa.ForeignKeyConstraint(
+            ["user_invited_id"],
+            ["users.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_inviting_id"],
+            ["users.id"],
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     # ### end Alembic commands ###

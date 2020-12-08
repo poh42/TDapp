@@ -18,6 +18,7 @@ def get_challenges(games):
             "status": STATUS_COMPLETED,
             "date": "2020-09-12 00:00:00",
             "due_date": "2020-09-12 23:59:59",
+            "is_direct": True,
         },
         "roger_tomas": {
             "game_id": games["pga_2k21"].id,
@@ -27,6 +28,7 @@ def get_challenges(games):
             "status": STATUS_ACCEPTED,
             "date": "2020-12-12 00:00:00",
             "due_date": "2020-12-12 23:59:59",
+            "is_direct": True,
         },
         "phil_ryan": {
             "game_id": games["madden21"].id,
@@ -36,6 +38,7 @@ def get_challenges(games):
             "status": STATUS_PENDING,
             "date": "2020-12-01 00:00:00",
             "due_date": "2020-12-01 23:59:59",
+            "is_direct": True,
         },
         "noah": {
             "game_id": games["rocket_league"].id,
@@ -45,6 +48,7 @@ def get_challenges(games):
             "status": STATUS_OPEN,
             "date": "2021-01-21 00:00:00",
             "due_date": "2021-01-21 23:59:59",
+            "is_direct": False,
         },
         "maureen_asdrubal_2": {
             "game_id": games["fifa20"].id,
@@ -54,6 +58,7 @@ def get_challenges(games):
             "status": STATUS_REJECTED,
             "date": "2020-11-03 00:00:00",
             "due_date": "2020-11-03 23:59:59",
+            "is_direct": True,
         },
     }
     return challenges
