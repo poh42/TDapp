@@ -24,8 +24,14 @@ def upgrade():
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("level", sa.String(length=45), nullable=False),
         sa.Column("gamertag", sa.String(length=255), nullable=False),
-        sa.ForeignKeyConstraint(["game_id"], ["games.id"],),
-        sa.ForeignKeyConstraint(["user_id"], ["users.id"],),
+        sa.ForeignKeyConstraint(
+            ["game_id"],
+            ["games.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.id"],
+        ),
         sa.PrimaryKeyConstraint("game_id", "user_id"),
     )
     # ### end Alembic commands ###

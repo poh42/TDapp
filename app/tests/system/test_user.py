@@ -350,7 +350,8 @@ class TestUserEndpoints(BaseAPITestCase):
                         json_data = rv.get_json()
                         self.assertEqual(rv.status_code, 400, "Wrong status code")
                         self.assertEqual(
-                            json_data["message"], "You are not a friend of this user",
+                            json_data["message"],
+                            "You are not a friend of this user",
                         )
 
     def test_add_user_invite(self):

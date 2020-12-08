@@ -38,7 +38,8 @@ class ChallengePost(Resource):
         challenge.save_to_db()
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         challenge_user = ChallengeUserModel(
-            wager_id=challenge.id, challenger_id=current_user.id,
+            wager_id=challenge.id,
+            challenger_id=current_user.id,
         )
         challenge_user.save_to_db()
         return {
@@ -408,7 +409,7 @@ class ChallengesByUser(Resource):
                 "results_1v1.winner.username",
                 "results_1v1.winner.id",
                 "results_1v1.winner.last_name",
-                "results_1v1.winner.name"
+                "results_1v1.winner.name",
             ),
             exclude=(
                 "results_1v1.player_1",

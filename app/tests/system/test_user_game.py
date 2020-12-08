@@ -31,6 +31,7 @@ class TestUserGameEndpoints(BaseAPITestCase):
                     gamertag=gamertag,
                 ).first()
                 self.assertIsNotNone(
-                    instance, "User game model was not saved",
+                    instance,
+                    "User game model was not saved",
                 )
                 self.assertEqual(instance.level, level, "Levels are not equal")
