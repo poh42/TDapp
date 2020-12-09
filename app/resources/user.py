@@ -219,7 +219,8 @@ class TopEarners(Resource):
     @classmethod
     @optional_check_token
     def get(cls):
-        top_earners = UserModel.get_top_earners()
+        days = request.args.get("days", type=int, default=7)
+        top_earners = UserModel.get_top_earners(days=days)
         if not is_admin():
             ret_val = []
             for u in top_earners:
