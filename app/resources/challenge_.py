@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from marshmallow import ValidationError
 
 from db import db
@@ -5,6 +7,7 @@ from decorators import check_token
 from models.challenge_user import (
     ChallengeUserModel,
     STATUS_OPEN,
+    STATUS_READY,
     STATUS_ACCEPTED,
     STATUS_DECLINED,
 )
@@ -428,7 +431,7 @@ class ChallengesByUser(Resource):
 class ChallengeStatusUpdate(Resource):
     @classmethod
     def put(cls, challenge_id):
-        print("Endpoint for Challenge Status Transition #117")
+        now = datetime.now()
         challenge = ChallengeModel.find_by_id(challenge_id)
         json_data = request.get_json()
         errors = challenge_schema.validate(json_data, partial=True)
@@ -437,21 +440,22 @@ class ChallengeStatusUpdate(Resource):
         if not challenge:
             return {"message": "Challenge not found"}, 404
         
-        current_user = 4 # UserModel.find_by_firebase_id(g.claims["uid"])
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         challenge_users = ChallengeUserModel.query.filter_by(wager_id=challenge.id).first()
-        print(challenge_users.challenger_id)
-        print(challenge_users.challenged_id)
         user_belongs_challenge = current_user == challenge_users.challenger_id \
             or current_user == challenge_users.challenged_id
         challenge_users_same_status = \
             challenge_users.status_challenger == challenge_users.status_challenged
-        # TODO: Validation for status READY
         if user_belongs_challenge:
             if challenge_users_same_status:
                 challenge.status = challenge_users.status_challenger
                 try:
+                    now_less_150_sec  = now - timedelta(seconds=150)
+                    now_plus_150_sec  = now + timedelta(seconds=150)
+                    if challenge_users.status_challenged == STATUS_READY \
+                        and  not now_less_150_sec <= challenge.date <= now_plus_150_sec:
+                        return {"message": "Incorrect transition for challenge"}, 403
                     challenge.save_to_db()
-                    pass
                 except Exception as e:
                     print(e)
                     return {"message": "There was an error saving the challenge"}, 400
