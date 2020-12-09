@@ -121,7 +121,10 @@ class ChallengeList(Resource):
             )
         challenge_schema = ChallengeSchema(
             only=(
+                "id",
                 "game.name",
+                "console.id",
+                "console.name",
                 "type",
                 "date",
                 "buy_in",
@@ -382,6 +385,8 @@ class ChallengesByUser(Resource):
         challenge_schema = ChallengeSchema(
             only=(
                 "game",
+                "console.name",
+                "console.id",
                 "game.consoles",
                 "type",
                 "date",

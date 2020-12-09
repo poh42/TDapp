@@ -2,6 +2,8 @@ from ma import ma
 from models.user_game import UserGameModel
 from marshmallow import fields
 
+from schemas.console import ConsoleSchema
+
 
 class BaseUserGameSchema(ma.SQLAlchemyAutoSchema):
     game_id = fields.Integer(required=True)
@@ -14,5 +16,8 @@ class BaseUserGameSchema(ma.SQLAlchemyAutoSchema):
 
 
 class UserGameSchema(BaseUserGameSchema):
+    console = fields.Nested(ConsoleSchema)
+    game = fields.Nested("GameSchema")
+
     class Meta(BaseUserGameSchema.Meta):
         load_instance = True
