@@ -423,3 +423,53 @@ class ChallengesByUser(Resource):
             ),
         )
         return {"challenges": challenge_schema.dump(challenges, many=True)}, 200
+
+
+class ChallengeStatusUpdate(Resource):
+    @classmethod
+    def put(cls, challenge_id):
+        print("Endpoint for Challenge Status Transition #117")
+        challenge = ChallengeModel.find_by_id(challenge_id)
+        json_data = request.get_json()
+        errors = challenge_schema.validate(json_data, partial=True)
+        if errors:
+            raise ValidationError(errors)
+        if not challenge:
+            return {"message": "Challenge not found"}, 404
+        
+        current_user = 4 # UserModel.find_by_firebase_id(g.claims["uid"])
+        challenge_users = ChallengeUserModel.query.filter_by(wager_id=challenge.id).first()
+        print(challenge_users.challenger_id)
+        print(challenge_users.challenged_id)
+        user_belongs_challenge = current_user == challenge_users.challenger_id \
+            or current_user == challenge_users.challenged_id
+        challenge_users_same_status = \
+            challenge_users.status_challenger == challenge_users.status_challenged
+        # TODO: Validation for status READY
+        if user_belongs_challenge:
+            if challenge_users_same_status:
+                challenge.status = challenge_users.status_challenger
+                try:
+                    challenge.save_to_db()
+                    pass
+                except Exception as e:
+                    print(e)
+                    return {"message": "There was an error saving the challenge"}, 400
+                return (
+                    {
+                        "message": "Challenge updated successfully",
+                        "challenge": challenge_schema.dump(challenge),
+                    },
+                    200,
+                )
+            else:
+                return {"message": "Incorrect transition for challenge"}, 403
+        else:
+            return {"message": "User does not belong to challenge"}, 403
+        
+
+
+        
+        
+
+       
