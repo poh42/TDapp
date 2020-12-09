@@ -423,7 +423,6 @@ class TestUserEndpoints(BaseAPITestCase):
                         content_type="application/json",
                     )
                     json_data = rv.get_json()
-                    print(json_data)
                     self.assertEqual(rv.status_code, 200, "Wrong status code")
                     self.assertEqual(
                         json_data["message"],
