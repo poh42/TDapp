@@ -434,16 +434,16 @@ class ChallengeStatusUpdate(Resource):
         now = datetime.now()
         challenge = ChallengeModel.find_by_id(challenge_id)
         json_data = request.get_json()
-        errors = challenge_schema.validate(json_data, partial=True)
-        if errors:
-            raise ValidationError(errors)
+        # errors = challenge_schema.validate(json_data, partial=True)
+        # if errors:
+        #     raise ValidationError(errors)
         if not challenge:
             return {"message": "Challenge not found"}, 404
-        
-        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        # TODO: Validate body input
+        current_user = UserModel.find_by_id(json_data.get("user_id"))
         challenge_users = ChallengeUserModel.query.filter_by(wager_id=challenge.id).first()
-        user_belongs_challenge = current_user == challenge_users.challenger_id \
-            or current_user == challenge_users.challenged_id
+        user_belongs_challenge = current_user.id == challenge_users.challenger_id \
+            or current_user.id == challenge_users.challenged_id
         challenge_users_same_status = \
             challenge_users.status_challenger == challenge_users.status_challenged
         if user_belongs_challenge:
@@ -470,10 +470,3 @@ class ChallengeStatusUpdate(Resource):
                 return {"message": "Incorrect transition for challenge"}, 403
         else:
             return {"message": "User does not belong to challenge"}, 403
-        
-
-
-        
-        
-
-       
