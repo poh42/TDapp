@@ -103,11 +103,11 @@ class UserModel(db.Model):
         return send_email([self.email], subject, text, html)
 
     @classmethod
-    def get_top_earners(cls):
+    def get_top_earners(cls, days=7):
         sql = """
         with t as (
             select SUM(t2.credit_change) as credit_change , t2.user_id from transactions t2
-                    where t2.created_at >= :week_ago
+                    where t2.created_at >= :time_ago
             group by t2.user_id 
         ) select
              u.*,
@@ -115,8 +115,8 @@ class UserModel(db.Model):
             left join t on t.user_id = u.id
           order by COALESCE(t.credit_change, 0) desc
         """
-        week_ago = datetime.today() - timedelta(days=7)
-        data = db.engine.execute(text(sql), week_ago=week_ago).fetchall()
+        time_ago = datetime.today() - timedelta(days=days)
+        data = db.engine.execute(text(sql), time_ago=time_ago).fetchall()
         return [dict(d) for d in data]
 
     @classmethod
