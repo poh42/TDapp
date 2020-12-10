@@ -34,16 +34,7 @@ class ChallengeSchema(ma.SQLAlchemyAutoSchema):
     challenge_users = fields.Nested(ChallengeUserSchema, many=True)
     console_id = fields.Integer(required=True, validate=validate_console_id)
     console = fields.Nested(ConsoleSchema)
-
-    @validates_schema
-    def validate_related_fields(self, data, **kwargs):
-        validate_lower_upper_fields(
-            data,
-            "buy_in",
-            "reward",
-            "buy_in and reward should be specified together",
-            "buy_in should be smaller than reward",
-        )
+    reward = fields.Decimal(required=False)
 
     class Meta:
         model = ChallengeModel

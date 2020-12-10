@@ -27,6 +27,7 @@ from schemas.challenge_user import ChallengeUserSchema
 from schemas.dispute import DisputeSchema
 from schemas.results_1v1 import Results1v1Schema
 from utils.schema import get_fields_user_to_exclude
+from decimal import Decimal
 
 challenge_schema = ChallengeSchema()
 challenge_user_schema = ChallengeUserSchema()
@@ -37,9 +38,12 @@ class ChallengePost(Resource):
     @classmethod
     @check_token
     def post(cls):
-        challenge = challenge_schema.load(request.get_json())
+        challenge: ChallengeModel = challenge_schema.load(request.get_json())
+        challenge.reward = Decimal(challenge.buy_in) * 2
         challenge.save_to_db()
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        # TODO We might want to redefine this if the user challenges directly
+        # i.e. putting the challenged_id
         challenge_user = ChallengeUserModel(
             wager_id=challenge.id,
             challenger_id=current_user.id,

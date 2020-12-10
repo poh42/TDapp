@@ -191,7 +191,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 "game_id": fixtures["game"].id,
                 "date": "2019-01-01T00:00:00",
                 "buy_in": 10,
-                "reward": 100,
                 "status": "OPEN",
                 "due_date": "2019-01-01T00:00:00",
                 "console_id": fixtures["console"].id,
@@ -201,8 +200,8 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 rv = c.post(
                     "/challenge", data=json.dumps(data), content_type="application/json"
                 )
-                self.assertEqual(rv.status_code, 200, "Wrong status code")
                 json_data = rv.get_json()
+                self.assertEqual(rv.status_code, 200, "Wrong status code")
                 challenge_created = json_data["challenge"]
                 self.assertEqual(challenge_created["type"], data["type"], "Wrong type")
                 self.assertEqual(
@@ -212,7 +211,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     challenge_created["buy_in"], data["buy_in"], "Wrong buy in"
                 )
                 self.assertAlmostEqual(
-                    challenge_created["reward"], data["reward"], "Wrong reward"
+                    challenge_created["reward"], 20, "Wrong reward"
                 )
                 self.assertEqual(challenge_created["date"], data["date"], "Wrong date")
                 self.assertEqual(
