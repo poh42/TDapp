@@ -24,11 +24,8 @@ from resources.challenge_ import (
     AcceptChallenge,
     DeclineChallenge,
     ChallengesByUser,
-<<<<<<< HEAD
     ChallengeStatusUpdate
-=======
     DirectChallenges,
->>>>>>> develop
 )
 from resources.console import ConsoleList
 from resources.game import GamesByConsole, Games, Game
