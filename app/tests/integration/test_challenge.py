@@ -17,14 +17,14 @@ class TestIntegrationChallenge(BaseAPITestCase):
             user_login = fixtures["user_login"]
             with self.subTest(msg="all challenges"):
                 challenges = ChallengeModel.find_user_challenges(user_login.id)
-                self.assertEqual(len(challenges), 2, "Wrong number of challenges")
+                self.assertEqual(len(challenges), 3, "Wrong number of challenges")
             with self.subTest(msg="get upcoming challenges"):
                 challenges = ChallengeModel.find_user_challenges(
                     user_login.id, upcoming=True
                 )
                 self.assertEqual(
                     len(challenges),
-                    1,
+                    2,
                     "Wrong number of challenges in upcoming challenges call",
                 )
                 c = get_challenge(challenges, "Upcoming challenge")

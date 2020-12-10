@@ -16,6 +16,7 @@ class UserGameModel(db.Model):
     gamertag = db.Column(db.String(255), nullable=False)
 
     game = db.relationship("GameModel", back_populates="user_games")
+    console = db.relationship("ConsoleModel")
 
     def save_to_db(self):
         db.session.add(self)

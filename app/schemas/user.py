@@ -27,7 +27,10 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     friends = fields.Nested(
         "self",
         many=True,
-        exclude=("friends", "is_private",)  # This exclude avoids infinite recursion
+        exclude=(
+            "friends",
+            "is_private",
+        )  # This exclude avoids infinite recursion
         + FIELDS_TO_EXCLUDE,
     )
 

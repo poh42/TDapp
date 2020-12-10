@@ -22,8 +22,14 @@ def upgrade():
         "friendships",
         sa.Column("follower_id", sa.Integer(), nullable=False),
         sa.Column("followed_id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(["followed_id"], ["users.id"],),
-        sa.ForeignKeyConstraint(["follower_id"], ["users.id"],),
+        sa.ForeignKeyConstraint(
+            ["followed_id"],
+            ["users.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["follower_id"],
+            ["users.id"],
+        ),
         sa.PrimaryKeyConstraint("follower_id", "followed_id"),
     )
     # ### end Alembic commands ###

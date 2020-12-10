@@ -30,9 +30,18 @@ def upgrade():
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True
         ),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(["challenge_id"], ["challenges.id"],),
-        sa.ForeignKeyConstraint(["player_1_id"], ["users.id"],),
-        sa.ForeignKeyConstraint(["player_2_id"], ["users.id"],),
+        sa.ForeignKeyConstraint(
+            ["challenge_id"],
+            ["challenges.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["player_1_id"],
+            ["users.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["player_2_id"],
+            ["users.id"],
+        ),
         sa.PrimaryKeyConstraint("challenge_id"),
     )
     # ### end Alembic commands ###

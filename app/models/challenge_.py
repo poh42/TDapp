@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import text
+from sqlalchemy import text, or_
 
 from db import db
 from sqlalchemy.sql import func
@@ -34,6 +34,7 @@ class ChallengeModel(db.Model):
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
     console_id = db.Column(db.Integer, db.ForeignKey("consoles.id"), nullable=True)
+    is_direct = db.Column(db.Boolean, default=False)
     game = db.relationship("GameModel")
     console = db.relationship("ConsoleModel")
     challenge_users = db.relationship(
@@ -90,3 +91,17 @@ class ChallengeModel(db.Model):
             text(sql), user_id=user_id, challenge_id=self.id
         ).fetchone()
         return data is not None
+
+    @classmethod
+    def get_direct_challenges(cls, user_id):
+        challenge_users = aliased(cls.challenge_users)
+        return (
+            cls.query.join(challenge_users)
+            .filter(
+                or_(
+                    challenge_users.challenged_id == user_id,
+                    challenge_users.challenger_id == user_id,
+                )
+            )
+            .filter(cls.is_direct == True)
+        ).all()

@@ -24,7 +24,10 @@ def upgrade():
         sa.Column("expire_at", sa.Integer(), nullable=False),
         sa.Column("confirmed", sa.Boolean(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(["user_id"], ["users.id"],),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.id"],
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     # ### end Alembic commands ###

@@ -25,7 +25,10 @@ class GameModel(db.Model):
         back_populates="games",
     )
 
-    user_games = db.relationship("UserGameModel", cascade="all, delete-orphan",)
+    user_games = db.relationship(
+        "UserGameModel",
+        cascade="all, delete-orphan",
+    )
 
     @classmethod
     def get_active_games(cls):
