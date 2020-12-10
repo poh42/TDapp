@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from marshmallow import ValidationError
 
 from db import db
@@ -5,6 +7,7 @@ from decorators import check_token
 from models.challenge_user import (
     ChallengeUserModel,
     STATUS_OPEN,
+    STATUS_READY,
     STATUS_ACCEPTED,
     STATUS_DECLINED,
 )
@@ -515,3 +518,54 @@ class DirectChallenges(Resource):
             ),
         )
         return {"challenges": challenge_schema.dump(challenges, many=True)}, 200
+
+
+class ChallengeStatusUpdate(Resource):
+    @classmethod
+    def put(cls, challenge_id):
+        now = datetime.now()
+        challenge = ChallengeModel.find_by_id(challenge_id)
+        json_data = request.get_json()
+        # errors = challenge_schema.validate(json_data, partial=True)
+        # if errors:
+        #     raise ValidationError(errors)
+        if not challenge:
+            return {"message": "Challenge not found"}, 404
+        # TODO: Validate body input
+        current_user = UserModel.find_by_id(json_data.get("user_id"))
+        challenge_users = ChallengeUserModel.query.filter_by(
+            wager_id=challenge.id
+        ).first()
+        user_belongs_challenge = (
+            current_user.id == challenge_users.challenger_id
+            or current_user.id == challenge_users.challenged_id
+        )
+        challenge_users_same_status = (
+            challenge_users.status_challenger == challenge_users.status_challenged
+        )
+        if user_belongs_challenge:
+            if challenge_users_same_status:
+                challenge.status = challenge_users.status_challenger
+                try:
+                    now_less_150_sec = now - timedelta(seconds=150)
+                    now_plus_150_sec = now + timedelta(seconds=150)
+                    if (
+                        challenge_users.status_challenged == STATUS_READY
+                        and not now_less_150_sec <= challenge.date <= now_plus_150_sec
+                    ):
+                        return {"message": "Incorrect transition for challenge"}, 403
+                    challenge.save_to_db()
+                except Exception as e:
+                    print(e)
+                    return {"message": "There was an error saving the challenge"}, 400
+                return (
+                    {
+                        "message": "Challenge updated successfully",
+                        "challenge": challenge_schema.dump(challenge),
+                    },
+                    200,
+                )
+            else:
+                return {"message": "Incorrect transition for challenge"}, 403
+        else:
+            return {"message": "User does not belong to challenge"}, 403
