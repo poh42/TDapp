@@ -533,19 +533,26 @@ class ChallengeStatusUpdate(Resource):
             return {"message": "Challenge not found"}, 404
         # TODO: Validate body input
         current_user = UserModel.find_by_id(json_data.get("user_id"))
-        challenge_users = ChallengeUserModel.query.filter_by(wager_id=challenge.id).first()
-        user_belongs_challenge = current_user.id == challenge_users.challenger_id \
+        challenge_users = ChallengeUserModel.query.filter_by(
+            wager_id=challenge.id
+        ).first()
+        user_belongs_challenge = (
+            current_user.id == challenge_users.challenger_id
             or current_user.id == challenge_users.challenged_id
-        challenge_users_same_status = \
+        )
+        challenge_users_same_status = (
             challenge_users.status_challenger == challenge_users.status_challenged
+        )
         if user_belongs_challenge:
             if challenge_users_same_status:
                 challenge.status = challenge_users.status_challenger
                 try:
-                    now_less_150_sec  = now - timedelta(seconds=150)
-                    now_plus_150_sec  = now + timedelta(seconds=150)
-                    if challenge_users.status_challenged == STATUS_READY \
-                        and  not now_less_150_sec <= challenge.date <= now_plus_150_sec:
+                    now_less_150_sec = now - timedelta(seconds=150)
+                    now_plus_150_sec = now + timedelta(seconds=150)
+                    if (
+                        challenge_users.status_challenged == STATUS_READY
+                        and not now_less_150_sec <= challenge.date <= now_plus_150_sec
+                    ):
                         return {"message": "Incorrect transition for challenge"}, 403
                     challenge.save_to_db()
                 except Exception as e:

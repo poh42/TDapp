@@ -14,8 +14,9 @@ from models.challenge_user import (
     STATUS_READY,
     STATUS_ACCEPTED,
     STATUS_DECLINED,
-    STATUS_COMPLETED
+    STATUS_COMPLETED,
 )
+
 
 class TestChallengeEndpoints(BaseAPITestCase):
     def test_challenge_get(self):
@@ -370,45 +371,58 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     challenge.date = datetime.now()
                     challenge_users.status_challenger = STATUS_READY
                     challenge_users.status_challenged = STATUS_READY
-                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge",
-                            data=data,
-                            content_type="application/json",
-                            )
-                    self.assertEqual(rv.status_code, 200, "Challenge updated successfully")
+                    rv = c.put(
+                        f"/challenge/{challenge.id}/updateChallenge",
+                        data=data,
+                        content_type="application/json",
+                    )
+                    self.assertEqual(
+                        rv.status_code, 200, "Challenge updated successfully"
+                    )
                 with self.subTest("Incorrect transition for status READY"):
                     data = json.dumps({"user_id": 2})
                     challenge.date = datetime.now() + timedelta(seconds=200)
                     challenge_users.status_challenger = STATUS_READY
                     challenge_users.status_challenged = STATUS_READY
-                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge",
-                            data=data,
-                            content_type="application/json",
-                            )
-                    self.assertEqual(rv.status_code, 403, "Incorrect transition for challenge")
+                    rv = c.put(
+                        f"/challenge/{challenge.id}/updateChallenge",
+                        data=data,
+                        content_type="application/json",
+                    )
+                    self.assertEqual(
+                        rv.status_code, 403, "Incorrect transition for challenge"
+                    )
                 with self.subTest("Incorrect transition users with different statuses"):
                     data = json.dumps({"user_id": 2})
                     challenge_users.status_challenger = STATUS_READY
                     challenge_users.status_challenged = STATUS_ACCEPTED
-                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge",
-                            data=data,
-                            content_type="application/json",
-                            )
-                    self.assertEqual(rv.status_code, 403, "Incorrect transition for challenge")
+                    rv = c.put(
+                        f"/challenge/{challenge.id}/updateChallenge",
+                        data=data,
+                        content_type="application/json",
+                    )
+                    self.assertEqual(
+                        rv.status_code, 403, "Incorrect transition for challenge"
+                    )
                 with self.subTest("User does not belong to challenge"):
                     data = json.dumps({"user_id": 1})
-                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge",
-                            data=data,
-                            content_type="application/json",
-                            )
-                    self.assertEqual(rv.status_code, 403, "User does not belong to challenge")
+                    rv = c.put(
+                        f"/challenge/{challenge.id}/updateChallenge",
+                        data=data,
+                        content_type="application/json",
+                    )
+                    self.assertEqual(
+                        rv.status_code, 403, "User does not belong to challenge"
+                    )
                 with self.subTest("Challenge not found"):
                     data = json.dumps({"user_id": 1})
-                    rv = c.put(f"/challenge/6/updateChallenge",
-                            data=data,
-                            content_type="application/json",
-                            )
+                    rv = c.put(
+                        f"/challenge/6/updateChallenge",
+                        data=data,
+                        content_type="application/json",
+                    )
                     self.assertEqual(rv.status_code, 404, "Challenge not found")
-                    
+
     def test_direct_challenges(self):
         with self.app_context():
             fixtures = create_fixtures()
