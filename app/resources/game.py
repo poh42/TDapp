@@ -1,5 +1,6 @@
 from flask import request
 from flask_restful import Resource
+from marshmallow import ValidationError
 from sqlalchemy.sql import text
 from db import db
 from decorators import (
@@ -55,6 +56,28 @@ class Games(Resource):
 
 
 class Game(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin
+    def put(cls, game_id):
+        game: GameModel = GameModel.find_by_id(game_id)
+        if game is None:
+            return {"message": "Game not found"}, 400
+        game_data = request.get_json()
+        schema = GameSchema()
+        errors = schema.validate(game_data, partial=True)
+        if errors:
+            raise ValidationError(errors)
+        if game_data.get("name"):
+            game.name = game_data.get("name")
+        if game_data.get("image"):
+            game.image = game_data.get("image")
+        is_active = game_data.get("is_active")
+        if is_active is True or is_active is False:
+            game.is_active = is_active
+        game.save_to_db()
+        return {"game": schema.dump(game)}, 200
+
     @classmethod
     @check_token
     @check_is_admin
