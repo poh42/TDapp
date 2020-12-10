@@ -24,7 +24,7 @@ from resources.challenge_ import (
     AcceptChallenge,
     DeclineChallenge,
     ChallengesByUser,
-    ChallengeStatusUpdate
+    ChallengeStatusUpdate,
     DirectChallenges,
 )
 from resources.console import ConsoleList
