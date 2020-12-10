@@ -75,3 +75,16 @@ class TestGameEndpoints(BaseAPITestCase):
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
                 self.assertIsNone(GameModel.find_by_id(game.id))
                 self.assertEqual(json_data["message"], "Game deleted")
+
+    def test_edit_game(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            game = fixtures["game"]
+            with self.test_client() as c:
+                data = json.dumps({"is_active": False, "name": "edited"})
+                rv = c.put(
+                    f"/games/{game.id}", data=data, content_type="application/json"
+                )
+                self.assertEqual(rv.status_code, 200, "Wrong status code")
+                edited_game = GameModel.find_by_id(game.id)
+                self.assertFalse(edited_game.is_active, "Game wasn't edited")
