@@ -201,7 +201,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     "/challenge", data=json.dumps(data), content_type="application/json"
                 )
                 json_data = rv.get_json()
-                print(json_data)
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
                 challenge_created = json_data["challenge"]
                 self.assertEqual(challenge_created["type"], data["type"], "Wrong type")
