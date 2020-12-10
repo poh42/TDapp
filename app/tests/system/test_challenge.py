@@ -3,6 +3,7 @@ import json
 from unittest.mock import patch
 
 from models.challenge_user import ChallengeUserModel
+from models.user import UserModel
 from tests.base import BaseAPITestCase
 from tests.utils import create_fixtures
 from models.challenge_ import ChallengeModel
@@ -367,72 +368,48 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 challenge: ChallengeModel = fixtures["challenge"]
                 challenge_users: ChallengeUserModel = fixtures["challenge_user"]
                 with self.subTest("Correct transition for status READY"):
-                    data = json.dumps({"user_id": 2})
+                    g.claims = {"uid": "dummy_2"}
                     challenge.date = datetime.now()
                     challenge_users.status_challenger = STATUS_READY
                     challenge_users.status_challenged = STATUS_READY
-                    rv = c.put(
-                        f"/challenge/{challenge.id}/updateChallenge",
-                        data=data,
-                        content_type="application/json",
-                    )
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 200, "Challenge updated successfully"
                     )
                 with self.subTest("Incorrect transition for status READY"):
-                    data = json.dumps({"user_id": 2})
+                    g.claims = {"uid": "dummy_2"}
                     challenge.date = datetime.now() + timedelta(seconds=200)
                     challenge_users.status_challenger = STATUS_READY
                     challenge_users.status_challenged = STATUS_READY
-                    rv = c.put(
-                        f"/challenge/{challenge.id}/updateChallenge",
-                        data=data,
-                        content_type="application/json",
-                    )
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 403, "Incorrect transition for challenge"
                     )
                 with self.subTest("Correct transition for status"):
-                    data = json.dumps({"user_id": 2})
+                    g.claims = {"uid": "dummy_2"}
                     challenge_users.status_challenger = STATUS_COMPLETED
                     challenge_users.status_challenged = STATUS_COMPLETED
-                    rv = c.put(
-                        f"/challenge/{challenge.id}/updateChallenge",
-                        data=data,
-                        content_type="application/json",
-                    )
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 200, "Challenge updated successfully"
                     )
                 with self.subTest("Incorrect transition users with different statuses"):
-                    data = json.dumps({"user_id": 2})
+                    g.claims = {"uid": "dummy_2"}
                     challenge_users.status_challenger = STATUS_READY
                     challenge_users.status_challenged = STATUS_ACCEPTED
-                    rv = c.put(
-                        f"/challenge/{challenge.id}/updateChallenge",
-                        data=data,
-                        content_type="application/json",
-                    )
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 403, "Incorrect transition for challenge"
                     )
                 with self.subTest("User does not belong to challenge"):
-                    data = json.dumps({"user_id": 1})
-                    rv = c.put(
-                        f"/challenge/{challenge.id}/updateChallenge",
-                        data=data,
-                        content_type="application/json",
-                    )
+                    g.claims = {"uid": "dummy"}
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 403, "User does not belong to challenge"
                     )
                 with self.subTest("Challenge not found"):
-                    data = json.dumps({"user_id": 1})
-                    rv = c.put(
-                        f"/challenge/6/updateChallenge",
-                        data=data,
-                        content_type="application/json",
-                    )
+                    g.claims = {"uid": "dummy"}
+                    rv = c.put(f"/challenge/6/updateChallenge")
                     self.assertEqual(rv.status_code, 404, "Challenge not found")
 
     def test_direct_challenges(self):
