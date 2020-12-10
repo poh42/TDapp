@@ -210,8 +210,14 @@ class ResultsByUser(Resource):
                 rv.played,
                 rv.score_player_1,
                 rv.score_player_2,
+                rv.winner_id,
                 u1.username as user_1_username,
-                u2.username as user_2_username
+                u2.username as user_2_username,
+                u1.id as user_1_id,
+                u2.id as user_2_id,
+                u1.avatar as user_1_avatar,
+                u2.avatar as user_2_avatar,
+                co.name as console
             from
                 results_1v1 rv
             inner join challenges c on
@@ -222,6 +228,8 @@ class ResultsByUser(Resource):
                 rv.player_2_id = u2.id
             inner join games g on
                 g.id = c.game_id 
+            left join consoles co on
+                co.id = c.console_id
             where
                 rv.played is not null
                 and (rv.player_1_id = :user_id
