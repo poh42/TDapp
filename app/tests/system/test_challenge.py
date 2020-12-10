@@ -392,6 +392,18 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     self.assertEqual(
                         rv.status_code, 403, "Incorrect transition for challenge"
                     )
+                with self.subTest("Correct transition for status"):
+                    data = json.dumps({"user_id": 2})
+                    challenge_users.status_challenger = STATUS_COMPLETED
+                    challenge_users.status_challenged = STATUS_COMPLETED
+                    rv = c.put(
+                        f"/challenge/{challenge.id}/updateChallenge",
+                        data=data,
+                        content_type="application/json",
+                    )
+                    self.assertEqual(
+                        rv.status_code, 200, "Challenge updated successfully"
+                    )
                 with self.subTest("Incorrect transition users with different statuses"):
                     data = json.dumps({"user_id": 2})
                     challenge_users.status_challenger = STATUS_READY
