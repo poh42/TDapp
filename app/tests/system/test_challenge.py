@@ -408,6 +408,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                             content_type="application/json",
                             )
                     self.assertEqual(rv.status_code, 404, "Challenge not found")
+                    
     def test_direct_challenges(self):
         with self.app_context():
             fixtures = create_fixtures()
