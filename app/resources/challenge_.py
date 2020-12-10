@@ -533,14 +533,9 @@ class ChallengeStatusUpdate(Resource):
     def put(cls, challenge_id):
         now = datetime.now()
         challenge = ChallengeModel.find_by_id(challenge_id)
-        json_data = request.get_json()
-        # errors = challenge_schema.validate(json_data, partial=True)
-        # if errors:
-        #     raise ValidationError(errors)
         if not challenge:
             return {"message": "Challenge not found"}, 404
-        # TODO: Validate body input
-        current_user = UserModel.find_by_id(json_data.get("user_id"))
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         challenge_users = ChallengeUserModel.query.filter_by(
             wager_id=challenge.id
         ).first()
