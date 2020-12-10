@@ -125,7 +125,11 @@ class User(Resource):
     def get(cls, user_id):
         user = UserModel.find_by_id(user_id)
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
-        exclude = ("friends.user_games.game.consoles",)
+        exclude = (
+            "friends.user_games",
+            "user_games.game.consoles",
+            "user_games.game.is_active",
+        )
         if not user.can_show_all_info(current_user.id):
             user_schema = UserSchema(only=USER_PUBLIC_FIELDS, exclude=exclude)
         else:
