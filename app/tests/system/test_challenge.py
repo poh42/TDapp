@@ -210,9 +210,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 self.assertAlmostEqual(
                     challenge_created["buy_in"], data["buy_in"], "Wrong buy in"
                 )
-                self.assertAlmostEqual(
-                    challenge_created["reward"], 20, "Wrong reward"
-                )
+                self.assertAlmostEqual(challenge_created["reward"], 20, "Wrong reward")
                 self.assertEqual(challenge_created["date"], data["date"], "Wrong date")
                 self.assertEqual(
                     challenge_created["due_date"], data["due_date"], "Wrong due_date"
