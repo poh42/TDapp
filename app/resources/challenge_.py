@@ -576,7 +576,7 @@ class ChallengeStatusUpdate(Resource):
         if not challenge:
             return {"message": "Challenge not found"}, 404
         if challenge.status == STATUS_DISPUTED:
-            return {"message": "Action not available for user"}, 404
+            return {"message": "Action not available for user"}, 403
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         challenge_users = ChallengeUserModel.query.filter_by(
             wager_id=challenge.id
@@ -601,20 +601,20 @@ class ChallengeStatusUpdate(Resource):
         if not user_belongs_challenge:
             return {"message": "User does not belong to challenge"}, 403
         if not user_valid_status:
-            return {"message": "Invalid challenge user status"}, 403 
+            return {"message": "Invalid challenge user status"}, 403
         if not challenge_valid_status:
             return {"message": "Invalid challenge status"}, 403
-
-        if user_is_challenger:
-            challenge_users.status_challenger = next_status
-        elif user_is_challenged:
-            challenge_users.status_challenged = next_status
 
         now_less_150_sec = now - timedelta(seconds=150)
         now_plus_150_sec = now + timedelta(seconds=150)
         valid_time_frame_for_ready = now_less_150_sec <= challenge.date <= now_plus_150_sec
         if next_status == STATUS_READY and not valid_time_frame_for_ready:
             return {"message": "Incorrect transition for challenge"}, 403
+
+        if user_is_challenger:
+            challenge_users.status_challenger = next_status
+        elif user_is_challenged:
+            challenge_users.status_challenged = next_status
 
         challenge_users_same_status = challenge_users.status_challenger == challenge_users.status_challenged
         try:    
