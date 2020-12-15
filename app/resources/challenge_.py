@@ -399,6 +399,7 @@ class ChallengesByUser(Resource):
         challenges = ChallengeModel.find_user_challenges(user_id, **kwargs)
         challenge_schema = ChallengeSchema(
             only=(
+                "id",
                 "game",
                 "console.name",
                 "console.id",
