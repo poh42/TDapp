@@ -49,10 +49,26 @@ class ChallengePost(Resource):
             challenger_id=current_user.id,
         )
         challenge_user.save_to_db()
+        challenge_dump_schema = ChallengeSchema(
+            only=(
+                "buy_in",
+                "status",
+                "game_id",
+                "id",
+                "challenge_users.created_at",
+                "challenge_users.challenger.username",
+                "reward",
+                "date",
+                "console.name",
+                "console.id",
+                "type",
+                "game.id",
+                "game.name",
+            )
+        )
         return {
             "message": "Challenge created",
-            "challenge": challenge_schema.dump(challenge),
-            "challenge_user": challenge_user_schema.dump(challenge_user),
+            "challenge": challenge_dump_schema.dump(challenge),
         }
 
 
