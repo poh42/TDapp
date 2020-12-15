@@ -56,7 +56,10 @@ class ChallengeModel(db.Model):
         challenge_users = aliased(cls.challenge_users)
         results_1v1 = aliased(cls.results_1v1)
         query = cls.query.join(challenge_users).filter(
-            challenge_users.challenged_id == user_id
+            or_(
+                challenge_users.challenged_id == user_id,
+                challenge_users.challenger_id == user_id,
+            )
         )
         if kwargs.get("upcoming"):
             query = query.filter(cls.date >= datetime.now())
