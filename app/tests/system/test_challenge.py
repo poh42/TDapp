@@ -213,24 +213,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 self.assertAlmostEqual(challenge_created["reward"], 20, "Wrong reward")
                 self.assertEqual(challenge_created["date"], data["date"], "Wrong date")
                 self.assertEqual(
-                    challenge_created["due_date"], data["due_date"], "Wrong due_date"
-                )
-                self.assertEqual(
                     challenge_created["status"], data["status"], "Wrong type"
-                )
-                self.assertIn(
-                    "challenge_user",
-                    json_data,
-                    "Challenge user is not part of the response as it should be",
-                )
-                challenge_user = json_data["challenge_user"]
-                self.assertEqual(
-                    challenge_user["wager_id"],
-                    challenge_created["id"],
-                    "Challenge user was created with wrong id",
-                )
-                self.assertEqual(
-                    challenge_user["status_challenger"], "OPEN", "Wrong status"
                 )
 
     def test_get_disputes(self):
