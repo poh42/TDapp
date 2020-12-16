@@ -534,7 +534,11 @@ class DirectChallenges(Resource):
         challenge_schema = ChallengeSchema(
             only=(
                 "id",
+                "console.id",
+                "console.name",
                 "game",
+                "game.id",
+                "game.name",
                 "game.consoles",
                 "type",
                 "date",
