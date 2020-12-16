@@ -12,10 +12,15 @@ from flask import g
 from models.challenge_user import (
     ChallengeUserModel,
     STATUS_OPEN,
-    STATUS_READY,
+    STATUS_PENDING,
     STATUS_ACCEPTED,
     STATUS_DECLINED,
+    STATUS_READY,
+    STATUS_STARTED,
+    STATUS_FINISHED,
     STATUS_COMPLETED,
+    STATUS_DISPUTED,
+    STATUS_SOLVED
 )
 
 
@@ -347,50 +352,81 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 fixtures = create_fixtures()
                 challenge: ChallengeModel = fixtures["challenge"]
                 challenge_users: ChallengeUserModel = fixtures["challenge_user"]
-                with self.subTest("Correct transition for status READY"):
+                with self.subTest("Correct transition to READY"):
+                    g.claims = {"uid": "myLbdKL8dFhipvanv4AnIUaJpqd2"}
+                    challenge.date = datetime.now()
+                    challenge.status = STATUS_ACCEPTED
+                    challenge_users.status_challenger = STATUS_OPEN
+                    challenge_users.status_challenged = STATUS_ACCEPTED
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
+                    self.assertEqual(
+                        rv.status_code, 200, "Challenge updated successfully"
+                    )
+                    self.assertEqual(challenge.status, STATUS_ACCEPTED)
+                    self.assertEqual(challenge_users.status_challenger, STATUS_OPEN)
+                    self.assertEqual(challenge_users.status_challenged, STATUS_READY)
+                with self.subTest("Correct transition to READY both users"):
                     g.claims = {"uid": "dummy_2"}
                     challenge.date = datetime.now()
-                    challenge_users.status_challenger = STATUS_READY
+                    challenge.status = STATUS_ACCEPTED
+                    challenge_users.status_challenger = STATUS_OPEN
                     challenge_users.status_challenged = STATUS_READY
                     rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 200, "Challenge updated successfully"
                     )
-                with self.subTest("Incorrect transition for status READY"):
+                    self.assertEqual(challenge.status, STATUS_READY)
+                    self.assertEqual(challenge_users.status_challenger, STATUS_READY)
+                    self.assertEqual(challenge_users.status_challenged, STATUS_READY)
+                with self.subTest("Incorrect transition to READY - not in time frame"):
                     g.claims = {"uid": "dummy_2"}
-                    challenge.date = datetime.now() + timedelta(seconds=200)
-                    challenge_users.status_challenger = STATUS_READY
-                    challenge_users.status_challenged = STATUS_READY
+                    challenge.date = datetime.now() - timedelta(minutes=10)
+                    challenge.status = STATUS_ACCEPTED
+                    challenge_users.status_challenger = STATUS_OPEN
+                    challenge_users.status_challenged = STATUS_ACCEPTED
                     rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 403, "Incorrect transition for challenge"
                     )
-                with self.subTest("Correct transition for status"):
+                    self.assertEqual(challenge.status, STATUS_ACCEPTED)
+                    self.assertEqual(challenge_users.status_challenger, STATUS_OPEN)
+                    self.assertEqual(challenge_users.status_challenged, STATUS_ACCEPTED)
+                with self.subTest("Correct transition to COMPLETED"):
                     g.claims = {"uid": "dummy_2"}
+                    challenge.status = STATUS_FINISHED
+                    challenge_users.status_challenger = STATUS_FINISHED
+                    challenge_users.status_challenged = STATUS_COMPLETED
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
+                    self.assertEqual(
+                        rv.status_code, 200, "Challenge updated successfully"
+                    )
+                    self.assertEqual(challenge.status, STATUS_COMPLETED)
+                    self.assertEqual(challenge_users.status_challenger, STATUS_COMPLETED)
+                    self.assertEqual(challenge_users.status_challenged, STATUS_COMPLETED)
+                with self.subTest("Correct transition to DISPUTED"):
+                    g.claims = {"uid": "myLbdKL8dFhipvanv4AnIUaJpqd2"}
+                    challenge.status = STATUS_COMPLETED
                     challenge_users.status_challenger = STATUS_COMPLETED
                     challenge_users.status_challenged = STATUS_COMPLETED
                     rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 200, "Challenge updated successfully"
                     )
-                with self.subTest("Incorrect transition users with different statuses"):
-                    g.claims = {"uid": "dummy_2"}
-                    challenge_users.status_challenger = STATUS_READY
-                    challenge_users.status_challenged = STATUS_ACCEPTED
-                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
-                    self.assertEqual(
-                        rv.status_code, 403, "Incorrect transition for challenge"
-                    )
-                with self.subTest("User does not belong to challenge"):
+                    self.assertEqual(challenge.status, STATUS_DISPUTED)
+                    self.assertEqual(challenge_users.status_challenger, STATUS_COMPLETED)
+                    self.assertEqual(challenge_users.status_challenged, STATUS_DISPUTED)
+                with self.subTest("User not in challenge"):
                     g.claims = {"uid": "dummy"}
                     rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 403, "User does not belong to challenge"
                     )
-                with self.subTest("Challenge not found"):
-                    g.claims = {"uid": "dummy"}
-                    rv = c.put(f"/challenge/6/updateChallenge")
-                    self.assertEqual(rv.status_code, 404, "Challenge not found")
+                with self.subTest("Invalid challenge user status"):
+                    g.claims = {"uid": "dummy_2"}
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
+                    self.assertEqual(
+                        rv.status_code, 403, "Invalid challenge user status"
+                    )
 
     def test_direct_challenges(self):
         with self.app_context():
