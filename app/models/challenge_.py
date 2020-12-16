@@ -9,6 +9,7 @@ from models.challenge_user import ChallengeUserModel
 from models.results_1v1 import Results1v1Model
 from models.dispute import DisputeModel
 from models.console import ConsoleModel
+from models.challenge_screenshot import ChallengeScreenshot
 
 STATUS_COMPLETED = "COMPLETED"
 STATUS_ACCEPTED = "ACCEPTED"
