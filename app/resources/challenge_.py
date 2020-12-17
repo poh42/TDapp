@@ -84,18 +84,27 @@ class ChallengePost(Resource):
     @classmethod
     @check_token
     def post(cls):
-        challenge: ChallengeModel = challenge_schema.load(request.get_json())
+        json_data = request.get_json()
+        challenged_id = json_data.pop("challenged_id", None)
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if challenged_id is not None:
+            can_challenge_user, error_message = current_user.can_challenge_user(challenged_id)
+            if not can_challenge_user:
+                return {"message", error_message}, 400
+        challenge: ChallengeModel = challenge_schema.load(json_data)
         challenge.reward = Decimal(challenge.buy_in) * 2
         challenge.status = STATUS_OPEN
         challenge.due_date = challenge.date + timedelta(minutes=5)
         challenge.save_to_db()
-        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
-        # TODO We might want to redefine this if the user challenges directly
-        # i.e. putting the challenged_id
-        challenge_user = ChallengeUserModel(
-            wager_id=challenge.id,
-            challenger_id=current_user.id,
-        )
+        challenge_user_args = {
+            "wager_id": challenge.id,
+            "challenger_id": current_user.id,
+            "status_challenger": STATUS_OPEN,
+            "status_challenged": STATUS_PENDING,
+        }
+        if challenged_id is not None:
+            challenge_user_args["challenged_id"] = challenged_id
+        challenge_user = ChallengeUserModel(**challenge_user_args)
         challenge_user.save_to_db()
         challenge_dump_schema = ChallengeSchema(
             only=(
