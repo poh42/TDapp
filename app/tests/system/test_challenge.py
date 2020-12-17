@@ -20,7 +20,7 @@ from models.challenge_user import (
     STATUS_FINISHED,
     STATUS_COMPLETED,
     STATUS_DISPUTED,
-    STATUS_SOLVED
+    STATUS_SOLVED,
 )
 
 
@@ -52,9 +52,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 {
                     "type": "1v1",
                     "buy_in": 100,
-                    "reward": 1000,
-                    "status": "ended",
-                    "due_date": "2019-01-01 00:00:00",
                 }
             )
             with self.test_client() as c:
@@ -67,13 +64,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 challenge_edited = json_data["challenge"]
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
                 self.assertEqual(challenge_edited["type"], "1v1", "Wrong type")
-                self.assertAlmostEqual(challenge_edited["buy_in"], 100, "Wrong buy in")
-                self.assertAlmostEqual(challenge_edited["reward"], 1000, "Wrong reward")
-                self.assertEqual(
-                    challenge_edited["due_date"],
-                    "2019-01-01T00:00:00",
-                    "Due date is not being edited",
-                )
 
     def test_challenge_list(self):
         with self.app_context():
@@ -98,29 +88,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     results[0]["challenge_id"], challenge.id, "Wrong challenge id"
                 )
                 self.assertEqual(results[0]["game_name"], "FIFA", "Wrong game name")
-
-    def test_challenge_someone(self):
-        with self.app_context():
-            fixtures = create_fixtures()
-            challenge = fixtures["challenge"]
-            second_user = fixtures["second_user"]
-            with self.test_client() as c:
-                g.claims = {"user_id": "dummy"}
-                data = json.dumps({"wager_id": challenge.id})
-                rv = c.post(
-                    f"/challenge/{second_user.id}/create",
-                    data=data,
-                    content_type="application/json",
-                )
-                json_data = rv.get_json()
-                self.assertEqual(rv.status_code, 200)
-                challenge_user = json_data["challenge_user"]
-                self.assertEqual(
-                    challenge_user["status_challenger"], "OPEN", "Wrong status"
-                )
-                self.assertEqual(
-                    challenge_user["wager_id"], challenge.id, "Wrong challenge id"
-                )
 
     def test_get_result(self):
         with self.app_context():
@@ -188,6 +155,68 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         json_data["message"], "This user cannot report this challenge"
                     )
 
+    def test_post_direct_challenge(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            with self.test_client() as c:
+                with self.subTest("Private user"):
+                    data = {
+                        "type": "1v1",
+                        "game_id": fixtures["game"].id,
+                        "date": "2019-01-01T00:00:00",
+                        "buy_in": 10,
+                        "console_id": fixtures["console"].id,
+                        "challenged_id": fixtures["private_user"].id,
+                    }
+                    g.claims = {"uid": fixtures["user_login"].firebase_id}
+                    rv = c.post(
+                        "/challenge",
+                        data=json.dumps(data),
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 400, "Wrong status code.")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        json_data["message"],
+                        "You can't challenge a user that's private and not your friend",
+                    )
+                with self.subTest("User not found"):
+                    data = {
+                        "type": "1v1",
+                        "game_id": fixtures["game"].id,
+                        "date": "2019-01-01T00:00:00",
+                        "buy_in": 10,
+                        "console_id": fixtures["console"].id,
+                        "challenged_id": 1000000,
+                    }
+                    g.claims = {"uid": fixtures["user_login"].firebase_id}
+                    rv = c.post(
+                        "/challenge",
+                        data=json.dumps(data),
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 400, "Wrong status code.")
+                    json_data = rv.get_json()
+                    self.assertEqual(json_data["message"], "User not found")
+                with self.subTest("Challenge yourself"):
+                    data = {
+                        "type": "1v1",
+                        "game_id": fixtures["game"].id,
+                        "date": "2019-01-01T00:00:00",
+                        "buy_in": 10,
+                        "console_id": fixtures["console"].id,
+                        "challenged_id": fixtures["user_login"].id,
+                    }
+                    g.claims = {"uid": fixtures["user_login"].firebase_id}
+                    rv = c.post(
+                        "/challenge",
+                        data=json.dumps(data),
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 400, "Wrong status code.")
+                    json_data = rv.get_json()
+                    self.assertEqual(json_data["message"], "Can't challenge yourself")
+
     def test_post_challenge(self):
         with self.app_context():
             fixtures = create_fixtures()
@@ -196,8 +225,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 "game_id": fixtures["game"].id,
                 "date": "2019-01-01T00:00:00",
                 "buy_in": 10,
-                "status": "OPEN",
-                "due_date": "2019-01-01T00:00:00",
                 "console_id": fixtures["console"].id,
             }
             with self.test_client() as c:
@@ -217,9 +244,8 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 )
                 self.assertAlmostEqual(challenge_created["reward"], 20, "Wrong reward")
                 self.assertEqual(challenge_created["date"], data["date"], "Wrong date")
-                self.assertEqual(
-                    challenge_created["status"], data["status"], "Wrong type"
-                )
+                self.assertEqual(challenge_created["status"], "OPEN", "Wrong type")
+                self.assertEqual(challenge_created["due_date"], "2019-01-01T00:05:00")
 
     def test_get_disputes(self):
         with self.app_context():
@@ -401,8 +427,12 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         rv.status_code, 200, "Challenge updated successfully"
                     )
                     self.assertEqual(challenge.status, STATUS_COMPLETED)
-                    self.assertEqual(challenge_users.status_challenger, STATUS_COMPLETED)
-                    self.assertEqual(challenge_users.status_challenged, STATUS_COMPLETED)
+                    self.assertEqual(
+                        challenge_users.status_challenger, STATUS_COMPLETED
+                    )
+                    self.assertEqual(
+                        challenge_users.status_challenged, STATUS_COMPLETED
+                    )
                 with self.subTest("Correct transition to DISPUTED"):
                     g.claims = {"uid": "myLbdKL8dFhipvanv4AnIUaJpqd2"}
                     challenge.status = STATUS_COMPLETED
@@ -413,7 +443,9 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         rv.status_code, 200, "Challenge updated successfully"
                     )
                     self.assertEqual(challenge.status, STATUS_DISPUTED)
-                    self.assertEqual(challenge_users.status_challenger, STATUS_COMPLETED)
+                    self.assertEqual(
+                        challenge_users.status_challenger, STATUS_COMPLETED
+                    )
                     self.assertEqual(challenge_users.status_challenged, STATUS_DISPUTED)
                 with self.subTest("User not in challenge"):
                     g.claims = {"uid": "dummy"}

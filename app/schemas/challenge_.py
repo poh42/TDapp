@@ -38,5 +38,15 @@ class ChallengeSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
         model = ChallengeModel
-        dump_only = ("id", "created_at", "updated_at", "results", "game", "console")
+        dump_only = (
+            "id",
+            "created_at",
+            "updated_at",
+            "results",
+            "game",
+            "console",
+            "reward",
+            "due_date",
+            "status",
+        )
         load_instance = True

@@ -206,3 +206,21 @@ class UserModel(db.Model):
         """
         results = db.engine.execute(text(sql)).fetchall()
         return [dict(r) for r in results]
+
+    def can_challenge_user(self, other_id):
+        """Returns if a user can be challenged"""
+        if self.id == int(other_id):
+            return False, "Can't challenge yourself"
+        other_user = UserModel.find_by_id(other_id)
+        if other_user is None:
+            return False, "User not found"
+        if not other_user.is_private:
+            return True, None
+        is_friend = self.is_friend_of_user(other_id)
+        if is_friend:
+            return True, None
+        else:
+            return (
+                False,
+                "You can't challenge a user that's private and not your friend",
+            )
