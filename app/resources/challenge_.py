@@ -19,7 +19,11 @@ from models.challenge_user import (
 )
 from models.dispute import DisputeModel
 from models.game import GameModel
-from models.transaction import TransactionModel
+from models.transaction import (
+    TransactionModel,
+    TYPE_ADD,
+    TYPE_SUBSTRACTION
+    )
 from models.results_1v1 import Results1v1Model
 from models.challenge_ import (
     ChallengeModel,
@@ -84,12 +88,17 @@ class ChallengePost(Resource):
     @classmethod
     @check_token
     def post(cls):
-        challenge: ChallengeModel = challenge_schema.load(request.get_json())
-        challenge.reward = Decimal(challenge.buy_in) * 2
-        challenge.save_to_db()
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        transaction = TransactionModel.find_by_user_id(current_user.id)
         # TODO We might want to redefine this if the user challenges directly
         # i.e. putting the challenged_id
+        challenge: ChallengeModel = challenge_schema.load(request.get_json())
+        if challenge.buy_in > transaction.credit_total:
+            return {"message": "Not enough credits"}, 403
+        
+        challenge.reward = Decimal(challenge.buy_in) * 2
+        challenge.save_to_db()
+        
         challenge_user = ChallengeUserModel(
             wager_id=challenge.id,
             challenger_id=current_user.id,
@@ -112,6 +121,16 @@ class ChallengePost(Resource):
                 "game.name",
             )
         )
+
+        new_transaction = TransactionModel()
+        new_transaction.previous_credit_total = transaction.credit_total
+        new_transaction.credit_change = challenge.buy_in
+        new_transaction.credit_total = transaction.credit_total - challenge.buy_in
+        new_transaction.challenge_id = challenge.id
+        new_transaction.user_id = current_user.id
+        new_transaction.type = TYPE_SUBSTRACTION
+        new_transaction.save_to_db()
+
         return {
             "message": "Challenge created",
             "challenge": challenge_dump_schema.dump(challenge),
@@ -402,16 +421,36 @@ class AcceptChallenge(Resource):
         challenge_user: ChallengeUserModel = ChallengeUserModel.find_by_id(
             challenge_user_id
         )
+        challenge = ChallengeModel.find_by_id(challenge_user.wager_id)
+        transaction = TransactionModel.find_by_user_id(current_user.id)
         if challenge_user is None:
             return {"message": "Challenge user not found"}, 400
         if challenge_user.accepted:
             return {"message": "Challenge already accepted"}, 400
         if not challenge_user.open:
             return {"message": "Challenge cannot be accepted"}, 400
-        if current_user.id != challenge_user.challenged_id:
-            return {"message": "Cannot accept challenge from a different user"}, 400
+        # Check this validation, seems more like a direct challenge validation
+        # if current_user.id != challenge_user.challenged_id:
+        #     return {"message": "Cannot accept challenge from a different user"}, 400
+        if challenge.buy_in > transaction.credit_total:
+            return {"message": "Not enough credits"}, 403
+
+        challenge_user.challenged_id = current_user.id
         challenge_user.status_challenged = STATUS_ACCEPTED
         challenge_user.save_to_db()
+
+        challenge.status = STATUS_ACCEPTED
+        challenge.save_to_db()
+
+        new_transaction = TransactionModel()
+        new_transaction.previous_credit_total = transaction.credit_total
+        new_transaction.credit_change = challenge.buy_in
+        new_transaction.credit_total = transaction.credit_total - challenge.buy_in
+        new_transaction.challenge_id = challenge.id
+        new_transaction.user_id = current_user.id
+        new_transaction.type = TYPE_SUBSTRACTION
+        new_transaction.save_to_db()
+
         return {"message": "Challenge accepted"}, 200
 
 
@@ -654,6 +693,17 @@ class ChallengeStatusUpdate(Resource):
             if challenge_users_same_status or next_status == STATUS_DISPUTED:
                 challenge.status = next_status
                 challenge.save_to_db()
+            if challenge.status == STATUS_COMPLETED:
+                results = Results1v1Model.find_by_challenge_id(challenge.id)
+                transaction = TransactionModel.find_by_user_id(current_user.id)
+                new_transaction = TransactionModel()
+                new_transaction.previous_credit_total = transaction.credit_total
+                new_transaction.credit_change = challenge.reward
+                new_transaction.credit_total = transaction.credit_total + challenge.reward
+                new_transaction.challenge_id = challenge.id
+                new_transaction.user_id = results.winner_id
+                new_transaction.type = TYPE_ADD
+                new_transaction.save_to_db()
             return (
             {
                 "message": "Challenge updated successfully",

@@ -2,6 +2,8 @@ from sqlalchemy import func
 
 from db import db
 
+TYPE_ADD = "ADD"
+TYPE_SUBSTRACTION = "SUBSTRACTION"
 
 class TransactionModel(db.Model):
     __tablename__ = "transactions"
@@ -23,3 +25,8 @@ class TransactionModel(db.Model):
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
+
+    @classmethod
+    def find_by_user_id(cls, _id):
+        max_transaction_id = db.session.query(func.max(cls.id)).filter_by(user_id=_id)
+        return cls.query.filter_by(id=max_transaction_id).first()
