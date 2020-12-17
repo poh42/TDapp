@@ -155,6 +155,59 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         json_data["message"], "This user cannot report this challenge"
                     )
 
+    def test_post_direct_challenge(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            with self.test_client() as c:
+                with self.subTest("Private user"):
+                    data = {
+                        "type": "1v1",
+                        "game_id": fixtures["game"].id,
+                        "date": "2019-01-01T00:00:00",
+                        "buy_in": 10,
+                        "console_id": fixtures["console"].id,
+                        "challenged_id": fixtures["private_user"].id,
+                    }
+                    g.claims = {"uid": fixtures["user_login"].firebase_id}
+                    rv = c.post(
+                        "/challenge", data=json.dumps(data), content_type="application/json"
+                    )
+                    self.assertEqual(rv.status_code, 400, "Wrong status code.")
+                    json_data = rv.get_json()
+                    self.assertEqual(json_data["message"], "You can't challenge a user that's private and not your friend")
+                with self.subTest("User not found"):
+                    data = {
+                        "type": "1v1",
+                        "game_id": fixtures["game"].id,
+                        "date": "2019-01-01T00:00:00",
+                        "buy_in": 10,
+                        "console_id": fixtures["console"].id,
+                        "challenged_id": 1000000,
+                    }
+                    g.claims = {"uid": fixtures["user_login"].firebase_id}
+                    rv = c.post(
+                        "/challenge", data=json.dumps(data), content_type="application/json"
+                    )
+                    self.assertEqual(rv.status_code, 400, "Wrong status code.")
+                    json_data = rv.get_json()
+                    self.assertEqual(json_data["message"], "User not found")
+                with self.subTest("Challenge yourself"):
+                    data = {
+                        "type": "1v1",
+                        "game_id": fixtures["game"].id,
+                        "date": "2019-01-01T00:00:00",
+                        "buy_in": 10,
+                        "console_id": fixtures["console"].id,
+                        "challenged_id": fixtures["user_login"].id,
+                    }
+                    g.claims = {"uid": fixtures["user_login"].firebase_id}
+                    rv = c.post(
+                        "/challenge", data=json.dumps(data), content_type="application/json"
+                    )
+                    self.assertEqual(rv.status_code, 400, "Wrong status code.")
+                    json_data = rv.get_json()
+                    self.assertEqual(json_data["message"], "Can't challenge yourself")
+
     def test_post_challenge(self):
         with self.app_context():
             fixtures = create_fixtures()

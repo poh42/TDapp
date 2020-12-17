@@ -87,11 +87,13 @@ class ChallengePost(Resource):
         json_data = request.get_json()
         challenged_id = json_data.pop("challenged_id", None)
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        challenge: ChallengeModel = challenge_schema.load(json_data)
+        challenge.is_direct = False
         if challenged_id is not None:
             can_challenge_user, error_message = current_user.can_challenge_user(challenged_id)
             if not can_challenge_user:
-                return {"message", error_message}, 400
-        challenge: ChallengeModel = challenge_schema.load(json_data)
+                return {"message": error_message}, 400
+            challenge.is_direct = True
         challenge.reward = Decimal(challenge.buy_in) * 2
         challenge.status = STATUS_OPEN
         challenge.due_date = challenge.date + timedelta(minutes=5)
