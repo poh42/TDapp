@@ -220,4 +220,7 @@ class UserModel(db.Model):
         if is_friend:
             return True, None
         else:
-            return False, "You can't challenge a user that's private and not your friend"
+            return (
+                False,
+                "You can't challenge a user that's private and not your friend",
+            )

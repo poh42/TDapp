@@ -15,7 +15,7 @@ from models.challenge_user import (
     STATUS_FINISHED,
     STATUS_COMPLETED,
     STATUS_DISPUTED,
-    STATUS_SOLVED
+    STATUS_SOLVED,
 )
 from models.dispute import DisputeModel
 from models.game import GameModel
@@ -32,7 +32,7 @@ from models.challenge_ import (
     STATUS_REPORTING,
     STATUS_COMPLETED,
     STATUS_DISPUTED,
-    STATUS_SOLVED
+    STATUS_SOLVED,
 )
 from flask_restful import Resource
 from models.user import UserModel
@@ -53,30 +53,42 @@ dispute_schema = DisputeSchema()
 
 _USERS_STATUS_FLOW = {
     # [valid status 1, valid status 2, next status, valid challenge status]
-    STATUS_OPEN: [STATUS_OPEN,
-                  (STATUS_ACCEPTED, STATUS_READY),
-                  STATUS_READY,
-                  STATUS_ACCEPTED],
-    STATUS_ACCEPTED: [(STATUS_OPEN, STATUS_READY),
-                      STATUS_ACCEPTED,
-                      STATUS_READY,
-                      STATUS_ACCEPTED],
-    STATUS_READY: [(STATUS_OPEN, STATUS_READY, STATUS_STARTED),
-                   (STATUS_ACCEPTED, STATUS_READY, STATUS_STARTED),
-                   STATUS_STARTED,
-                   STATUS_READY],
-    STATUS_STARTED: [(STATUS_STARTED, STATUS_READY, STATUS_FINISHED),
-                     (STATUS_STARTED, STATUS_READY, STATUS_FINISHED),
-                     STATUS_FINISHED,
-                     STATUS_STARTED],
-    STATUS_FINISHED: [(STATUS_FINISHED, STATUS_STARTED, STATUS_COMPLETED),
-                      (STATUS_FINISHED, STATUS_STARTED, STATUS_COMPLETED),
-                      STATUS_COMPLETED,
-                      STATUS_FINISHED],
-    STATUS_COMPLETED: [(STATUS_COMPLETED),
-                       (STATUS_COMPLETED),
-                       STATUS_DISPUTED,
-                       STATUS_COMPLETED],
+    STATUS_OPEN: [
+        STATUS_OPEN,
+        (STATUS_ACCEPTED, STATUS_READY),
+        STATUS_READY,
+        STATUS_ACCEPTED,
+    ],
+    STATUS_ACCEPTED: [
+        (STATUS_OPEN, STATUS_READY),
+        STATUS_ACCEPTED,
+        STATUS_READY,
+        STATUS_ACCEPTED,
+    ],
+    STATUS_READY: [
+        (STATUS_OPEN, STATUS_READY, STATUS_STARTED),
+        (STATUS_ACCEPTED, STATUS_READY, STATUS_STARTED),
+        STATUS_STARTED,
+        STATUS_READY,
+    ],
+    STATUS_STARTED: [
+        (STATUS_STARTED, STATUS_READY, STATUS_FINISHED),
+        (STATUS_STARTED, STATUS_READY, STATUS_FINISHED),
+        STATUS_FINISHED,
+        STATUS_STARTED,
+    ],
+    STATUS_FINISHED: [
+        (STATUS_FINISHED, STATUS_STARTED, STATUS_COMPLETED),
+        (STATUS_FINISHED, STATUS_STARTED, STATUS_COMPLETED),
+        STATUS_COMPLETED,
+        STATUS_FINISHED,
+    ],
+    STATUS_COMPLETED: [
+        (STATUS_COMPLETED),
+        (STATUS_COMPLETED),
+        STATUS_DISPUTED,
+        STATUS_COMPLETED,
+    ],
 }
 
 
@@ -90,7 +102,9 @@ class ChallengePost(Resource):
         challenge: ChallengeModel = challenge_schema.load(json_data)
         challenge.is_direct = False
         if challenged_id is not None:
-            can_challenge_user, error_message = current_user.can_challenge_user(challenged_id)
+            can_challenge_user, error_message = current_user.can_challenge_user(
+                challenged_id
+            )
             if not can_challenge_user:
                 return {"message": error_message}, 400
             challenge.is_direct = True
@@ -314,6 +328,7 @@ class ResultsByUser(Resource):
 
         results = db.engine.execute(sql, user_id=user_id).fetchall()
         return {"message": "Results found", "results": [dict(r) for r in results]}
+
 
 class ChallengeResults(Resource):
     @classmethod
@@ -580,8 +595,6 @@ class DirectChallenges(Resource):
 
 
 class ChallengeStatusUpdate(Resource):
-
-        
     @classmethod
     def put(cls, challenge_id):
         now = datetime.now()
@@ -597,19 +610,23 @@ class ChallengeStatusUpdate(Resource):
 
         user_is_challenger = current_user.id == challenge_users.challenger_id
         user_is_challenged = current_user.id == challenge_users.challenged_id
-        user_belongs_challenge = (user_is_challenger or user_is_challenged)
+        user_belongs_challenge = user_is_challenger or user_is_challenged
         user_status = challenge_users.status_challenger
         rival_status = challenge_users.status_challenged
-        status_check_index = 1 
+        status_check_index = 1
         if user_is_challenged:
             user_status = challenge_users.status_challenged
             rival_status = challenge_users.status_challenger
             status_check_index = 0
 
         current_challenge_status = challenge.status
-        user_valid_status = rival_status in _USERS_STATUS_FLOW[user_status][status_check_index]
+        user_valid_status = (
+            rival_status in _USERS_STATUS_FLOW[user_status][status_check_index]
+        )
         next_status = _USERS_STATUS_FLOW[user_status][2]
-        challenge_valid_status = current_challenge_status == _USERS_STATUS_FLOW[user_status][3]
+        challenge_valid_status = (
+            current_challenge_status == _USERS_STATUS_FLOW[user_status][3]
+        )
 
         if not user_belongs_challenge:
             return {"message": "User does not belong to challenge"}, 403
@@ -620,7 +637,9 @@ class ChallengeStatusUpdate(Resource):
 
         now_less_150_sec = now - timedelta(seconds=150)
         now_plus_150_sec = now + timedelta(seconds=150)
-        valid_time_frame_for_ready = now_less_150_sec <= challenge.date <= now_plus_150_sec
+        valid_time_frame_for_ready = (
+            now_less_150_sec <= challenge.date <= now_plus_150_sec
+        )
         if next_status == STATUS_READY and not valid_time_frame_for_ready:
             return {"message": "Incorrect transition for challenge"}, 403
 
@@ -629,18 +648,21 @@ class ChallengeStatusUpdate(Resource):
         elif user_is_challenged:
             challenge_users.status_challenged = next_status
 
-        challenge_users_same_status = challenge_users.status_challenger == challenge_users.status_challenged
-        try:    
+        challenge_users_same_status = (
+            challenge_users.status_challenger == challenge_users.status_challenged
+        )
+        try:
             challenge_users.save_to_db()
             if challenge_users_same_status or next_status == STATUS_DISPUTED:
                 challenge.status = next_status
                 challenge.save_to_db()
             return (
-            {
-                "message": "Challenge updated successfully",
-                "challenge": challenge_schema.dump(challenge),
-            },
-            200,)
+                {
+                    "message": "Challenge updated successfully",
+                    "challenge": challenge_schema.dump(challenge),
+                },
+                200,
+            )
         except Exception as e:
             print(e)
             return {"message": "There was an error updating the challenge"}, 400
