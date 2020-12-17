@@ -52,9 +52,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 {
                     "type": "1v1",
                     "buy_in": 100,
-                    "reward": 1000,
-                    "status": "ended",
-                    "due_date": "2019-01-01 00:00:00",
                 }
             )
             with self.test_client() as c:
@@ -67,13 +64,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 challenge_edited = json_data["challenge"]
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
                 self.assertEqual(challenge_edited["type"], "1v1", "Wrong type")
-                self.assertAlmostEqual(challenge_edited["buy_in"], 100, "Wrong buy in")
-                self.assertAlmostEqual(challenge_edited["reward"], 1000, "Wrong reward")
-                self.assertEqual(
-                    challenge_edited["due_date"],
-                    "2019-01-01T00:00:00",
-                    "Due date is not being edited",
-                )
 
     def test_challenge_list(self):
         with self.app_context():
@@ -173,8 +163,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 "game_id": fixtures["game"].id,
                 "date": "2019-01-01T00:00:00",
                 "buy_in": 10,
-                "status": "OPEN",
-                "due_date": "2019-01-01T00:00:00",
                 "console_id": fixtures["console"].id,
             }
             with self.test_client() as c:
@@ -195,8 +183,9 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 self.assertAlmostEqual(challenge_created["reward"], 20, "Wrong reward")
                 self.assertEqual(challenge_created["date"], data["date"], "Wrong date")
                 self.assertEqual(
-                    challenge_created["status"], data["status"], "Wrong type"
+                    challenge_created["status"], "OPEN", "Wrong type"
                 )
+                self.assertEqual(challenge_created["due_date"], "2019-01-01T00:05:00")
 
     def test_get_disputes(self):
         with self.app_context():

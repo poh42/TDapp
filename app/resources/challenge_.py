@@ -86,6 +86,8 @@ class ChallengePost(Resource):
     def post(cls):
         challenge: ChallengeModel = challenge_schema.load(request.get_json())
         challenge.reward = Decimal(challenge.buy_in) * 2
+        challenge.status = STATUS_OPEN
+        challenge.due_date = challenge.date + timedelta(minutes=5)
         challenge.save_to_db()
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         # TODO We might want to redefine this if the user challenges directly
@@ -105,6 +107,7 @@ class ChallengePost(Resource):
                 "challenge_users.challenger.username",
                 "reward",
                 "date",
+                "due_date",
                 "console.name",
                 "console.id",
                 "type",
@@ -150,12 +153,6 @@ class Challenge(Resource):
             challenge.type = json_data.get("type")
         if json_data.get("name"):
             challenge.name = json_data.get("name")
-        if json_data.get("buy_in"):
-            challenge.buy_in = json_data.get("buy_in")
-        if json_data.get("reward"):
-            challenge.reward = json_data.get("reward")
-        if json_data.get("status"):
-            challenge.status = json_data.get("status")
         if json_data.get("due_date"):
             challenge.due_date = json_data.get("due_date")
         try:
