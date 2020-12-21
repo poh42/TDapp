@@ -130,6 +130,7 @@ class ChallengePost(Resource):
                 "id",
                 "challenge_users.created_at",
                 "challenge_users.challenger.username",
+                "challenge_users.challenged.username",
                 "reward",
                 "date",
                 "due_date",
