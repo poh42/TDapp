@@ -8,7 +8,7 @@ class Results1v1Schema(ma.SQLAlchemyAutoSchema):
     player_1 = fields.Nested(UserSchema)
     player_2 = fields.Nested(UserSchema)
     winner = fields.Nested(UserSchema)
-    challenge = fields.Nested("ChallengeSchema", only=("console.name", "console.id"))
+    challenge = fields.Nested("ChallengeSchema", only=("console.name", "console.id", "id"))
 
     class Meta:
         model = Results1v1Model

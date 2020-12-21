@@ -153,6 +153,68 @@ class Challenge(Resource):
         challenge = ChallengeModel.find_by_id(challenge_id)
         if not challenge:
             return {"message": "Challenge not found"}, 404
+        challenge_schema = ChallengeSchema(
+            only=(
+                "id",
+                "console.id",
+                "console.name",
+                "game",
+                "game.id",
+                "game.name",
+                "type",
+                "date",
+                "buy_in",
+                "reward",
+                "status",
+                "due_date",
+                "created_at",
+                "updated_at",
+                "challenge_users",
+                "challenge_users.challenged.avatar",
+                "challenge_users.challenged.username",
+                "challenge_users.challenged.id",
+                "challenge_users.challenged.last_name",
+                "challenge_users.challenged.name",
+                "challenge_users.challenger.avatar",
+                "challenge_users.challenger.username",
+                "challenge_users.challenger.id",
+                "challenge_users.challenger.last_name",
+                "challenge_users.challenger.name",
+                "results_1v1.winner.avatar",
+                "results_1v1.winner.user_games",
+                "results_1v1.winner.username",
+                "results_1v1.winner.id",
+                "results_1v1.winner.last_name",
+                "results_1v1.winner.name",
+            ),
+            exclude=(
+                "results_1v1.player_1",
+                "results_1v1.player_2",
+                # challenge users
+                "challenge_users.challenged.is_private",
+                "challenge_users.challenged.dob",
+                "challenge_users.challenged.is_active",
+                "challenge_users.challenged.phone",
+                "challenge_users.challenged.range_bet_low",
+                "challenge_users.challenged.playing_hours_begin",
+                "challenge_users.challenged.playing_hours_end",
+                "challenge_users.challenged.range_bet_high",
+                "challenge_users.challenged.accepted_terms",
+                # winner
+                "results_1v1.winner.firebase_id",
+                "results_1v1.winner.user_games",
+                "results_1v1.winner.is_private",
+                "results_1v1.winner.dob",
+                "results_1v1.winner.is_active",
+                "results_1v1.winner.phone",
+                "results_1v1.winner.range_bet_low",
+                "results_1v1.winner.playing_hours_begin",
+                "results_1v1.winner.playing_hours_end",
+                "results_1v1.winner.range_bet_high",
+                "results_1v1.winner.accepted_terms",
+                "results_1v1.winner.firebase_id",
+            ),
+        )
         return {
             "message": "Challenge found",
             "challenge": challenge_schema.dump(challenge),
@@ -335,23 +397,23 @@ class ChallengeResults(Resource):
     @classmethod
     def get(cls, challenge_id):
         results = Results1v1Model.find_by_challenge_id(challenge_id)
-        fields_to_exclude_winner = get_fields_user_to_exclude(
-            "winner",
-            additional=(
-                "friends",
-                "avatar",
-                "user_games",
-                "username",
-                "created_at",
-                "updated_at",
-                "accepted_terms",
-                "email",
-                "is_active",
-                "is_private",
-            ),
-        )
         results_1v1_schema = Results1v1Schema(
-            exclude=fields_to_exclude_winner + ("player_1.friends", "player_2.friends")
+            only=(
+                "score_player_1",
+                "score_player_2",
+                "winner.id",
+                "winner.name",
+                "winner.last_name",
+                "challenge.console.id",
+                "challenge.console.name",
+                "player_1.name",
+                "player_1.last_name",
+                "player_1.id",
+                "player_2.name",
+                "player_2.last_name",
+                "player_2.id",
+                "challenge.id"
+            )
         )
         if not results:
             return {"message": "Results not found"}, 400
