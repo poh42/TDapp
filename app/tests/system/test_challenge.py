@@ -4,6 +4,8 @@ from unittest.mock import patch
 
 from models.challenge_user import ChallengeUserModel
 from models.user import UserModel
+from models.results_1v1 import Results1v1Model
+from models.transaction import TransactionModel
 from tests.base import BaseAPITestCase
 from tests.utils import create_fixtures
 from models.challenge_ import ChallengeModel
@@ -378,6 +380,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 fixtures = create_fixtures()
                 challenge: ChallengeModel = fixtures["challenge"]
                 challenge_users: ChallengeUserModel = fixtures["challenge_user"]
+                result_1v1: Results1v1Model = fixtures["result_1v1"]
                 with self.subTest("Correct transition to READY"):
                     g.claims = {"uid": "myLbdKL8dFhipvanv4AnIUaJpqd2"}
                     challenge.date = datetime.now()
@@ -422,6 +425,8 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     challenge.status = STATUS_FINISHED
                     challenge_users.status_challenger = STATUS_FINISHED
                     challenge_users.status_challenged = STATUS_COMPLETED
+                    result_1v1.challenge_id = challenge.id
+                    result_1v1.winner_id = UserModel.find_by_firebase_id("myLbdKL8dFhipvanv4AnIUaJpqd2").id
                     rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 200, "Challenge updated successfully"
@@ -432,6 +437,11 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     )
                     self.assertEqual(
                         challenge_users.status_challenged, STATUS_COMPLETED
+                    )
+                    prev_transaction = fixtures["transaction2"]
+                    transaction = TransactionModel.find_by_user_id(result_1v1.winner_id)
+                    self.assertEqual(
+                        transaction.credit_total, prev_transaction.credit_total + challenge.reward
                     )
                 with self.subTest("Correct transition to DISPUTED"):
                     g.claims = {"uid": "myLbdKL8dFhipvanv4AnIUaJpqd2"}

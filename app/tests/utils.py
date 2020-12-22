@@ -170,6 +170,7 @@ def create_dummy_result(challenge_id, user1_id, user2_id):
     result_1v1.score_player_1 = 1
     result_1v1.score_player_2 = 0
     result_1v1.played = datetime(2019, 10, 1)
+    result_1v1.winner_id = user2_id
     result_1v1.save_to_db()
     return result_1v1
 
@@ -267,7 +268,7 @@ def create_fixtures():
     console = create_dummy_console()
     challenge = create_dummy_challenge(game.id)
     upcoming_challenge = create_upcoming_challenge(game.id)
-    result_1v1 = create_dummy_result(challenge.id, user.id, user.id)
+    result_1v1 = create_dummy_result(challenge.id, user.id, user_login.id)
     user_game = create_dummy_user_game(game.id, second_user.id, console.id)
     transaction = create_dummy_transaction(second_user.id)
     transaction2 = create_dummy_transaction(user_login.id)
