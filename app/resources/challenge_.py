@@ -413,7 +413,7 @@ class ChallengeResults(Resource):
                 "player_2.last_name",
                 "player_2.id",
                 "challenge.id",
-                "played"
+                "played",
             )
         )
         if not results:
