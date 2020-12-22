@@ -231,6 +231,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
             }
             with self.test_client() as c:
                 g.claims = {"uid": fixtures["user_login"].firebase_id}
+                prev_transaction = fixtures["transaction2"]
                 rv = c.post(
                     "/challenge", data=json.dumps(data), content_type="application/json"
                 )
@@ -248,6 +249,13 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 self.assertEqual(challenge_created["date"], data["date"], "Wrong date")
                 self.assertEqual(challenge_created["status"], "OPEN", "Wrong type")
                 self.assertEqual(challenge_created["due_date"], "2019-01-01T00:05:00")
+                transaction = TransactionModel.find_by_user_id(
+                    UserModel.find_by_firebase_id("myLbdKL8dFhipvanv4AnIUaJpqd2").id
+                )
+                self.assertEqual(
+                    transaction.credit_total, 
+                    int(prev_transaction.credit_total) - int(challenge_created["buy_in"])
+                )
 
     def test_get_disputes(self):
         with self.app_context():
@@ -279,11 +287,20 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     )
                 g.claims = {"user_id": fixtures["user_login"].firebase_id}
                 with self.subTest(shouldAccept=True):
+                    prev_transaction = fixtures["transaction2"]
                     rv = c.post(f"/challenge/{challenge_user.id}/accept")
                     self.assertEqual(rv.status_code, 200, "Wrong status")
                     json_data = rv.get_json()
                     self.assertEqual(
                         "Challenge accepted", json_data["message"], "Wrong message"
+                    )
+                    transaction = TransactionModel.find_by_user_id(
+                        UserModel.find_by_firebase_id("myLbdKL8dFhipvanv4AnIUaJpqd2").id
+                    )
+                    challenge = ChallengeModel.find_by_id(challenge_user.wager_id)
+                    self.assertEqual(
+                        transaction.credit_total, 
+                        int(prev_transaction.credit_total) - int(challenge.buy_in)
                     )
                 with self.subTest(shouldAccept=False, msg="Challenge accepted"):
                     rv = c.post(f"/challenge/{challenge_user.id}/accept")
