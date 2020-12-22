@@ -72,6 +72,33 @@ class UserLogin(Resource):
         email = json_data["email"]
         password = json_data["password"]
         user_instance = UserModel.find_by_email(email)
+        user_dump_schema = UserSchema(
+            only=(
+                "user_games",
+                "avatar",
+                "range_bet_high",
+                "name",
+                "playing_hours_end",
+                "email",
+                "friends.avatar",
+                "friends.name",
+                "friends.last_name",
+                "friends.id",
+                "dob",
+                "firebase_id",
+                "playing_hours_begin",
+                "accepted_terms",
+                "updated_at",
+                "created_at",
+                "is_active",
+                "last_name",
+                "range_bet_low",
+                "phone",
+                "is_private",
+                "username",
+                "id",
+            )
+        )
         if user_instance:
             if (
                 not user_instance.most_recent_confirmation
@@ -81,7 +108,7 @@ class UserLogin(Resource):
             try:
                 user = pb.auth().sign_in_with_email_and_password(email, password)
                 jwt = user["idToken"]
-                return {"token": jwt, "user": user_schema.dump(user_instance)}, 200
+                return {"token": jwt, "user": user_dump_schema.dump(user_instance)}, 200
             except HTTPError as e:
                 try:
                     error_data = json.loads(e.strerror)
