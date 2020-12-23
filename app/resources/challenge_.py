@@ -4,6 +4,9 @@ from marshmallow import ValidationError
 
 from db import db
 from decorators import check_token
+from models.user_challenge_scores import (
+    UserChallengeScoresModel
+    )
 from models.challenge_user import (
     ChallengeUserModel,
     STATUS_OPEN,
@@ -753,6 +756,46 @@ class ChallengeStatusUpdate(Resource):
             if challenge_users_same_status or next_status == STATUS_DISPUTED:
                 challenge.status = next_status
             if next_status == STATUS_COMPLETED:
+                # {own_score: int, opponent_score: int, screenshot: str}
+                json_data = request.get_json()
+                challenge_user_results = UserChallengeScoresModel()
+                challenge_user_results.challenge_id = challenge.id
+                challenge_user_results.user_id = current_user.id
+                challenge_user_results.own_score = json_data["own_score"]
+                challenge_user_results.opponent_score = json_data["opponent_score"]
+                challenge_user_results.screenshot = json_data["screenshot"]
+                challenge_user_results.save_to_db()
+            if challenge.status == STATUS_COMPLETED:
+                challenger_challenge_result = UserChallengeScoresModel.find_by_challenge_id_user_id(
+                    challege.id, challenge_users.challenger_id)
+                challenged_challenge_result = UserChallengeScoresModel.find_by_challenge_id_user_id(
+                    challege.id, challenge_users.challenged_id)
+                same_challenger_result = challenger_challenge_result.own_score == challenged_challenge_result.opponent_score
+                same_challenged_result = challenged_challenge_result.own_score == challenger_challenge_result.opponent_score
+                if same_challenger_result and same_challenged_result:
+                    results = Results1v1Model()
+                    results.challenge_id = challenge.id
+                    results.score_player_1 = challenger_challenge_result.own_score
+                    results.score_player_2 = challenged_challenge_result.own_score
+                    results.player_1_id = challenge_users.challenger_id
+                    results.player_2_id = challenge_users.challenged_id
+                    results.played = now
+                    challenger_won = challenger_challenge_result.own_score > challenged_challenge_result.own_score
+                    challenged_won = challenged_challenge_result.own_score > challenger_challenge_result.own_score
+                    if challenger_won:
+                        results.winner_id = challenge_users.challenger_id
+                    elif challenged_won:
+                        results.winner_id = challenge_users.challenged_id
+                    else:
+                        # WHAT HAPPENS ON A TIE???
+                        pass
+                    results.save_to_db()
+                if not (same_challenger_result or same_challenged_result):
+                    # DISPUTE
+                    
+                    challenge.status = STATUS_DISPUTED
+                    pass
+
                 results = Results1v1Model.find_by_challenge_id(challenge.id)
                 transaction = TransactionModel.find_by_user_id(current_user.id)
                 new_transaction = TransactionModel()
