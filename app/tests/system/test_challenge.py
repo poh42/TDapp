@@ -253,8 +253,9 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     UserModel.find_by_firebase_id("myLbdKL8dFhipvanv4AnIUaJpqd2").id
                 )
                 self.assertEqual(
-                    transaction.credit_total, 
-                    int(prev_transaction.credit_total) - int(challenge_created["buy_in"])
+                    transaction.credit_total,
+                    int(prev_transaction.credit_total)
+                    - int(challenge_created["buy_in"]),
                 )
 
     def test_get_disputes(self):
@@ -299,8 +300,8 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     )
                     challenge = ChallengeModel.find_by_id(challenge_user.wager_id)
                     self.assertEqual(
-                        transaction.credit_total, 
-                        int(prev_transaction.credit_total) - int(challenge.buy_in)
+                        transaction.credit_total,
+                        int(prev_transaction.credit_total) - int(challenge.buy_in),
                     )
                 with self.subTest(shouldAccept=False, msg="Challenge accepted"):
                     rv = c.post(f"/challenge/{challenge_user.id}/accept")
@@ -308,6 +309,29 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     json_data = rv.get_json()
                     self.assertEqual(
                         "Challenge already accepted",
+                        json_data["message"],
+                        "Wrong message",
+                    )
+
+    def test_challenge_accept_not_direct(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+
+            class TestTransaction:
+                credit_total = 1000
+
+            with patch(
+                "resources.challenge_.TransactionModel.find_by_user_id",
+                return_value=TestTransaction(),
+            ):
+                with self.test_client() as c:
+                    g.claims = {"user_id": fixtures["user"].firebase_id}
+                    challenge_user = fixtures["challenge_user_not_direct"]
+                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                    self.assertEqual(rv.status_code, 200, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "Challenge accepted",
                         json_data["message"],
                         "Wrong message",
                     )
@@ -443,7 +467,9 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     challenge_users.status_challenger = STATUS_FINISHED
                     challenge_users.status_challenged = STATUS_COMPLETED
                     result_1v1.challenge_id = challenge.id
-                    result_1v1.winner_id = UserModel.find_by_firebase_id("myLbdKL8dFhipvanv4AnIUaJpqd2").id
+                    result_1v1.winner_id = UserModel.find_by_firebase_id(
+                        "myLbdKL8dFhipvanv4AnIUaJpqd2"
+                    ).id
                     rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
                     self.assertEqual(
                         rv.status_code, 200, "Challenge updated successfully"
@@ -458,7 +484,8 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     prev_transaction = fixtures["transaction2"]
                     transaction = TransactionModel.find_by_user_id(result_1v1.winner_id)
                     self.assertEqual(
-                        transaction.credit_total, prev_transaction.credit_total + challenge.reward
+                        transaction.credit_total,
+                        prev_transaction.credit_total + challenge.reward,
                     )
                 with self.subTest("Correct transition to DISPUTED"):
                     g.claims = {"uid": "myLbdKL8dFhipvanv4AnIUaJpqd2"}

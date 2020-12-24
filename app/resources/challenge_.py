@@ -19,11 +19,7 @@ from models.challenge_user import (
 )
 from models.dispute import DisputeModel
 from models.game import GameModel
-from models.transaction import (
-    TransactionModel,
-    TYPE_ADD,
-    TYPE_SUBSTRACTION
-    )
+from models.transaction import TransactionModel, TYPE_ADD, TYPE_SUBSTRACTION
 from models.results_1v1 import Results1v1Model
 from models.challenge_ import (
     ChallengeModel,
@@ -487,7 +483,10 @@ class AcceptChallenge(Resource):
             return {"message": "Challenge already accepted"}, 400
         if not challenge_user.open:
             return {"message": "Challenge cannot be accepted"}, 400
-        if current_user.id != challenge_user.challenged_id and challenge_user.challenged_id is not None:
+        if (
+            current_user.id != challenge_user.challenged_id
+            and challenge_user.challenged_id is not None
+        ):
             return {"message": "Cannot accept challenge from a different user"}, 400
         if challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
@@ -758,7 +757,9 @@ class ChallengeStatusUpdate(Resource):
                 new_transaction = TransactionModel()
                 new_transaction.previous_credit_total = transaction.credit_total
                 new_transaction.credit_change = challenge.reward
-                new_transaction.credit_total = transaction.credit_total + challenge.reward
+                new_transaction.credit_total = (
+                    transaction.credit_total + challenge.reward
+                )
                 new_transaction.challenge_id = challenge.id
                 new_transaction.user_id = results.winner_id
                 new_transaction.type = TYPE_ADD

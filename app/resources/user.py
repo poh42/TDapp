@@ -189,7 +189,9 @@ class User(Resource):
             except EmailAlreadyExistsError as e:
                 return {"message": "Email already in use"}, 400
             except Exception as e:
-                return {"message": "There was an error updating the user, please try again"}, 500
+                return {
+                    "message": "There was an error updating the user, please try again"
+                }, 500
         if json_data.get("name"):
             user.name = json_data["name"]
         if json_data.get("playing_hours_begin") and json_data.get("playing_hours_end"):
