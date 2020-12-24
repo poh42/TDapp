@@ -259,6 +259,21 @@ def create_direct_challenge(game_id):
     return challenge
 
 
+def create_challenge_not_direct(game_id):
+    challenge = ChallengeModel(
+        type="1v1",
+        game_id=game_id,
+        date="2022-01-01 15:00:00",
+        due_date="2022-01-01 15:00:00",
+        buy_in="10",
+        reward="10",
+        status="OPEN",
+        is_direct=False,
+    )
+    challenge.save_to_db()
+    return challenge
+
+
 def create_fixtures():
     user = create_dummy_user()
     user_login = create_login_user()
@@ -288,6 +303,10 @@ def create_fixtures():
     challenge_user_direct = create_challenge_user_dummy(
         second_user.id, user_login.id, direct_challenge.id
     )
+    challenge_not_direct = create_challenge_not_direct(game.id)
+    challenge_user_not_direct = create_challenge_user_dummy(
+        second_user.id, None, challenge_not_direct.id
+    )
     return {
         "user": user,
         "second_user": second_user,
@@ -309,4 +328,6 @@ def create_fixtures():
         "invite": invite,
         "direct_challenge": direct_challenge,
         "challenge_user_direct": challenge_user_direct,
+        "challenge_not_direct": challenge_not_direct,
+        "challenge_user_not_direct": challenge_user_not_direct,
     }

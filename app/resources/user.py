@@ -1,3 +1,4 @@
+from firebase_admin.auth import EmailAlreadyExistsError
 from flask_restful import Resource
 from flask import request, g
 from firebase_admin import auth
@@ -183,7 +184,14 @@ class User(Resource):
         if json_data.get("email") and user.email != json_data["email"]:
             if UserModel.find_by_email(json_data["email"]):
                 raise ValidationError({"email": "Email already in use"})
-            user.update_email(json_data["email"])
+            try:
+                user.update_email(json_data["email"])
+            except EmailAlreadyExistsError as e:
+                return {"message": "Email already in use"}, 400
+            except Exception as e:
+                return {
+                    "message": "There was an error updating the user, please try again"
+                }, 500
         if json_data.get("name"):
             user.name = json_data["name"]
         if json_data.get("playing_hours_begin") and json_data.get("playing_hours_end"):
