@@ -487,7 +487,7 @@ class AcceptChallenge(Resource):
             return {"message": "Challenge already accepted"}, 400
         if not challenge_user.open:
             return {"message": "Challenge cannot be accepted"}, 400
-        if current_user.id != challenge_user.challenged_id:
+        if current_user.id != challenge_user.challenged_id and challenge_user.challenged_id is not None:
             return {"message": "Cannot accept challenge from a different user"}, 400
         if challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
