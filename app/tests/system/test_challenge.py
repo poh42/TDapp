@@ -219,6 +219,28 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     json_data = rv.get_json()
                     self.assertEqual(json_data["message"], "Can't challenge yourself")
 
+    def test_create_challenge_no_transactions(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            data = {
+                "type": "Test",
+                "game_id": fixtures["game"].id,
+                "date": "2019-01-01T00:00:00",
+                "buy_in": 10,
+                "console_id": fixtures["console"].id,
+            }
+            with self.test_client() as c:
+                with patch(
+                        "resources.challenge_.TransactionModel.find_by_user_id",
+                        return_value=None,
+                ):
+                    g.claims = {"uid": fixtures["user"].firebase_id}
+                    rv = c.post(f"/challenge", data=json.dumps(data), content_type="application/json")
+                    self.assertEqual(rv.status_code, 403, "Wrong status code")
+                    json_data = rv.get_json()
+                    self.assertEqual(json_data["message"], "Not enough credits", "Wrong message")
+
+
     def test_post_challenge(self):
         with self.app_context():
             fixtures = create_fixtures()
