@@ -219,6 +219,28 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     json_data = rv.get_json()
                     self.assertEqual(json_data["message"], "Can't challenge yourself")
 
+    def test_create_challenge_no_transactions(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            data = {
+                "type": "Test",
+                "game_id": fixtures["game"].id,
+                "date": "2019-01-01T00:00:00",
+                "buy_in": 10,
+                "console_id": fixtures["console"].id,
+            }
+            with self.test_client() as c:
+                with patch(
+                        "resources.challenge_.TransactionModel.find_by_user_id",
+                        return_value=None,
+                ):
+                    g.claims = {"uid": fixtures["user"].firebase_id}
+                    rv = c.post(f"/challenge", data=json.dumps(data), content_type="application/json")
+                    self.assertEqual(rv.status_code, 403, "Wrong status code")
+                    json_data = rv.get_json()
+                    self.assertEqual(json_data["message"], "Not enough credits", "Wrong message")
+
+
     def test_post_challenge(self):
         with self.app_context():
             fixtures = create_fixtures()
@@ -332,6 +354,26 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     json_data = rv.get_json()
                     self.assertEqual(
                         "Challenge accepted",
+                        json_data["message"],
+                        "Wrong message",
+                    )
+
+    def test_challenge_accept_not_direct_return_value_none(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+
+            with patch(
+                "resources.challenge_.TransactionModel.find_by_user_id",
+                return_value=None,
+            ):
+                with self.test_client() as c:
+                    g.claims = {"user_id": fixtures["user"].firebase_id}
+                    challenge_user = fixtures["challenge_user_not_direct"]
+                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                    self.assertEqual(rv.status_code, 403, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "Not enough credits",
                         json_data["message"],
                         "Wrong message",
                     )

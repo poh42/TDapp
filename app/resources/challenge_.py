@@ -101,7 +101,7 @@ class ChallengePost(Resource):
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         transaction = TransactionModel.find_by_user_id(current_user.id)
         challenge: ChallengeModel = challenge_schema.load(json_data)
-        if challenge.buy_in > transaction.credit_total:
+        if transaction is None or challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
         challenge.is_direct = False
         if challenged_id is not None:
@@ -488,7 +488,7 @@ class AcceptChallenge(Resource):
             and challenge_user.challenged_id is not None
         ):
             return {"message": "Cannot accept challenge from a different user"}, 400
-        if challenge.buy_in > transaction.credit_total:
+        if transaction is None or challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
 
         challenge_user.challenged_id = current_user.id
