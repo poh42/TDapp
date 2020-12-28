@@ -336,6 +336,26 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         "Wrong message",
                     )
 
+    def test_challenge_accept_not_direct_return_value_none(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+
+            with patch(
+                "resources.challenge_.TransactionModel.find_by_user_id",
+                return_value=None,
+            ):
+                with self.test_client() as c:
+                    g.claims = {"user_id": fixtures["user"].firebase_id}
+                    challenge_user = fixtures["challenge_user_not_direct"]
+                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                    self.assertEqual(rv.status_code, 403, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "Not enough credits",
+                        json_data["message"],
+                        "Wrong message",
+                    )
+
     def test_challenge_decline(self):
         with self.app_context():
             fixtures = create_fixtures()
