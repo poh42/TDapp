@@ -231,15 +231,20 @@ class TestChallengeEndpoints(BaseAPITestCase):
             }
             with self.test_client() as c:
                 with patch(
-                        "resources.challenge_.TransactionModel.find_by_user_id",
-                        return_value=None,
+                    "resources.challenge_.TransactionModel.find_by_user_id",
+                    return_value=None,
                 ):
                     g.claims = {"uid": fixtures["user"].firebase_id}
-                    rv = c.post(f"/challenge", data=json.dumps(data), content_type="application/json")
+                    rv = c.post(
+                        f"/challenge",
+                        data=json.dumps(data),
+                        content_type="application/json",
+                    )
                     self.assertEqual(rv.status_code, 403, "Wrong status code")
                     json_data = rv.get_json()
-                    self.assertEqual(json_data["message"], "Not enough credits", "Wrong message")
-
+                    self.assertEqual(
+                        json_data["message"], "Not enough credits", "Wrong message"
+                    )
 
     def test_post_challenge(self):
         with self.app_context():

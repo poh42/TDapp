@@ -27,6 +27,7 @@ from resources.challenge_ import (
     DirectChallenges,
 )
 from resources.console import ConsoleList
+from resources.credit import AddCredits
 from resources.game import GamesByConsole, Games, Game
 from resources.user import (
     UserRegister,
@@ -119,6 +120,7 @@ def delete_database_command():
         print("Won't delete the database")
 
 
+api.add_resource(AddCredits, "/add_credits")
 api.add_resource(UserRegister, "/user/register")
 api.add_resource(UserLogin, "/user/login")
 api.add_resource(SetAdminStatus, "/user/set_admin/<int:user_id>")
