@@ -177,6 +177,10 @@ class TestUserEndpoints(BaseAPITestCase):
                             "password": "1234567",
                             "is_private": True,
                             "dob": "1990-01-01",
+                            "avatar": "my_avatar",
+                            "username": "new_username",
+                            "playing_days": "WEEKENDS",
+                            "drivers_license": "https://my-license.com/"
                         }
                     )
                     rv = c.put(
@@ -189,6 +193,9 @@ class TestUserEndpoints(BaseAPITestCase):
                         call(user.firebase_id, password="1234567"),
                     ]
                     update_user_mock.assert_has_calls(calls)
+                    self.assertEqual(user_data["avatar"], "my_avatar")
+                    self.assertEqual(user_data["username"], "new_username")
+                    self.assertEqual(user_data["playing_days"], "WEEKENDS")
                     self.assertEqual(
                         user_data["range_bet_low"], 100, "Range bet low should be 100"
                     )

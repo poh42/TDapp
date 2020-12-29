@@ -34,8 +34,18 @@ class AddCredits(Resource):
     @check_is_admin
     def post(cls):
         json_data = request.get_json()
-        if json_data is None or "threshold" not in json_data or "credit_change" not in json_data:
-            return {"message": "'threshold' and 'credit_change' must be in json data"}, 400
+        if (
+            json_data is None
+            or "threshold" not in json_data
+            or "credit_change" not in json_data
+        ):
+            return {
+                "message": "'threshold' and 'credit_change' must be in json data"
+            }, 400
         stmt = text(sql)
-        db.engine.execute(stmt, threshold=json_data["threshold"], credit_change=json_data["credit_change"])
+        db.engine.execute(
+            stmt,
+            threshold=json_data["threshold"],
+            credit_change=json_data["credit_change"],
+        )
         return {"message": "Credits added"}, 201

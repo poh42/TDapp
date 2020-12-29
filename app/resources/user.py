@@ -11,6 +11,7 @@ from decorators import (
     optional_check_token,
 )
 from models.invite import InviteModel, STATUS_PENDING
+from models.user_photo import UserPhotoModel
 from schemas.invite import InviteSchema
 from schemas.user_game import BaseUserGameSchema
 from utils.claims import set_is_admin, is_admin
@@ -178,6 +179,7 @@ class User(Resource):
         if not user:
             return {"message": "User not found"}, 400
         json_data = request.get_json()
+        drivers_license = json_data.pop("drivers_license", None)
         errors = user_schema.validate(json_data, partial=True)
         if errors:
             raise ValidationError(errors)
@@ -192,6 +194,10 @@ class User(Resource):
                 return {
                     "message": "There was an error updating the user, please try again"
                 }, 500
+        if json_data.get("username") and user.username != json_data["username"]:
+            if UserModel.find_by_username(json_data["username"]):
+                raise ValidationError({"username": "Username already in use"})
+            user.username = json_data["username"]
         if json_data.get("name"):
             user.name = json_data["name"]
         if json_data.get("playing_hours_begin") and json_data.get("playing_hours_end"):
@@ -202,6 +208,8 @@ class User(Resource):
             user.range_bet_high = json_data["range_bet_high"]
         if json_data.get("is_private", None) is not None:
             user.is_private = json_data["is_private"]
+        if json_data.get("playing_days"):
+            user.playing_days = json_data["playing_days"]
         if json_data.get("phone"):
             user.phone = json_data["phone"]
         if (
@@ -214,12 +222,22 @@ class User(Resource):
             user.dob = json_data["dob"]
         if json_data.get("last_name"):
             user.last_name = json_data["last_name"]
+        if json_data.get("avatar"):
+            user.avatar = json_data["avatar"]
         try:
             user.save()
         except Exception as e:
             print(e)
         if json_data.get("password"):
             user.update_password(json_data["password"])
+        if drivers_license is not None:
+            user_photo = UserPhotoModel(
+                url=drivers_license,
+                type="license",
+                user_id=user.id,
+            )
+            user_photo.save_to_db()
+
         return {"message": "Edit successful", "user": user_schema.dump(user)}, 200
 
 
