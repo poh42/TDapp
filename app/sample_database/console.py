@@ -8,10 +8,11 @@ def create_console(console_data):
 
 
 consoles = {
-    "playstation": {"name": "Play Station"},
-    "xbox": {"name": "XBox"},
+    "playstation": {"name": "PlayStation"},
+    "xbox": {"name": "Xbox"},
     "pc": {"name": "PC"},
-    "cross-platform": {"name": "Cross Platform"},
+    "cross-platform": {"name": "Cross-Platform"},
+    "nintendo-switch": {"name": "Nintendo Switch"},
 }
 
 
