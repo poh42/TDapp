@@ -48,7 +48,7 @@ games = {
         "name": "Rocket League",
         "is_active": True,
     },
-    "madden_20": {
+    "madden20": {
         "image": "",
         "name": "Madden 20",
         "is_active": True,
