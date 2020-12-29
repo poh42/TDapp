@@ -80,7 +80,8 @@ def output_json(data, code, headers=None):
 
 
 @app.before_first_request
-def create_tables():
+def before_request():
+    db.engine.execute("SET TIME ZONE 'UTC';")
     if app.config["RUN_ALEMBIC_MIGRATIONS"]:
         log.info("Running migrations")
         upgrade()
