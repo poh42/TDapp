@@ -180,7 +180,7 @@ class TestUserEndpoints(BaseAPITestCase):
                             "avatar": "my_avatar",
                             "username": "new_username",
                             "playing_days": "WEEKENDS",
-                            "drivers_license": "https://my-license.com/"
+                            "drivers_license": "https://my-license.com/",
                         }
                     )
                     rv = c.put(
