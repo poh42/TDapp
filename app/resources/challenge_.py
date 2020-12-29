@@ -695,6 +695,7 @@ class DirectChallenges(Resource):
 
 
 class ChallengeStatusUpdate(Resource):
+
     @classmethod
     def put(cls, challenge_id):
         now = datetime.now()
@@ -767,9 +768,9 @@ class ChallengeStatusUpdate(Resource):
                 challenge_user_results.save_to_db()
             if challenge.status == STATUS_COMPLETED:
                 challenger_challenge_result = UserChallengeScoresModel.find_by_challenge_id_user_id(
-                    challege.id, challenge_users.challenger_id)
+                    challenge.id, challenge_users.challenger_id)
                 challenged_challenge_result = UserChallengeScoresModel.find_by_challenge_id_user_id(
-                    challege.id, challenge_users.challenged_id)
+                    challenge.id, challenge_users.challenged_id)
                 same_challenger_result = challenger_challenge_result.own_score == challenged_challenge_result.opponent_score
                 same_challenged_result = challenged_challenge_result.own_score == challenger_challenge_result.opponent_score
                 if same_challenger_result and same_challenged_result:
@@ -792,9 +793,21 @@ class ChallengeStatusUpdate(Resource):
                     results.save_to_db()
                 if not (same_challenger_result or same_challenged_result):
                     # DISPUTE
-                    
+                    challenge_users = ChallengeUserModel.query.filter_by(
+                        wager_id=challenge.id
+                    ).first()
+                    challenge_users.status_challenger = STATUS_DISPUTED
+                    challenge_users.status_challenged = STATUS_DISPUTED
                     challenge.status = STATUS_DISPUTED
-                    pass
+
+                    challenge.save_to_db()
+                    return (
+                        {
+                            "message": "Challenge updated successfully, There was a mismatch in the scores. A dispute was open",
+                            "challenge": challenge_schema.dump(challenge),
+                        },
+                        200,
+                    )
 
                 results = Results1v1Model.find_by_challenge_id(challenge.id)
                 transaction = TransactionModel.find_by_user_id(current_user.id)

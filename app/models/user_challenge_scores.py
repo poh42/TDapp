@@ -3,8 +3,8 @@ from sqlalchemy.sql import func
 
 
 class UserChallengeScoresModel(db.Model):
-    __tablename__ = "results_1v1"
-
+    __tablename__ = "user_challenge_scores"
+    id = db.Column(db.Integer, primary_key=True)
     challenge_id = db.Column(db.Integer, db.ForeignKey("challenges.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     own_score = db.Column(db.Integer, nullable=False)
