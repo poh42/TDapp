@@ -48,6 +48,41 @@ games = {
         "name": "Rocket League",
         "is_active": True,
     },
+    "madden_20": {
+        "image": "",
+        "name": "Madden 20",
+        "is_active": True,
+    },
+    "mlb_20": {
+        "image": "",
+        "name": "MLB The Show 20",
+        "is_active": True,
+    },
+    "nba_2k20": {
+        "image": "",
+        "name": "NBA 2K20",
+        "is_active": True,
+    },
+    "nba_2k21": {
+        "image": "",
+        "name": "NBA 2k21",
+        "is_active": True,
+    },
+    "nhl_20": {
+        "image": "",
+        "name": "NHL 20",
+        "is_active": True,
+    },
+    "nhl_21": {
+        "image": "",
+        "name": "NHL 21",
+        "is_active": True,
+    },
+    "smash_bros": {
+        "image": "",
+        "name": "Super Smash Bros",
+        "is_active": True,
+    }
 }
 
 
