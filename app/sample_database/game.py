@@ -82,7 +82,7 @@ games = {
         "image": "",
         "name": "Super Smash Bros",
         "is_active": True,
-    }
+    },
 }
 
 

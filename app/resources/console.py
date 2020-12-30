@@ -26,3 +26,11 @@ class ConsoleList(Resource):
             return {"message": "Console already exists"}, 400
         console.save_to_db()
         return {"console": console_schema.dump(console)}, 201
+
+
+class Console(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin
+    def put(cls):
+        pass

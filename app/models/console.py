@@ -1,5 +1,5 @@
 from db import db
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, expression
 from models.game_has_console import game_has_console_table
 
 
@@ -8,6 +8,7 @@ class ConsoleModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True)
+    is_active = db.Column(db.Boolean, server_default=expression.true())
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
     games = db.relationship(
