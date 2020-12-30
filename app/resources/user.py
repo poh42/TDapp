@@ -386,7 +386,20 @@ class GetInvites(Resource):
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         status = request.args.get("status", STATUS_PENDING)
         invites = InviteModel.get_user_invites(current_user.id, status=status)
-        return {"invites": InviteSchema().dump(invites, many=True)}
+        fields_to_show = (
+            "id",
+            "created_at",
+            "status",
+            "updated_at",
+            "user_inviting.is_active",
+            "user_inviting.id",
+            "user_inviting.is_private",
+            "user_inviting.created_at",
+            "user_inviting.avatar",
+            "user_inviting.name",
+            "user_inviting.username",
+        )
+        return {"invites": InviteSchema(only=fields_to_show).dump(invites, many=True)}
 
 
 class UserFriends(Resource):
