@@ -5,6 +5,7 @@ from db import db
 TYPE_ADD = "ADD"
 TYPE_SUBSTRACTION = "SUBSTRACTION"
 
+
 class TransactionModel(db.Model):
     __tablename__ = "transactions"
 

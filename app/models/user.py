@@ -14,6 +14,10 @@ from models.friendship import (
     is_friend_of_user as is_friend_of_user_internal,
 )
 
+DAYS_ALL = "ALL"
+DAYS_WEEKENDS = "WEEKENDS"
+DAYS_WEEK = "WEEK"
+
 
 class UserModel(db.Model):
     __tablename__ = "users"
@@ -36,7 +40,7 @@ class UserModel(db.Model):
     is_private = db.Column(db.Boolean, default=False)
     avatar = db.Column(db.String(255))
     dob = db.Column(db.Date)
-
+    playing_days = db.Column(db.String(16), default=DAYS_ALL)
     confirmation = db.relationship(
         "ConfirmationModel", lazy="dynamic", cascade="all, delete-orphan"
     )

@@ -17,3 +17,7 @@ class UserPhotoModel(db.Model):
     @classmethod
     def find_by_id(cls, _id) -> "UserPhotoModel":
         return cls.query.filter_by(id=_id).first()
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()

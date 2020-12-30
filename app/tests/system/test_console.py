@@ -82,3 +82,22 @@ class TestConsoleEndpoints(BaseAPITestCase):
                     self.assertEqual(rv.status_code, 400, "Wrong status code")
                     json_data = rv.get_json()
                     self.assertEqual(json_data["message"], "Console already exists")
+
+    def test_edit_console(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            console = fixtures["console"]
+            data = {"name": "Console_Test", "is_active": False}
+            g.claims = {"uid": fixtures["user_login"].id}
+            with self.test_client() as c:
+                with self.subTest("Creating console"):
+                    rv = c.put(
+                        f"/consoles/{console.id}",
+                        data=json.dumps(data),
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 200, "Wrong status code")
+                    json_data = rv.get_json()
+                    console_data = json_data["console"]
+                    self.assertFalse(console_data["is_active"])
+                    self.assertEqual("Console_Test", console_data["name"])
