@@ -49,4 +49,7 @@ class Console(Resource):
             console.is_active = json_data["is_active"]
         console.save_to_db()
         console_schema_dump = ConsoleSchema(only=("id", "name", "is_active"))
-        return {"message": "Edit successful", "console": console_schema_dump.dump(console)}
+        return {
+            "message": "Edit successful",
+            "console": console_schema_dump.dump(console),
+        }
