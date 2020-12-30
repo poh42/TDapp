@@ -26,7 +26,7 @@ from resources.challenge_ import (
     ChallengeStatusUpdate,
     DirectChallenges,
 )
-from resources.console import ConsoleList
+from resources.console import ConsoleList, Console
 from resources.credit import AddCredits
 from resources.game import GamesByConsole, Games, Game
 from resources.user import (
@@ -145,6 +145,7 @@ api.add_resource(Game, "/games/<int:game_id>")
 api.add_resource(AcceptChallenge, "/challenge/<int:challenge_user_id>/accept")
 api.add_resource(DeclineChallenge, "/challenge/<int:challenge_user_id>/decline")
 api.add_resource(ConsoleList, "/consoles")
+api.add_resource(Console, "/consoles/<int:console_id>")
 api.add_resource(ChallengesByUser, "/challenge/<int:user_id>/user")
 api.add_resource(UserGamesLibrary, "/user/<int:user_id>/addToLibrary")
 api.add_resource(RemoveFriend, "/user/<int:user_id>/deleteFriend")
