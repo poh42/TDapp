@@ -131,7 +131,7 @@ class UserLogin(Resource):
                 log.error(e)
                 return {"message": "There was an error logging in"}, 400
         else:
-            return {"message": "User not found"}
+            return {"message": "User not found"}, 404
 
 
 class SetAdminStatus(Resource):
