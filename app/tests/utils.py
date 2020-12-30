@@ -10,6 +10,7 @@ from models.console import ConsoleModel
 from models.results_1v1 import Results1v1Model
 from models.friendship import friendship_table
 from models.user_game import UserGameModel
+from models.user_challenge_scores import UserChallengeScoresModel
 from models.challenge_user import ChallengeUserModel, STATUS_OPEN, STATUS_PENDING
 from datetime import datetime, timedelta
 from db import db
@@ -258,6 +259,16 @@ def create_direct_challenge(game_id):
     challenge.save_to_db()
     return challenge
 
+def create_user_challenge_score(challenge_id, user_id):
+    challenge_user_score = UserChallengeScoresModel(
+        challenge_id=challenge_id,
+        user_id=user_id,
+        own_score="1",
+        opponent_score="0",
+        screenshot="",
+    )
+    challenge_user_score.save_to_db()
+    return challenge_user_score
 
 def create_fixtures():
     user = create_dummy_user()
@@ -288,6 +299,7 @@ def create_fixtures():
     challenge_user_direct = create_challenge_user_dummy(
         second_user.id, user_login.id, direct_challenge.id
     )
+    challenge_user_score = create_user_challenge_score(challenge.id, user_login.id)
     return {
         "user": user,
         "second_user": second_user,
@@ -309,4 +321,5 @@ def create_fixtures():
         "invite": invite,
         "direct_challenge": direct_challenge,
         "challenge_user_direct": challenge_user_direct,
+        "challenge_user_score": challenge_user_score,
     }

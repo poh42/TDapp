@@ -7,6 +7,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import aliased
 from models.challenge_user import ChallengeUserModel
 from models.results_1v1 import Results1v1Model
+from models.user_challenge_scores import UserChallengeScoresModel
 from models.dispute import DisputeModel
 from models.console import ConsoleModel
 from models.challenge_screenshot import ChallengeScreenshot
@@ -44,6 +45,9 @@ class ChallengeModel(db.Model):
     )
     results_1v1 = db.relationship(
         "Results1v1Model", cascade="all, delete-orphan", uselist=False
+    )
+    user_challenge_scores = db.relationship(
+        "UserChallengeScoresModel", cascade="all, delete-orphan", uselist=False
     )
 
     disputes = db.relationship("DisputeModel", cascade="all, delete-orphan")
