@@ -535,7 +535,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     result_1v1: Results1v1Model = fixtures["result_1v1"]
                     result_1v1.challenge_id = 2
                     result_1v1.save_to_db()
-                    prev_transaction = TransactionModel.find_by_user_id(current_user_id)
+                    prev_transaction = TransactionModel.find_by_user_id(rival_user_id)
                     rv = c.put(f"/challenge/{challenge.id}/updateChallenge",
                                 data=json.dumps(data),
                                 content_type="application/json",
@@ -552,6 +552,12 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         )
                     self.assertEqual(challenge_user_score.own_score, data["own_score"])
                     self.assertEqual(challenge_user_score.opponent_score, data["opponent_score"])
+                    challenge_rival_score = UserChallengeScoresModel.find_by_challenge_id_user_id(
+                        challenge.id, rival_user_id
+                        )
+                    self.assertEqual(challenge_rival_score.own_score, data["opponent_score"])
+                    self.assertEqual(challenge_rival_score.opponent_score, data["own_score"])
+
                     result_1v1 = Results1v1Model.find_by_challenge_id(challenge.id)
                     self.assertEqual(result_1v1.winner_id, rival_user_id)
                     transaction = TransactionModel.find_by_user_id(result_1v1.winner_id)
@@ -604,6 +610,54 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     self.assertEqual(
                         rv.status_code, 202, "Challenge updated successfully"
                     )
+                
+                with self.subTest("Transition to Complete on Tie"):
+                    g.claims = {"uid": "dummy_2"}
+                    current_user_id = UserModel.find_by_firebase_id("dummy_2").id
+                    rival_user_id = UserModel.find_by_firebase_id("myLbdKL8dFhipvanv4AnIUaJpqd2").id
+                    challenge.status = STATUS_FINISHED
+                    challenge_users.status_challenger = STATUS_FINISHED
+                    challenge_users.status_challenged = STATUS_COMPLETED
+                    challenge_user_score = UserChallengeScoresModel.find_by_challenge_id_user_id(
+                        challenge.id, current_user_id
+                        )
+                    challenge_user_score.challenge_id = 2
+                    challenge_rival_score = UserChallengeScoresModel.find_by_challenge_id_user_id(
+                        challenge.id, rival_user_id
+                        )
+                    challenge_rival_score.own_score = 1
+                    challenge_rival_score.opponent_score = 1
+                    challenge_rival_score.save_to_db()
+                    data = {
+                        "own_score": 1,
+                        "opponent_score": 1,
+                        "screenshot": "",
+                    }
+
+                    prev_user_transaction = TransactionModel.find_by_user_id(current_user_id)
+                    prev_rival_transaction = TransactionModel.find_by_user_id(rival_user_id)
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge",
+                                data=json.dumps(data),
+                                content_type="application/json",
+                        )
+                    
+                    self.assertEqual(
+                        rv.status_code, 202, "Challenge updated successfully"
+                    )
+                    self.assertEqual(
+                        challenge_users.status_challenger, STATUS_COMPLETED
+                    )
+                    self.assertEqual(
+                        challenge_users.status_challenged, STATUS_COMPLETED
+                    )
+                    self.assertEqual(challenge.status, STATUS_COMPLETED)
+                    user_transaction = TransactionModel.find_by_user_id(current_user_id)
+                    self.assertEqual(user_transaction.credit_total, 
+                    prev_user_transaction.credit_total + challenge.buy_in)
+                    rival_transaction = TransactionModel.find_by_user_id(rival_user_id)
+                    self.assertEqual(rival_transaction.credit_total, 
+                    prev_rival_transaction.credit_total + challenge.buy_in)
+
 
     def test_direct_challenges(self):
         with self.app_context():
