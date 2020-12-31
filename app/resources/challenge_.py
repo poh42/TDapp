@@ -4,6 +4,9 @@ from marshmallow import ValidationError
 
 from db import db
 from decorators import check_token
+from models.user_challenge_scores import (
+    UserChallengeScoresModel
+    )
 from models.challenge_user import (
     ChallengeUserModel,
     STATUS_OPEN,
@@ -691,87 +694,180 @@ class DirectChallenges(Resource):
 
 
 class ChallengeStatusUpdate(Resource):
+
+    @classmethod
+    def __init__(cls):
+        cls.now : datetime = datetime.now()
+        cls.current_user : UserModel
+        cls.challenge : ChallengeModel
+        cls.challenge_users : ChallengeUserModel
+        cls.user_belongs_challenge : bool
+        cls.user_valid_status : bool
+        cls.challenge_valid_status : bool
+
     @classmethod
     def put(cls, challenge_id):
-        now = datetime.now()
-        challenge = ChallengeModel.find_by_id(challenge_id)
-        if not challenge:
+        cls.assign_init_values(challenge_id)
+        if not cls.challenge:
             return {"message": "Challenge not found"}, 404
-        if challenge.status == STATUS_DISPUTED:
+        if cls.challenge.status == STATUS_DISPUTED:
             return {"message": "Action not available for user"}, 403
-        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
-        challenge_users = ChallengeUserModel.query.filter_by(
-            wager_id=challenge.id
-        ).first()
-
-        user_is_challenger = current_user.id == challenge_users.challenger_id
-        user_is_challenged = current_user.id == challenge_users.challenged_id
-        user_belongs_challenge = user_is_challenger or user_is_challenged
-        user_status = challenge_users.status_challenger
-        rival_status = challenge_users.status_challenged
-        status_check_index = 1
-        if user_is_challenged:
-            user_status = challenge_users.status_challenged
-            rival_status = challenge_users.status_challenger
-            status_check_index = 0
-
-        current_challenge_status = challenge.status
-        user_valid_status = (
-            rival_status in _USERS_STATUS_FLOW[user_status][status_check_index]
-        )
-        next_status = _USERS_STATUS_FLOW[user_status][2]
-        challenge_valid_status = (
-            current_challenge_status == _USERS_STATUS_FLOW[user_status][3]
-        )
-
-        if not user_belongs_challenge:
+        cls.validate_challenge_flow()
+        if not cls.user_belongs_challenge:
             return {"message": "User does not belong to challenge"}, 403
-        if not user_valid_status:
+        if not cls.user_valid_status:
             return {"message": "Invalid challenge user status"}, 403
-        if not challenge_valid_status:
+        if not cls.challenge_valid_status:
             return {"message": "Invalid challenge status"}, 403
-
-        now_less_150_sec = now - timedelta(seconds=150)
-        now_plus_150_sec = now + timedelta(seconds=150)
-        valid_time_frame_for_ready = (
-            now_less_150_sec <= challenge.date <= now_plus_150_sec
-        )
-        if next_status == STATUS_READY and not valid_time_frame_for_ready:
+        if cls.next_status == STATUS_READY and not cls.validate_time_window():
             return {"message": "Incorrect transition for challenge"}, 403
-
-        if user_is_challenger:
-            challenge_users.status_challenger = next_status
-        elif user_is_challenged:
-            challenge_users.status_challenged = next_status
-
-        challenge_users_same_status = (
-            challenge_users.status_challenger == challenge_users.status_challenged
-        )
         try:
-            challenge_users.save_to_db()
-            if challenge_users_same_status or next_status == STATUS_DISPUTED:
-                challenge.status = next_status
-            if next_status == STATUS_COMPLETED:
-                results = Results1v1Model.find_by_challenge_id(challenge.id)
-                transaction = TransactionModel.find_by_user_id(current_user.id)
-                new_transaction = TransactionModel()
-                new_transaction.previous_credit_total = transaction.credit_total
-                new_transaction.credit_change = challenge.reward
-                new_transaction.credit_total = (
-                    transaction.credit_total + challenge.reward
-                )
-                new_transaction.challenge_id = challenge.id
-                new_transaction.user_id = results.winner_id
-                new_transaction.type = TYPE_ADD
-                new_transaction.save_to_db()
-            challenge.save_to_db()
+            cls.update_challenge_user_status()
+            cls.update_challenge_status()
+            cls.store_challenge_user_score()
+            if cls.challenge.status == STATUS_COMPLETED:
+                cls.validate_challenge_scores()
+                cls.store_challenge_results()
+                if cls.create_dispute_on_scores_mismatch():
+                    return (
+                        {
+                            "message": """Challenge updated successfully.
+                            There was a mismatch in the scores. 
+                            A dispute was open""",
+                            "challenge": challenge_schema.dump(cls.challenge),
+                        },
+                        202,
+                    )
+                cls.assign_credits_to_winner()
+            cls.challenge.save_to_db()
             return (
                 {
                     "message": "Challenge updated successfully",
-                    "challenge": challenge_schema.dump(challenge),
+                    "challenge": challenge_schema.dump(cls.challenge),
                 },
                 200,
             )
         except Exception as e:
             print(e)
             return {"message": "There was an error updating the challenge"}, 400
+
+    @classmethod
+    def assign_init_values(cls, challenge_id):
+        cls.json_data = request.get_json()
+        cls.challenge = ChallengeModel.find_by_id(challenge_id)
+        cls.current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        cls.challenge_users = ChallengeUserModel.query.filter_by(
+            wager_id=cls.challenge.id
+        ).first()
+
+    @classmethod
+    def validate_challenge_flow(cls):
+        cls.user_is_challenger = cls.current_user.id == cls.challenge_users.challenger_id
+        cls.user_is_challenged = cls.current_user.id == cls.challenge_users.challenged_id
+        cls.user_belongs_challenge = cls.user_is_challenger or cls.user_is_challenged
+        user_status = cls.challenge_users.status_challenger
+        rival_status = cls.challenge_users.status_challenged
+        status_check_index = 1
+        if cls.user_is_challenged:
+            user_status = cls.challenge_users.status_challenged
+            rival_status = cls.challenge_users.status_challenger
+            status_check_index = 0
+
+        current_challenge_status = cls.challenge.status
+        cls.user_valid_status = (
+            rival_status in _USERS_STATUS_FLOW[user_status][status_check_index]
+        )
+        cls.next_status = _USERS_STATUS_FLOW[user_status][2]
+        cls.challenge_valid_status = (
+            current_challenge_status == _USERS_STATUS_FLOW[user_status][3]
+        )
+
+    @classmethod
+    def validate_time_window(cls):
+        now_less_150_sec = cls.now - timedelta(seconds=150)
+        now_plus_150_sec = cls.now + timedelta(seconds=150)
+        return (
+            now_less_150_sec <= cls.challenge.date <= now_plus_150_sec
+        )
+
+    @classmethod
+    def update_challenge_user_status(cls):
+        if cls.user_is_challenger:
+            cls.challenge_users.status_challenger = cls.next_status
+        elif cls.user_is_challenged:
+            cls.challenge_users.status_challenged = cls.next_status
+        cls.challenge_users.save_to_db()
+
+    @classmethod
+    def update_challenge_status(cls):
+        challenge_users_same_status = (
+            cls.challenge_users.status_challenger == cls.challenge_users.status_challenged
+        )
+        if challenge_users_same_status or cls.next_status == STATUS_DISPUTED:
+            cls.challenge.status = cls.next_status
+
+    @classmethod
+    def store_challenge_user_score(cls):
+        if cls.next_status == STATUS_COMPLETED:
+            # {own_score: int, opponent_score: int, screenshot: str}
+            user_challenge_score = UserChallengeScoresModel()
+            user_challenge_score.challenge_id = cls.challenge.id
+            user_challenge_score.user_id = cls.current_user.id
+            user_challenge_score.own_score = cls.json_data["own_score"]
+            user_challenge_score.opponent_score = cls.json_data["opponent_score"]
+            user_challenge_score.screenshot = cls.json_data["screenshot"]
+            user_challenge_score.save_to_db()
+
+    @classmethod
+    def validate_challenge_scores(cls):
+        cls.challenger_score = UserChallengeScoresModel.find_by_challenge_id_user_id(
+            cls.challenge.id, cls.challenge_users.challenger_id)
+        cls.challenged_score = UserChallengeScoresModel.find_by_challenge_id_user_id(
+            cls.challenge.id, cls.challenge_users.challenged_id)
+        cls.same_challenger_result = cls.challenger_score.own_score \
+            == cls.challenged_score.opponent_score
+        cls.same_challenged_result = cls.challenged_score.own_score \
+            == cls.challenger_score.opponent_score
+
+    @classmethod
+    def store_challenge_results(cls):
+        if cls.same_challenger_result and cls.same_challenged_result:
+            results = Results1v1Model()
+            results.challenge_id = cls.challenge.id
+            results.score_player_1 = cls.challenger_score.own_score
+            results.score_player_2 = cls.challenged_score.own_score
+            results.player_1_id = cls.challenge_users.challenger_id
+            results.player_2_id = cls.challenge_users.challenged_id
+            results.played = cls.now
+            challenger_won = cls.challenger_score.own_score \
+                > cls.challenged_score.own_score
+            challenged_won = cls.challenged_score.own_score \
+                > cls.challenger_score.own_score
+            if challenger_won:
+                results.winner_id = cls.challenge_users.challenger_id
+            elif challenged_won:
+                results.winner_id = cls.challenge_users.challenged_id
+            results.save_to_db()
+
+    @classmethod
+    def create_dispute_on_scores_mismatch(cls):
+        if not (cls.same_challenger_result or cls.same_challenged_result):
+            cls.challenge_users.status_challenger = STATUS_DISPUTED
+            cls.challenge_users.status_challenged = STATUS_DISPUTED
+            cls.challenge.status = STATUS_DISPUTED
+            cls.challenge.save_to_db()
+            return True
+        return False
+
+    @classmethod
+    def assign_credits_to_winner(cls):
+        results = Results1v1Model.find_by_challenge_id(cls.challenge.id)
+        transaction = TransactionModel.find_by_user_id(cls.current_user.id)
+        new_transaction = TransactionModel()
+        new_transaction.previous_credit_total = transaction.credit_total
+        new_transaction.credit_change = cls.challenge.reward
+        new_transaction.credit_total = transaction.credit_total + cls.challenge.reward
+        new_transaction.challenge_id = cls.challenge.id
+        new_transaction.user_id = results.winner_id
+        new_transaction.type = TYPE_ADD
+        new_transaction.save_to_db()

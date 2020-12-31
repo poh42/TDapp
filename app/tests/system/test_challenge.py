@@ -3,6 +3,7 @@ import json
 from unittest.mock import patch
 
 from models.challenge_user import ChallengeUserModel
+from models.user_challenge_scores import UserChallengeScoresModel
 from models.user import UserModel
 from models.results_1v1 import Results1v1Model
 from models.transaction import TransactionModel
@@ -468,7 +469,6 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 fixtures = create_fixtures()
                 challenge: ChallengeModel = fixtures["challenge"]
                 challenge_users: ChallengeUserModel = fixtures["challenge_user"]
-                result_1v1: Results1v1Model = fixtures["result_1v1"]
                 with self.subTest("Correct transition to READY"):
                     g.claims = {"uid": "myLbdKL8dFhipvanv4AnIUaJpqd2"}
                     challenge.date = datetime.now()
@@ -508,32 +508,63 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     self.assertEqual(challenge.status, STATUS_ACCEPTED)
                     self.assertEqual(challenge_users.status_challenger, STATUS_OPEN)
                     self.assertEqual(challenge_users.status_challenged, STATUS_ACCEPTED)
+                with self.subTest("User not in challenge"):
+                    g.claims = {"uid": "dummy"}
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
+                    self.assertEqual(
+                        rv.status_code, 403, "User does not belong to challenge"
+                    )
+                with self.subTest("Invalid challenge user status"):
+                    g.claims = {"uid": "dummy_2"}
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
+                    self.assertEqual(
+                        rv.status_code, 403, "Invalid challenge user status"
+                    )
                 with self.subTest("Correct transition to COMPLETED"):
                     g.claims = {"uid": "dummy_2"}
+                    current_user_id = UserModel.find_by_firebase_id("dummy_2").id
+                    rival_user_id = UserModel.find_by_firebase_id("myLbdKL8dFhipvanv4AnIUaJpqd2").id
                     challenge.status = STATUS_FINISHED
                     challenge_users.status_challenger = STATUS_FINISHED
                     challenge_users.status_challenged = STATUS_COMPLETED
-                    result_1v1.challenge_id = challenge.id
-                    result_1v1.winner_id = UserModel.find_by_firebase_id(
-                        "myLbdKL8dFhipvanv4AnIUaJpqd2"
-                    ).id
-                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
-                    self.assertEqual(
-                        rv.status_code, 200, "Challenge updated successfully"
-                    )
-                    self.assertEqual(challenge.status, STATUS_COMPLETED)
+                    data = {
+                        "own_score": 0,
+                        "opponent_score": 1,
+                        "screenshot": "",
+                    }
+                    result_1v1: Results1v1Model = fixtures["result_1v1"]
+                    result_1v1.challenge_id = 2
+                    result_1v1.save_to_db()
+                    prev_transaction = TransactionModel.find_by_user_id(current_user_id)
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge",
+                                data=json.dumps(data),
+                                content_type="application/json",
+                        )
                     self.assertEqual(
                         challenge_users.status_challenger, STATUS_COMPLETED
                     )
                     self.assertEqual(
                         challenge_users.status_challenged, STATUS_COMPLETED
                     )
-                    prev_transaction = fixtures["transaction2"]
+                    self.assertEqual(challenge.status, STATUS_COMPLETED)
+                    challenge_user_score = UserChallengeScoresModel.find_by_challenge_id_user_id(
+                        challenge.id, current_user_id
+                        )
+                    self.assertEqual(challenge_user_score.own_score, data["own_score"])
+                    self.assertEqual(challenge_user_score.opponent_score, data["opponent_score"])
+                    result_1v1 = Results1v1Model.find_by_challenge_id(challenge.id)
+                    self.assertEqual(result_1v1.winner_id, rival_user_id)
                     transaction = TransactionModel.find_by_user_id(result_1v1.winner_id)
                     self.assertEqual(
                         transaction.credit_total,
                         prev_transaction.credit_total + challenge.reward,
                     )
+                    self.assertEqual(
+                        rv.status_code, 200, "Challenge updated successfully"
+                    )
+                    result_1v1.challenge_id = 3
+                    result_1v1.save_to_db()
+                    challenge_user_score.challenge_id = 3
                 with self.subTest("Correct transition to DISPUTED"):
                     g.claims = {"uid": "myLbdKL8dFhipvanv4AnIUaJpqd2"}
                     challenge.status = STATUS_COMPLETED
@@ -548,17 +579,30 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         challenge_users.status_challenger, STATUS_COMPLETED
                     )
                     self.assertEqual(challenge_users.status_challenged, STATUS_DISPUTED)
-                with self.subTest("User not in challenge"):
-                    g.claims = {"uid": "dummy"}
-                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
-                    self.assertEqual(
-                        rv.status_code, 403, "User does not belong to challenge"
-                    )
-                with self.subTest("Invalid challenge user status"):
+                with self.subTest("Transition to DISPUTED for scores mismatch"):
                     g.claims = {"uid": "dummy_2"}
-                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge")
+                    current_user_id = UserModel.find_by_firebase_id("dummy_2").id
+                    challenge.status = STATUS_FINISHED
+                    challenge_users.status_challenger = STATUS_FINISHED
+                    challenge_users.status_challenged = STATUS_COMPLETED
+                    data = {
+                        "own_score": 1,
+                        "opponent_score": 0,
+                        "screenshot": "",
+                    }
+                    rv = c.put(f"/challenge/{challenge.id}/updateChallenge",
+                                data=json.dumps(data),
+                                content_type="application/json",
+                        )
                     self.assertEqual(
-                        rv.status_code, 403, "Invalid challenge user status"
+                        challenge_users.status_challenger, STATUS_DISPUTED
+                    )
+                    self.assertEqual(
+                        challenge_users.status_challenged, STATUS_DISPUTED
+                    )
+                    self.assertEqual(challenge.status, STATUS_DISPUTED)
+                    self.assertEqual(
+                        rv.status_code, 202, "Challenge updated successfully"
                     )
 
     def test_direct_challenges(self):
