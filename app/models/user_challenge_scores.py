@@ -18,10 +18,11 @@ class UserChallengeScoresModel(db.Model):
 
     @classmethod
     def find_by_challenge_id_user_id(cls, challenge_id, user_id):
-        return cls.query\
-        .filter_by(challenge_id=challenge_id)\
-        .filter_by(user_id=user_id)\
-        .first()
+        return (
+            cls.query.filter_by(challenge_id=challenge_id)
+            .filter_by(user_id=user_id)
+            .first()
+        )
 
     def save_to_db(self):
         db.session.add(self)

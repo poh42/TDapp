@@ -228,3 +228,11 @@ class UserModel(db.Model):
                 False,
                 "You can't challenge a user that's private and not your friend",
             )
+
+    def get_credits(self):
+        sql = """select t.credit_total from transactions t 
+        where user_id = :user_id order by id desc limit 1"""
+        data = db.engine.execute(text(sql), user_id=self.id).fetchone()
+        if data is None:
+            return 0
+        return data["credit_total"]

@@ -259,6 +259,7 @@ def create_direct_challenge(game_id):
     challenge.save_to_db()
     return challenge
 
+
 def create_user_challenge_score(challenge_id, user_id):
     challenge_user_score = UserChallengeScoresModel(
         challenge_id=challenge_id,
@@ -269,6 +270,7 @@ def create_user_challenge_score(challenge_id, user_id):
     )
     challenge_user_score.save_to_db()
     return challenge_user_score
+
 
 def create_challenge_not_direct(game_id):
     challenge = ChallengeModel(

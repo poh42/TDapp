@@ -4,9 +4,7 @@ from marshmallow import ValidationError
 
 from db import db
 from decorators import check_token
-from models.user_challenge_scores import (
-    UserChallengeScoresModel
-    )
+from models.user_challenge_scores import UserChallengeScoresModel
 from models.challenge_user import (
     ChallengeUserModel,
     STATUS_OPEN,
@@ -698,16 +696,15 @@ class DirectChallenges(Resource):
 
 
 class ChallengeStatusUpdate(Resource):
-
     @classmethod
     def __init__(cls):
-        cls.now : datetime = datetime.now()
-        cls.current_user : UserModel
-        cls.challenge : ChallengeModel
-        cls.challenge_users : ChallengeUserModel
-        cls.user_belongs_challenge : bool
-        cls.user_valid_status : bool
-        cls.challenge_valid_status : bool
+        cls.now: datetime = datetime.now()
+        cls.current_user: UserModel
+        cls.challenge: ChallengeModel
+        cls.challenge_users: ChallengeUserModel
+        cls.user_belongs_challenge: bool
+        cls.user_valid_status: bool
+        cls.challenge_valid_status: bool
         cls.tie_challenge: bool
 
     @classmethod
@@ -763,7 +760,9 @@ class ChallengeStatusUpdate(Resource):
             )
         except Exception as e:
             print(e)
-            return {"message": "There was an error updating the challenge: " + str(e)}, 400
+            return {
+                "message": "There was an error updating the challenge: " + str(e)
+            }, 400
 
     @classmethod
     def assign_init_values(cls, challenge_id):
@@ -776,8 +775,12 @@ class ChallengeStatusUpdate(Resource):
 
     @classmethod
     def validate_challenge_flow(cls):
-        cls.user_is_challenger = cls.current_user.id == cls.challenge_users.challenger_id
-        cls.user_is_challenged = cls.current_user.id == cls.challenge_users.challenged_id
+        cls.user_is_challenger = (
+            cls.current_user.id == cls.challenge_users.challenger_id
+        )
+        cls.user_is_challenged = (
+            cls.current_user.id == cls.challenge_users.challenged_id
+        )
         cls.user_belongs_challenge = cls.user_is_challenger or cls.user_is_challenged
         user_status = cls.challenge_users.status_challenger
         rival_status = cls.challenge_users.status_challenged
@@ -800,9 +803,7 @@ class ChallengeStatusUpdate(Resource):
     def validate_time_window(cls):
         now_less_150_sec = cls.now - timedelta(seconds=150)
         now_plus_150_sec = cls.now + timedelta(seconds=150)
-        return (
-            now_less_150_sec <= cls.challenge.date <= now_plus_150_sec
-        )
+        return now_less_150_sec <= cls.challenge.date <= now_plus_150_sec
 
     @classmethod
     def update_challenge_user_status(cls):
@@ -815,7 +816,8 @@ class ChallengeStatusUpdate(Resource):
     @classmethod
     def update_challenge_status(cls):
         challenge_users_same_status = (
-            cls.challenge_users.status_challenger == cls.challenge_users.status_challenged
+            cls.challenge_users.status_challenger
+            == cls.challenge_users.status_challenged
         )
         if challenge_users_same_status or cls.next_status == STATUS_DISPUTED:
             cls.challenge.status = cls.next_status
@@ -835,13 +837,17 @@ class ChallengeStatusUpdate(Resource):
     @classmethod
     def validate_challenge_scores(cls):
         cls.challenger_score = UserChallengeScoresModel.find_by_challenge_id_user_id(
-            cls.challenge.id, cls.challenge_users.challenger_id)
+            cls.challenge.id, cls.challenge_users.challenger_id
+        )
         cls.challenged_score = UserChallengeScoresModel.find_by_challenge_id_user_id(
-            cls.challenge.id, cls.challenge_users.challenged_id)
-        cls.same_challenger_result = cls.challenger_score.own_score \
-            == cls.challenged_score.opponent_score
-        cls.same_challenged_result = cls.challenged_score.own_score \
-            == cls.challenger_score.opponent_score
+            cls.challenge.id, cls.challenge_users.challenged_id
+        )
+        cls.same_challenger_result = (
+            cls.challenger_score.own_score == cls.challenged_score.opponent_score
+        )
+        cls.same_challenged_result = (
+            cls.challenged_score.own_score == cls.challenger_score.opponent_score
+        )
 
     @classmethod
     def store_challenge_results(cls):
@@ -853,10 +859,12 @@ class ChallengeStatusUpdate(Resource):
             results.player_1_id = cls.challenge_users.challenger_id
             results.player_2_id = cls.challenge_users.challenged_id
             results.played = cls.now
-            challenger_won = cls.challenger_score.own_score \
-                > cls.challenged_score.own_score
-            challenged_won = cls.challenged_score.own_score \
-                > cls.challenger_score.own_score
+            challenger_won = (
+                cls.challenger_score.own_score > cls.challenged_score.own_score
+            )
+            challenged_won = (
+                cls.challenged_score.own_score > cls.challenger_score.own_score
+            )
             cls.tie_challenge = False
             if challenger_won:
                 results.winner_id = cls.challenge_users.challenger_id
@@ -875,7 +883,9 @@ class ChallengeStatusUpdate(Resource):
             new_transaction = TransactionModel()
             new_transaction.previous_credit_total = challenger_transaction.credit_total
             new_transaction.credit_change = cls.challenge.buy_in
-            new_transaction.credit_total = challenger_transaction.credit_total + cls.challenge.buy_in
+            new_transaction.credit_total = (
+                challenger_transaction.credit_total + cls.challenge.buy_in
+            )
             new_transaction.challenge_id = cls.challenge.id
             new_transaction.user_id = cls.challenge_users.challenger_id
             new_transaction.type = TYPE_ADD
@@ -887,12 +897,14 @@ class ChallengeStatusUpdate(Resource):
             new_transaction = TransactionModel()
             new_transaction.previous_credit_total = challenged_transaction.credit_total
             new_transaction.credit_change = cls.challenge.buy_in
-            new_transaction.credit_total = challenged_transaction.credit_total + cls.challenge.buy_in
+            new_transaction.credit_total = (
+                challenged_transaction.credit_total + cls.challenge.buy_in
+            )
             new_transaction.challenge_id = cls.challenge.id
             new_transaction.user_id = cls.challenge_users.challenged_id
             new_transaction.type = TYPE_ADD
             new_transaction.save_to_db()
-            
+
             return True
         return False
 
