@@ -708,6 +708,7 @@ class ChallengeStatusUpdate(Resource):
         cls.user_belongs_challenge : bool
         cls.user_valid_status : bool
         cls.challenge_valid_status : bool
+        cls.tie_challenge: bool
 
     @classmethod
     def put(cls, challenge_id):
@@ -732,6 +733,15 @@ class ChallengeStatusUpdate(Resource):
             if cls.challenge.status == STATUS_COMPLETED:
                 cls.validate_challenge_scores()
                 cls.store_challenge_results()
+                if cls.resolve_challenge_on_tie():
+                    return (
+                        {
+                            "message": """Challenge updated successfully.
+                            There was not a winner, credits reassigned""",
+                            "challenge": challenge_schema.dump(cls.challenge),
+                        },
+                        202,
+                    )
                 if cls.create_dispute_on_scores_mismatch():
                     return (
                         {
@@ -753,7 +763,7 @@ class ChallengeStatusUpdate(Resource):
             )
         except Exception as e:
             print(e)
-            return {"message": "There was an error updating the challenge"}, 400
+            return {"message": "There was an error updating the challenge: " + str(e)}, 400
 
     @classmethod
     def assign_init_values(cls, challenge_id):
@@ -847,11 +857,44 @@ class ChallengeStatusUpdate(Resource):
                 > cls.challenged_score.own_score
             challenged_won = cls.challenged_score.own_score \
                 > cls.challenger_score.own_score
+            cls.tie_challenge = False
             if challenger_won:
                 results.winner_id = cls.challenge_users.challenger_id
             elif challenged_won:
                 results.winner_id = cls.challenge_users.challenged_id
+            else:
+                cls.tie_challenge = True
             results.save_to_db()
+
+    @classmethod
+    def resolve_challenge_on_tie(cls):
+        if cls.tie_challenge:
+            challenger_transaction = TransactionModel.find_by_user_id(
+                cls.challenge_users.challenger_id
+            )
+            new_transaction = TransactionModel()
+            new_transaction.previous_credit_total = challenger_transaction.credit_total
+            new_transaction.credit_change = cls.challenge.buy_in
+            new_transaction.credit_total = challenger_transaction.credit_total + cls.challenge.buy_in
+            new_transaction.challenge_id = cls.challenge.id
+            new_transaction.user_id = cls.challenge_users.challenger_id
+            new_transaction.type = TYPE_ADD
+            new_transaction.save_to_db()
+
+            challenged_transaction = TransactionModel.find_by_user_id(
+                cls.challenge_users.challenged_id
+            )
+            new_transaction = TransactionModel()
+            new_transaction.previous_credit_total = challenged_transaction.credit_total
+            new_transaction.credit_change = cls.challenge.buy_in
+            new_transaction.credit_total = challenged_transaction.credit_total + cls.challenge.buy_in
+            new_transaction.challenge_id = cls.challenge.id
+            new_transaction.user_id = cls.challenge_users.challenged_id
+            new_transaction.type = TYPE_ADD
+            new_transaction.save_to_db()
+            
+            return True
+        return False
 
     @classmethod
     def create_dispute_on_scores_mismatch(cls):
@@ -866,7 +909,7 @@ class ChallengeStatusUpdate(Resource):
     @classmethod
     def assign_credits_to_winner(cls):
         results = Results1v1Model.find_by_challenge_id(cls.challenge.id)
-        transaction = TransactionModel.find_by_user_id(cls.current_user.id)
+        transaction = TransactionModel.find_by_user_id(results.winner_id)
         new_transaction = TransactionModel()
         new_transaction.previous_credit_total = transaction.credit_total
         new_transaction.credit_change = cls.challenge.reward
