@@ -7,6 +7,7 @@ from models.user_challenge_scores import UserChallengeScoresModel
 from models.user import UserModel
 from models.results_1v1 import Results1v1Model
 from models.transaction import TransactionModel
+from models.user_game import UserGameModel
 from tests.base import BaseAPITestCase
 from tests.utils import create_fixtures
 from models.challenge_ import ChallengeModel
@@ -159,8 +160,16 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     )
 
     def test_post_direct_challenge(self):
+
         with self.app_context():
             fixtures = create_fixtures()
+            user_game = UserGameModel()
+            user_game.game_id = fixtures["game"].id
+            user_game.user_id = fixtures["user_login"].id
+            user_game.console_id = fixtures["console"].id
+            user_game.level = "dummy"
+            user_game.gamertag = "dummy"
+            user_game.save_to_db()
             with self.test_client() as c:
                 with self.subTest("Private user"):
                     data = {
@@ -250,6 +259,13 @@ class TestChallengeEndpoints(BaseAPITestCase):
     def test_post_challenge(self):
         with self.app_context():
             fixtures = create_fixtures()
+            user_game = UserGameModel()
+            user_game.game_id = fixtures["game"].id
+            user_game.user_id = fixtures["user_login"].id
+            user_game.console_id = fixtures["console"].id
+            user_game.level = "dummy"
+            user_game.gamertag = "dummy"
+            user_game.save_to_db()
             data = {
                 "type": "Test",
                 "game_id": fixtures["game"].id,
