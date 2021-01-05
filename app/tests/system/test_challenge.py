@@ -29,6 +29,14 @@ from models.challenge_user import (
 
 
 class TestChallengeEndpoints(BaseAPITestCase):
+    def post_user_game(self, fixtures):
+        user_game = UserGameModel()
+        user_game.game_id = fixtures["game"].id
+        user_game.user_id = fixtures["user_login"].id
+        user_game.console_id = fixtures["console"].id
+        user_game.level = "dummy"
+        user_game.gamertag = "dummy"
+        user_game.save_to_db()
     def test_challenge_get(self):
         with self.app_context():
             fixtures = create_fixtures()
@@ -160,16 +168,9 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     )
 
     def test_post_direct_challenge(self):
-
         with self.app_context():
             fixtures = create_fixtures()
-            user_game = UserGameModel()
-            user_game.game_id = fixtures["game"].id
-            user_game.user_id = fixtures["user_login"].id
-            user_game.console_id = fixtures["console"].id
-            user_game.level = "dummy"
-            user_game.gamertag = "dummy"
-            user_game.save_to_db()
+            self.post_user_game(fixtures)
             with self.test_client() as c:
                 with self.subTest("Private user"):
                     data = {
@@ -259,13 +260,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
     def test_post_challenge(self):
         with self.app_context():
             fixtures = create_fixtures()
-            user_game = UserGameModel()
-            user_game.game_id = fixtures["game"].id
-            user_game.user_id = fixtures["user_login"].id
-            user_game.console_id = fixtures["console"].id
-            user_game.level = "dummy"
-            user_game.gamertag = "dummy"
-            user_game.save_to_db()
+            self.post_user_game(fixtures)
             data = {
                 "type": "Test",
                 "game_id": fixtures["game"].id,

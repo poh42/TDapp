@@ -485,6 +485,8 @@ class AcceptChallenge(Resource):
         transaction = TransactionModel.find_by_user_id(current_user.id)
         if challenge_user is None:
             return {"message": "Challenge user not found"}, 400
+        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+            return {"message": "User game console relation not matching"}, 400
         if challenge_user.accepted:
             return {"message": "Challenge already accepted"}, 400
         if not challenge_user.open:
