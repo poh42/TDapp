@@ -132,11 +132,12 @@ def create_dummy_console():
     return console
 
 
-def create_dummy_challenge(game_id):
+def create_dummy_challenge(game_id, console_id):
     challenge = ChallengeModel()
     challenge.type = "1v1"
     challenge.name = "Challenge"
     challenge.game_id = game_id
+    challenge.console_id = console_id
     challenge.date = "2019-01-01 15:00:00"
     challenge.due_date = "2019-01-01 15:00:00"
     challenge.buy_in = "10"
@@ -272,10 +273,11 @@ def create_user_challenge_score(challenge_id, user_id):
     return challenge_user_score
 
 
-def create_challenge_not_direct(game_id):
+def create_challenge_not_direct(game_id, console_id):
     challenge = ChallengeModel(
         type="1v1",
         game_id=game_id,
+        console_id=console_id,
         date="2022-01-01 15:00:00",
         due_date="2022-01-01 15:00:00",
         buy_in="10",
@@ -294,7 +296,7 @@ def create_fixtures():
     game = create_dummy_game()
     game_not_active = create_dummy_game_not_active()
     console = create_dummy_console()
-    challenge = create_dummy_challenge(game.id)
+    challenge = create_dummy_challenge(game.id, console.id)
     upcoming_challenge = create_upcoming_challenge(game.id)
     result_1v1 = create_dummy_result(challenge.id, user.id, user_login.id)
     user_game = create_dummy_user_game(game.id, second_user.id, console.id)
@@ -317,7 +319,7 @@ def create_fixtures():
         second_user.id, user_login.id, direct_challenge.id
     )
     challenge_user_score = create_user_challenge_score(challenge.id, user_login.id)
-    challenge_not_direct = create_challenge_not_direct(game.id)
+    challenge_not_direct = create_challenge_not_direct(game.id, console.id)
     challenge_user_not_direct = create_challenge_user_dummy(
         second_user.id, None, challenge_not_direct.id
     )

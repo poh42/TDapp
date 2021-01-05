@@ -38,6 +38,14 @@ class TestChallengeEndpoints(BaseAPITestCase):
         user_game.gamertag = "dummy"
         user_game.save_to_db()
 
+        user_game = UserGameModel()
+        user_game.game_id = fixtures["game"].id
+        user_game.user_id = fixtures["user"].id
+        user_game.console_id = fixtures["console"].id
+        user_game.level = "dummy"
+        user_game.gamertag = "dummy"
+        user_game.save_to_db()
+
     def test_challenge_get(self):
         with self.app_context():
             fixtures = create_fixtures()
@@ -349,6 +357,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     )
                 g.claims = {"user_id": fixtures["user_login"].firebase_id}
                 with self.subTest(shouldAccept=True):
+                    self.post_user_game(fixtures)
                     prev_transaction = fixtures["transaction2"]
                     rv = c.post(f"/challenge/{challenge_user.id}/accept")
                     self.assertEqual(rv.status_code, 200, "Wrong status")
@@ -377,6 +386,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
     def test_challenge_accept_not_direct(self):
         with self.app_context():
             fixtures = create_fixtures()
+            self.post_user_game(fixtures)
 
             class TestTransaction:
                 credit_total = 1000
@@ -400,6 +410,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
     def test_challenge_accept_not_direct_return_value_none(self):
         with self.app_context():
             fixtures = create_fixtures()
+            self.post_user_game(fixtures)
 
             with patch(
                 "resources.challenge_.TransactionModel.find_by_user_id",
