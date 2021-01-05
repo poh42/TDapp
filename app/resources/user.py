@@ -26,6 +26,7 @@ from schemas.user import UserSchema, USER_PUBLIC_FIELDS
 from schemas.admin_status import AdminStatusSchema
 import logging
 
+from utils.email import send_email
 from utils.pick import pick_from_dict
 
 log = logging.getLogger(__name__)
@@ -432,3 +433,18 @@ class IsFriend(Resource):
         else:
             message = f"User {user_1_id} is not friend of {user_2_id}"
         return {"is_friend": is_friend, "message": message}, 200
+
+
+class ResetPassword(Resource):
+    @classmethod
+    def post(cls):
+        json_data = request.get_json()
+        if "email" not in json_data:
+            return {"message": "Body request should have an 'email' field"}, 400
+        email = json_data.pop("email")
+        link = auth.generate_password_reset_link(email)
+        message = f"""
+            Here is your password link: {link}
+        """.strip()
+        send_email([email], "Here is your password reset link", message, message)
+        return {"message": "Email sent"}, 201
