@@ -37,6 +37,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
         user_game.level = "dummy"
         user_game.gamertag = "dummy"
         user_game.save_to_db()
+
     def test_challenge_get(self):
         with self.app_context():
             fixtures = create_fixtures()
