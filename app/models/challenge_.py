@@ -91,10 +91,9 @@ class ChallengeModel(db.Model):
         """Checks if a user can report a challenge or not"""
         sql = """
         select 1 from challenge_users cu
-            where (cu.challenged_id = :user_id OR cu.challenger_id = :user_id) and cu.wager_id = :challenge_id
-            and cu.status_challenger not in ('REJECTED', 'FINISHED', 'COMPLETED', 'SOLVED')
-            and cu.status_challenged not in ('REJECTED', 'FINISHED', 'COMPLETED', 'SOLVED')
-        limit 1
+            where cu.wager_id = :challenge_id and
+                ((cu.challenged_id = :user_id and cu.status_challenged = 'COMPLETED') or
+                (cu.challenger_id = :user_id and cu.status_challenger = 'COMPLETED'))
         """
         data = db.engine.execute(
             text(sql), user_id=user_id, challenge_id=self.id

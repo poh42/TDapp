@@ -11,7 +11,12 @@ from models.results_1v1 import Results1v1Model
 from models.friendship import friendship_table
 from models.user_game import UserGameModel
 from models.user_challenge_scores import UserChallengeScoresModel
-from models.challenge_user import ChallengeUserModel, STATUS_OPEN, STATUS_PENDING
+from models.challenge_user import (
+    ChallengeUserModel,
+    STATUS_OPEN,
+    STATUS_PENDING,
+    STATUS_COMPLETED,
+)
 from datetime import datetime, timedelta
 from db import db
 
@@ -228,13 +233,19 @@ def create_dispute(user_id, challenge_id):
     return dispute
 
 
-def create_challenge_user_dummy(challenger_id, challenged_id, wager_id):
+def create_challenge_user_dummy(
+    challenger_id,
+    challenged_id,
+    wager_id,
+    status_challenger=STATUS_OPEN,
+    status_challenged=STATUS_PENDING,
+):
     challenge_user = ChallengeUserModel(
         challenged_id=challenged_id,
         challenger_id=challenger_id,
         wager_id=wager_id,
-        status_challenger=STATUS_OPEN,
-        status_challenged=STATUS_PENDING,
+        status_challenger=status_challenger,
+        status_challenged=status_challenged,
     )
     challenge_user.save_to_db()
     return challenge_user
@@ -309,7 +320,11 @@ def create_fixtures():
         second_user.id, user_login.id, challenge.id
     )
     challenge_user_upcoming = create_challenge_user_dummy(
-        second_user.id, user_login.id, upcoming_challenge.id
+        second_user.id,
+        user_login.id,
+        upcoming_challenge.id,
+        status_challenged=STATUS_COMPLETED,
+        status_challenger=STATUS_COMPLETED,
     )
     create_rest_of_games(console.id)
     private_user = create_private_user()
