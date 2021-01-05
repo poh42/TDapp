@@ -485,8 +485,6 @@ class AcceptChallenge(Resource):
         transaction = TransactionModel.find_by_user_id(current_user.id)
         if challenge_user is None:
             return {"message": "Challenge user not found"}, 400
-        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
-            return {"message": "User game console relation not matching"}, 400
         if challenge_user.accepted:
             return {"message": "Challenge already accepted"}, 400
         if not challenge_user.open:
@@ -496,6 +494,8 @@ class AcceptChallenge(Resource):
             and challenge_user.challenged_id is not None
         ):
             return {"message": "Cannot accept challenge from a different user"}, 400
+        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+            return {"message": "User game console relation not matching"}, 400
         if transaction is None or challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
 
