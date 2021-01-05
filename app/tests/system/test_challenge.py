@@ -7,6 +7,7 @@ from models.user_challenge_scores import UserChallengeScoresModel
 from models.user import UserModel
 from models.results_1v1 import Results1v1Model
 from models.transaction import TransactionModel
+from models.user_game import UserGameModel
 from tests.base import BaseAPITestCase
 from tests.utils import create_fixtures
 from models.challenge_ import ChallengeModel
@@ -28,6 +29,23 @@ from models.challenge_user import (
 
 
 class TestChallengeEndpoints(BaseAPITestCase):
+    def post_user_game(self, fixtures):
+        user_game = UserGameModel()
+        user_game.game_id = fixtures["game"].id
+        user_game.user_id = fixtures["user_login"].id
+        user_game.console_id = fixtures["console"].id
+        user_game.level = "dummy"
+        user_game.gamertag = "dummy"
+        user_game.save_to_db()
+
+        user_game = UserGameModel()
+        user_game.game_id = fixtures["game"].id
+        user_game.user_id = fixtures["user"].id
+        user_game.console_id = fixtures["console"].id
+        user_game.level = "dummy"
+        user_game.gamertag = "dummy"
+        user_game.save_to_db()
+
     def test_challenge_get(self):
         with self.app_context():
             fixtures = create_fixtures()
@@ -161,6 +179,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
     def test_post_direct_challenge(self):
         with self.app_context():
             fixtures = create_fixtures()
+            self.post_user_game(fixtures)
             with self.test_client() as c:
                 with self.subTest("Private user"):
                     data = {
@@ -250,6 +269,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
     def test_post_challenge(self):
         with self.app_context():
             fixtures = create_fixtures()
+            self.post_user_game(fixtures)
             data = {
                 "type": "Test",
                 "game_id": fixtures["game"].id,
@@ -286,6 +306,27 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     - int(challenge_created["buy_in"]),
                 )
 
+    def test_post_challenge_without_user_game(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            data = {
+                "type": "Test",
+                "game_id": fixtures["game"].id,
+                "date": "2019-01-01T00:00:00",
+                "buy_in": 10,
+                "console_id": fixtures["console"].id,
+            }
+            with self.test_client() as c:
+                g.claims = {"uid": fixtures["user_login"].firebase_id}
+                rv = c.post(
+                    "/challenge", data=json.dumps(data), content_type="application/json"
+                )
+                json_data = rv.get_json()
+                self.assertEqual(rv.status_code, 400, "Wrong status code")
+                self.assertEqual(
+                    json_data["message"], "User game console relation not matching"
+                )
+
     def test_get_disputes(self):
         with self.app_context():
             fixtures = create_fixtures()
@@ -316,6 +357,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     )
                 g.claims = {"user_id": fixtures["user_login"].firebase_id}
                 with self.subTest(shouldAccept=True):
+                    self.post_user_game(fixtures)
                     prev_transaction = fixtures["transaction2"]
                     rv = c.post(f"/challenge/{challenge_user.id}/accept")
                     self.assertEqual(rv.status_code, 200, "Wrong status")
@@ -344,6 +386,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
     def test_challenge_accept_not_direct(self):
         with self.app_context():
             fixtures = create_fixtures()
+            self.post_user_game(fixtures)
 
             class TestTransaction:
                 credit_total = 1000
@@ -367,6 +410,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
     def test_challenge_accept_not_direct_return_value_none(self):
         with self.app_context():
             fixtures = create_fixtures()
+            self.post_user_game(fixtures)
 
             with patch(
                 "resources.challenge_.TransactionModel.find_by_user_id",

@@ -236,3 +236,13 @@ class UserModel(db.Model):
         if data is None:
             return 0
         return data["credit_total"]
+
+    def has_user_game(self, game_id, console_id):
+        sql = """select 1 from user_games u WHERE u.user_id = :user_id 
+            AND u.game_id = :game_id
+            AND u.console_id = :console_id
+        """
+        data = db.engine.execute(
+            text(sql), user_id=self.id, game_id=game_id, console_id=console_id
+        ).fetchone()
+        return data is not None
