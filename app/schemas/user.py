@@ -1,7 +1,7 @@
 from ma import ma
 from models.user import UserModel
 from marshmallow import fields, validate, validates_schema
-from utils.validation import validate_lower_upper_fields
+from utils.validation import validate_lower_upper_fields, validate_user_game_fields
 from schemas.user_game import UserGameSchema
 
 USER_PUBLIC_FIELDS = ("id", "user_games", "username", "friends", "avatar")
@@ -18,12 +18,19 @@ FIELDS_TO_EXCLUDE = (
 )
 
 
+def wrapper_validation(data):
+    values = []
+    for d in data:
+        values.append({"console_id": d.console_id, "game_id": d.game_id})
+    return validate_user_game_fields(values)
+
+
 class UserSchema(ma.SQLAlchemyAutoSchema):
     email = fields.Email(required=True)
     password = fields.String(validate=validate.Length(min=6), required=True)
     playing_hours_begin = fields.Integer(validate=validate.Range(0, 23))
     playing_hours_end = fields.Integer(validate=validate.Range(0, 23))
-    user_games = fields.Nested(UserGameSchema, many=True)
+    user_games = fields.Nested(UserGameSchema, many=True, validate=wrapper_validation)
     friends = fields.Nested(
         "self",
         many=True,
