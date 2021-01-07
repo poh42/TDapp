@@ -24,4 +24,4 @@ def validate_user_game_fields(fields):
     except KeyError:
         raise ValidationError("Keys are not in array")
     if not len(array_fields) == len(set(array_fields)):
-        raise ValidationError("(console_id, game_id) tuples should not be repeated")
+        raise ValidationError("Duplicated game console pair")
