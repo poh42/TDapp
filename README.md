@@ -23,18 +23,7 @@ const firebaseConfig = {
 };
 ```
 
-- Transform this to JSON and save it to `fbconfig.json` like the following
-```json
-{
-  "apiKey": "xxx",
-  "authDomain": "xxx",
-  "databaseURL": "xxx",
-  "projectId": "xxx",
-  "storageBucket": "xxx",
-  "messagingSenderId": "xxx",
-  "appId": "xxx",
-  "measurementId": "xxx"
-}
+
 ```
 - Enable email and password sign in — Go to Authentication -> Sign-In-Method and enable sign in with email and password
 - Export Admin SDK private key — Go to Project Overview -> Service Accounts -> Firebase Admin SDK, then select Python as the language and click generate new private key and your file will download. Do NOT share this file or upload it anywhere it allows total read and write access of your Firebase project. Save it somewhere in your computer with the name `fbAdminConfig.json`
@@ -55,6 +44,24 @@ EMAIL_USER=""
 EMAIL_PASSWORD=""
 EMAIL_SMTP_SERVER=""
 EMAIL_SMTP_PORT=""
+FIREBASE_TYPE=""
+FIREBASE_PROJECT_ID=""
+FIREBASE_PRIVATE_KEY_ID=""
+FIREBASE_PRIVATE_KEY=""
+FIREBASE_CLIENT_EMAIL=""
+FIREBASE_CLIENT_ID=""
+FIREBASE_AUTH_URI=""
+FIREBASE_TOKEN_URI=""
+FIREBASE_AUTH_PROVIDER_X509_CERT_URL=""
+FIREBASE_CLIENT_X509_CERT_URL=""
+PYREBASE_API_KEY=""
+PYREBASE_AUTH_DOMAIN=""
+PYREBASE_DATABASE_URL=""
+PYREBASE_PROJECT_ID=""
+PYREBASE_STORAGE_BUCKET=""
+PYREBASE_MESSAGING_SENDER_ID=""
+PYREBASE_APP_ID=""
+PYREBASE_MEASUREMENT_ID=""
 ```
 - Also create a `.env.test` file that's gonna be used for testing. It's recommended that the `DATABASE_URI` is different for testing
 - Set up a mailgun account and with the Domain and API key
