@@ -329,7 +329,6 @@ class TestUserEndpoints(BaseAPITestCase):
                     "Password should not be in the return data",
                 )
                 self.assertEqual(user.id, user_data["id"])
-                self.assertEqual(user.firebase_id, user_data["firebase_id"])
                 self.assertIsNotNone(user.avatar, "Avatar should not be None")
                 with self.subTest("Private user"):
                     private_user = fixtures["private_user"]
