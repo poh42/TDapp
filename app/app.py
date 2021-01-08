@@ -46,6 +46,7 @@ from resources.user import (
     TopEarners,
     PublicUserList,
     ModifyUserGames,
+    ResetPassword,
 )
 from flask_uploads import configure_uploads, IMAGES
 from utils.image_helper import IMAGE_SET
@@ -126,6 +127,7 @@ api.add_resource(AddCredits, "/add_credits")
 api.add_resource(Credit, "/credit")
 api.add_resource(UserRegister, "/user/register")
 api.add_resource(UserLogin, "/user/login")
+api.add_resource(ResetPassword, "/user/reset_password")
 api.add_resource(SetAdminStatus, "/user/set_admin/<int:user_id>")
 api.add_resource(User, "/user/<int:user_id>")
 api.add_resource(ModifyUserGames, "/user/<int:user_id>/games")

@@ -6,7 +6,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def send_email(to: List[str], subject: str, text: str, html: str) -> None:
+def send_email(to: List[str], subject: str, text: str, html: str) -> bool:
     # TODO this should support html messages
     # Check https://stackoverflow.com/questions/882712/sending-html-email-using-python
     email_user = os.getenv("EMAIL_USER")
@@ -35,6 +35,8 @@ Subject: %s
         server.close()
 
         print("Email sent!")
+        return True
     except Exception as e:
         print("There was an error sending email", e)
         log.error(e)
+        return False
