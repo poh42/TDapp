@@ -4,7 +4,7 @@ from marshmallow import fields, validate, validates_schema
 from utils.validation import validate_lower_upper_fields, validate_user_game_fields
 from schemas.user_game import UserGameSchema
 
-USER_PUBLIC_FIELDS = ("id", "user_games", "username", "friends", "avatar")
+USER_PUBLIC_FIELDS = ("id", "user_games", "username", "friends", "avatar", "is_private")
 
 FIELDS_TO_EXCLUDE = (
     "playing_hours_begin",

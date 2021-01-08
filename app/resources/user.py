@@ -161,12 +161,12 @@ class User(Resource):
             "user_games.game.consoles",
             "user_games.game.is_active",
         )
+        if not user:
+            return {"message": "User not found"}, 400
         if not user.can_show_all_info(current_user.id):
             user_schema = UserSchema(only=USER_PUBLIC_FIELDS, exclude=exclude)
         else:
             user_schema = UserSchema(exclude=exclude)
-        if not user:
-            return {"message": "User not found"}, 400
         return {"message": "User found", "user": user_schema.dump(user)}
 
     @classmethod
