@@ -246,3 +246,23 @@ class UserModel(db.Model):
             text(sql), user_id=self.id, game_id=game_id, console_id=console_id
         ).fetchone()
         return data is not None
+
+    def update_user_games(self, user_games):
+        connection = db.engine.connect()
+        transaction = connection.begin()
+        sql_delete = "DELETE FROM user_games u WHERE u.user_id = :user_id"
+        connection.execute(text(sql_delete), user_id=self.id)
+        sql_insert = text(
+            "INSERT INTO user_games (game_id, console_id, gamertag, level, user_id) "
+            "VALUES (:game_id, :console_id, :gamertag, :level, :user_id)"
+        )
+        for i in user_games:
+            connection.execute(
+                sql_insert,
+                game_id=i["game_id"],
+                console_id=i["console_id"],
+                gamertag=i["gamertag"],
+                level=i["level"],
+                user_id=self.id,
+            )
+        transaction.commit()

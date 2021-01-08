@@ -16,3 +16,12 @@ def validate_lower_upper_fields(
         return  # Nothing to do here
     if lower > upper:
         raise ValidationError(message_case_bigger)
+
+
+def validate_user_game_fields(fields):
+    try:
+        array_fields = [(f["console_id"], f["game_id"]) for f in fields]
+    except KeyError:
+        raise ValidationError("Keys are not in array")
+    if not len(array_fields) == len(set(array_fields)):
+        raise ValidationError("Duplicated game console pair")

@@ -95,6 +95,64 @@ class TestUserEndpoints(BaseAPITestCase):
                             user_game.level, "beginner", "Wrong user_game level"
                         )  # TODO check what should be default level
 
+    def test_signup_user_games_duplicated(self):
+        with self.app_context():
+            console = create_dummy_console()
+            game = create_dummy_game()
+            with self.test_client() as c:
+                data = {
+                    "username": "95984894",
+                    "email": "asdrubal.ivan.suarez.rivera+test9@gmail.com",
+                    "name": "tomasseg",
+                    "last_name": "Atilio",
+                    "phone": "12333333333",
+                    "dob": "1992-12-12",
+                    "password": "123456",
+                    "user_games": [
+                        {
+                            "console_id": console.id,
+                            "game_id": game.id,
+                            "gamertag": "console1",
+                        },
+                        {
+                            "console_id": console.id,
+                            "game_id": game.id,
+                            "gamertag": "console1",
+                        },
+                    ],
+                }
+                rv = c.post(
+                    "/user/register",
+                    data=json.dumps(data),
+                    content_type="application/json",
+                )
+                self.assertEqual(rv.status_code, 400)
+                json_data = rv.get_json()
+                self.assertTrue("user_games" in json_data)
+
+    def test_setuser_games(self):
+        with self.app_context():
+            with self.test_client() as c:
+                fixtures = create_fixtures()
+                console = fixtures["console"]
+                game = fixtures["game"]
+                user_login = fixtures["user_login"]
+                with self.subTest("Should put data"):
+                    data = [
+                        {
+                            "console_id": console.id,
+                            "game_id": game.id,
+                            "gamertag": "console1",
+                            "level": "beginner",
+                        }
+                    ]
+                    rv = c.put(
+                        f"/user/{user_login.id}/games",
+                        data=json.dumps(data),
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 201)
+
     def test_login(self):
         class TestClass:
             sign_in_with_email_and_password = Mock(return_value={"idToken": "MyToken"})
