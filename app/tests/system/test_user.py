@@ -130,6 +130,29 @@ class TestUserEndpoints(BaseAPITestCase):
                 json_data = rv.get_json()
                 self.assertTrue("user_games" in json_data)
 
+    def test_setuser_games(self):
+        with self.app_context():
+            with self.test_client() as c:
+                fixtures = create_fixtures()
+                console = fixtures["console"]
+                game = fixtures["game"]
+                user_login = fixtures["user_login"]
+                with self.subTest("Should put data"):
+                    data = [
+                        {
+                            "console_id": console.id,
+                            "game_id": game.id,
+                            "gamertag": "console1",
+                            "level": "beginner",
+                        }
+                    ]
+                    rv = c.put(
+                        f"/user/{user_login.id}/games",
+                        data=json.dumps(data),
+                        content_type="application/json",
+                    )
+                    self.assertEqual(rv.status_code, 201)
+
     def test_login(self):
         class TestClass:
             sign_in_with_email_and_password = Mock(return_value={"idToken": "MyToken"})
