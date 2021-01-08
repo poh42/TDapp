@@ -26,6 +26,8 @@ def game_must_exist(_id):
 class UserGameSchemaWithoutModel(Schema):
     game_id = fields.Integer(required=True, validate=game_must_exist)
     console_id = fields.Integer(required=True, validate=console_must_exist)
+    gamertag = fields.String(required=True)
+    level = fields.String(required=True)
 
 
 class BaseUserGameSchema(ma.SQLAlchemyAutoSchema):

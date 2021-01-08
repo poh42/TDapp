@@ -45,6 +45,7 @@ from resources.user import (
     IsFriend,
     TopEarners,
     PublicUserList,
+    ModifyUserGames,
 )
 from flask_uploads import configure_uploads, IMAGES
 from utils.image_helper import IMAGE_SET
@@ -127,6 +128,7 @@ api.add_resource(UserRegister, "/user/register")
 api.add_resource(UserLogin, "/user/login")
 api.add_resource(SetAdminStatus, "/user/set_admin/<int:user_id>")
 api.add_resource(User, "/user/<int:user_id>")
+api.add_resource(ModifyUserGames, "/user/<int:user_id>/games")
 api.add_resource(PublicUserList, "/users/public")
 api.add_resource(UserList, "/users")
 api.add_resource(TopEarners, "/users/topEarners")

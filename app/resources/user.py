@@ -13,7 +13,7 @@ from decorators import (
 from models.invite import InviteModel, STATUS_PENDING
 from models.user_photo import UserPhotoModel
 from schemas.invite import InviteSchema
-from schemas.user_game import BaseUserGameSchema
+from schemas.user_game import BaseUserGameSchema, UserGameSchemaWithoutModel
 from utils.claims import set_is_admin, is_admin
 from fb import pb
 from requests import HTTPError
@@ -27,6 +27,7 @@ from schemas.admin_status import AdminStatusSchema
 import logging
 
 from utils.pick import pick_from_dict
+from utils.validation import validate_user_game_fields
 
 log = logging.getLogger(__name__)
 
@@ -239,6 +240,24 @@ class User(Resource):
             user_photo.save_to_db()
 
         return {"message": "Edit successful", "user": user_schema.dump(user)}, 200
+
+
+class ModifyUserGames(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin_or_user_authorized
+    def put(cls, user_id):
+        schema = UserGameSchemaWithoutModel(many=True)
+        user: UserModel = UserModel.find_by_id(user_id)
+        if not user:
+            return {"message": "User not found"}, 400
+        data = schema.load(request.get_json())
+        try:
+            validate_user_game_fields(data)
+        except ValidationError as e:
+            return {"message": str(e)}
+        user.update_user_games(data)
+        return {"message": "Games updated", "data": schema.dump(data)}, 201
 
 
 class UserList(Resource):
