@@ -160,6 +160,7 @@ class User(Resource):
             "friends.user_games",
             "user_games.game.consoles",
             "user_games.game.is_active",
+            "firebase_id",
         )
         if not user:
             return {"message": "User not found"}, 400
