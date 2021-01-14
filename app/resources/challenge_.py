@@ -712,6 +712,7 @@ class ChallengeStatusUpdate(Resource):
         cls.tie_challenge: bool
 
     @classmethod
+    @check_token
     def put(cls, challenge_id):
         cls.assign_init_values(challenge_id)
         if not cls.challenge:
@@ -772,7 +773,11 @@ class ChallengeStatusUpdate(Resource):
     def assign_init_values(cls, challenge_id):
         cls.json_data = request.get_json()
         cls.challenge = ChallengeModel.find_by_id(challenge_id)
+        if not cls.challenge:
+            return
         cls.current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        if not cls.current_user:
+            return
         cls.challenge_users = ChallengeUserModel.query.filter_by(
             wager_id=cls.challenge.id
         ).first()
