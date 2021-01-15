@@ -2,6 +2,9 @@ from datetime import datetime, timedelta
 import json
 from unittest.mock import patch
 
+from sqlalchemy import text
+
+from db import db
 from models.challenge_user import ChallengeUserModel
 from models.user_challenge_scores import UserChallengeScoresModel
 from models.user import UserModel
@@ -45,6 +48,14 @@ class TestChallengeEndpoints(BaseAPITestCase):
         user_game.level = "dummy"
         user_game.gamertag = "dummy"
         user_game.save_to_db()
+
+    def post_console_relation(self, fixtures):
+        sql = """INSERT INTO games_has_consoles (game_id, console_id) VALUES (:game_id, :console_id)"""
+        db.engine.execute(
+            text(sql),
+            console_id=fixtures["another_console"].id,
+            game_id=fixtures["game"].id,
+        )
 
     def test_challenge_get(self):
         with self.app_context():
@@ -306,6 +317,30 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     - int(challenge_created["buy_in"]),
                 )
 
+    def test_post_challenge_challengee_without_user_game(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            self.post_user_game(fixtures)
+            data = {
+                "type": "Test",
+                "game_id": fixtures["game"].id,
+                "date": "2019-01-01T00:00:00",
+                "buy_in": 10,
+                "console_id": fixtures["console"].id,
+                "challenged_id": fixtures["third_user"].id,
+            }
+            with self.test_client() as c:
+                g.claims = {"uid": fixtures["user_login"].firebase_id}
+                rv = c.post(
+                    "/challenge", data=json.dumps(data), content_type="application/json"
+                )
+                json_data = rv.get_json()
+                self.assertEqual(rv.status_code, 400, "Wrong status code")
+                self.assertEqual(
+                    json_data["message"],
+                    "Challengee doesn't have that user game pair registered",
+                )
+
     def test_post_challenge_without_user_game(self):
         with self.app_context():
             fixtures = create_fixtures()
@@ -315,6 +350,25 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 "date": "2019-01-01T00:00:00",
                 "buy_in": 10,
                 "console_id": fixtures["console"].id,
+            }
+            with self.test_client() as c:
+                g.claims = {"uid": fixtures["user_login"].firebase_id}
+                rv = c.post(
+                    "/challenge", data=json.dumps(data), content_type="application/json"
+                )
+                json_data = rv.get_json()
+                self.assertEqual(rv.status_code, 400, "Wrong status code")
+                self.assertEqual(json_data["message"], "User/game not in user games")
+
+    def test_post_challenge_without_relation(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            data = {
+                "type": "Test",
+                "game_id": fixtures["game"].id,
+                "date": "2019-01-01T00:00:00",
+                "buy_in": 10,
+                "console_id": fixtures["another_console"].id,
             }
             with self.test_client() as c:
                 g.claims = {"uid": fixtures["user_login"].firebase_id}
@@ -379,6 +433,40 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     json_data = rv.get_json()
                     self.assertEqual(
                         "Challenge already accepted",
+                        json_data["message"],
+                        "Wrong message",
+                    )
+
+    def test_challenge_accept_console_not_matching(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            challenge_user: ChallengeUserModel = fixtures["challenge_user_direct_2"]
+            with self.test_client() as c:
+                with self.subTest(shouldAccept=False, msg="Wrong user"):
+                    g.claims = {"user_id": fixtures["user_login"].firebase_id}
+                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                    self.assertEqual(rv.status_code, 400, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "User game console relation not matching",
+                        json_data["message"],
+                        "Wrong message",
+                    )
+
+    def test_challenge_accept_console_user_game_not_in_user_games(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            self.post_console_relation(fixtures)
+            self.post_user_game(fixtures)
+            challenge_user: ChallengeUserModel = fixtures["challenge_user_direct_2"]
+            with self.test_client() as c:
+                with self.subTest(shouldAccept=False, msg="Wrong user"):
+                    g.claims = {"user_id": fixtures["user_login"].firebase_id}
+                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                    self.assertEqual(rv.status_code, 400, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "User/game not in user games",
                         json_data["message"],
                         "Wrong message",
                     )

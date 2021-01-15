@@ -48,6 +48,8 @@ from schemas.results_1v1 import Results1v1Schema
 from utils.schema import get_fields_user_to_exclude
 from decimal import Decimal
 
+from utils.validation import has_game_console
+
 challenge_schema = ChallengeSchema()
 challenge_user_schema = ChallengeUserSchema()
 dispute_schema = DisputeSchema()
@@ -104,8 +106,10 @@ class ChallengePost(Resource):
         challenge: ChallengeModel = challenge_schema.load(json_data)
         if transaction is None or challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
-        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+        if not has_game_console(challenge.game_id, challenge.console_id):
             return {"message": "User game console relation not matching"}, 400
+        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+            return {"message": "User/game not in user games"}, 400
         challenge.is_direct = False
         if challenged_id is not None:
             can_challenge_user, error_message = current_user.can_challenge_user(
@@ -114,6 +118,13 @@ class ChallengePost(Resource):
             if not can_challenge_user:
                 return {"message": error_message}, 400
             challenge.is_direct = True
+            challenged = UserModel.find_by_id(challenged_id)
+            # Note, in here we don't check if the challenged is None
+            # Because we already do so in can_challenge_user call
+            if not challenged.has_user_game(challenge.game_id, challenge.console_id):
+                return {
+                    "message": "Challengee doesn't have that user game pair registered"
+                }, 400
         challenge.reward = Decimal(challenge.buy_in) * 2
         challenge.status = STATUS_OPEN
         challenge.due_date = challenge.date + timedelta(minutes=5)
@@ -494,8 +505,10 @@ class AcceptChallenge(Resource):
             and challenge_user.challenged_id is not None
         ):
             return {"message": "Cannot accept challenge from a different user"}, 400
-        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+        if not has_game_console(challenge.game_id, challenge.console_id):
             return {"message": "User game console relation not matching"}, 400
+        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+            return {"message": "User/game not in user games"}, 400
         if transaction is None or challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
 

@@ -55,6 +55,17 @@ def create_second_user():
     return user
 
 
+def create_third_user():
+    user = UserModel()
+    user.email = "third@example.com"
+    user.password = "1234567"
+    user.username = "user3"
+    user.firebase_id = "dummy_3"
+    user.avatar = "https://avatar.com/3"
+    user.save()
+    return user
+
+
 def create_login_user():
     user = UserModel()
     user.email = "asdr@hotmail.com"
@@ -133,6 +144,14 @@ def create_rest_of_games(console_id):
 def create_dummy_console():
     console = ConsoleModel()
     console.name = "PS1"
+    console.save_to_db()
+    return console
+
+
+def create_another_console():
+    """Creates a console that is not included in user games or games_has_consoles"""
+    console = ConsoleModel()
+    console.name = "PS2 test"
     console.save_to_db()
     return console
 
@@ -307,6 +326,7 @@ def create_fixtures():
     game = create_dummy_game()
     game_not_active = create_dummy_game_not_active()
     console = create_dummy_console()
+    create_dummy_console_relationship(console.id, game.id)
     challenge = create_dummy_challenge(game.id, console.id)
     upcoming_challenge = create_upcoming_challenge(game.id)
     result_1v1 = create_dummy_result(challenge.id, user.id, user_login.id)
@@ -318,6 +338,11 @@ def create_fixtures():
     dispute = create_dispute(user_login.id, challenge.id)
     challenge_user = create_challenge_user_dummy(
         second_user.id, user_login.id, challenge.id
+    )
+    another_console = create_another_console()
+    challenge_2 = create_dummy_challenge(game.id, another_console.id)
+    challenge_user_direct_2 = create_challenge_user_dummy(
+        second_user.id, user_login.id, challenge_2.id
     )
     challenge_user_upcoming = create_challenge_user_dummy(
         second_user.id,
@@ -338,13 +363,18 @@ def create_fixtures():
     challenge_user_not_direct = create_challenge_user_dummy(
         second_user.id, None, challenge_not_direct.id
     )
+    third_user = create_third_user()
     return {
         "user": user,
         "second_user": second_user,
+        "third_user": third_user,
         "game": game,
         "challenge": challenge,
+        "challenge_2": challenge_2,
+        "challenge_user_direct_2": challenge_user_direct_2,
         "game_not_active": game_not_active,
         "console": console,
+        "another_console": another_console,
         "result_1v1": result_1v1,
         "user_game": user_game,
         "transaction": transaction,
