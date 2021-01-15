@@ -307,6 +307,7 @@ def create_fixtures():
     game = create_dummy_game()
     game_not_active = create_dummy_game_not_active()
     console = create_dummy_console()
+    create_dummy_console_relationship(console.id, game.id)
     challenge = create_dummy_challenge(game.id, console.id)
     upcoming_challenge = create_upcoming_challenge(game.id)
     result_1v1 = create_dummy_result(challenge.id, user.id, user_login.id)

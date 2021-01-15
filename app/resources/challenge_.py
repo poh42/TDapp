@@ -48,6 +48,8 @@ from schemas.results_1v1 import Results1v1Schema
 from utils.schema import get_fields_user_to_exclude
 from decimal import Decimal
 
+from utils.validation import has_game_console
+
 challenge_schema = ChallengeSchema()
 challenge_user_schema = ChallengeUserSchema()
 dispute_schema = DisputeSchema()
@@ -104,8 +106,10 @@ class ChallengePost(Resource):
         challenge: ChallengeModel = challenge_schema.load(json_data)
         if transaction is None or challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
-        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+        if not has_game_console(challenge.game_id, challenge.console_id):
             return {"message": "User game console relation not matching"}, 400
+        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+            return {"message": "user/game not in user games"}, 400
         challenge.is_direct = False
         if challenged_id is not None:
             can_challenge_user, error_message = current_user.can_challenge_user(
