@@ -54,6 +54,7 @@ def create_second_user():
     user.save()
     return user
 
+
 def create_third_user():
     user = UserModel()
     user.email = "third@example.com"
@@ -63,7 +64,6 @@ def create_third_user():
     user.avatar = "https://avatar.com/3"
     user.save()
     return user
-
 
 
 def create_login_user():
