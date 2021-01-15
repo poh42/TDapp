@@ -137,6 +137,14 @@ def create_dummy_console():
     return console
 
 
+def create_another_console():
+    """Creates a console that is not included in user games or games_has_consoles"""
+    console = ConsoleModel()
+    console.name = "PS2 test"
+    console.save_to_db()
+    return console
+
+
 def create_dummy_challenge(game_id, console_id):
     challenge = ChallengeModel()
     challenge.type = "1v1"
@@ -339,6 +347,7 @@ def create_fixtures():
     challenge_user_not_direct = create_challenge_user_dummy(
         second_user.id, None, challenge_not_direct.id
     )
+    another_console = create_another_console()
     return {
         "user": user,
         "second_user": second_user,
@@ -346,6 +355,7 @@ def create_fixtures():
         "challenge": challenge,
         "game_not_active": game_not_active,
         "console": console,
+        "another_console": another_console,
         "result_1v1": result_1v1,
         "user_game": user_game,
         "transaction": transaction,
