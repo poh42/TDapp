@@ -324,7 +324,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 json_data = rv.get_json()
                 self.assertEqual(rv.status_code, 400, "Wrong status code")
                 self.assertEqual(
-                    json_data["message"], "User game console relation not matching"
+                    json_data["message"], "User/game not in user games"
                 )
 
     def test_post_challenge_without_relation(self):

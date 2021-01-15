@@ -109,7 +109,7 @@ class ChallengePost(Resource):
         if not has_game_console(challenge.game_id, challenge.console_id):
             return {"message": "User game console relation not matching"}, 400
         if not current_user.has_user_game(challenge.game_id, challenge.console_id):
-            return {"message": "user/game not in user games"}, 400
+            return {"message": "User/game not in user games"}, 400
         challenge.is_direct = False
         if challenged_id is not None:
             can_challenge_user, error_message = current_user.can_challenge_user(
