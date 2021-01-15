@@ -54,6 +54,17 @@ def create_second_user():
     user.save()
     return user
 
+def create_third_user():
+    user = UserModel()
+    user.email = "third@example.com"
+    user.password = "1234567"
+    user.username = "user3"
+    user.firebase_id = "dummy_3"
+    user.avatar = "https://avatar.com/3"
+    user.save()
+    return user
+
+
 
 def create_login_user():
     user = UserModel()
@@ -348,9 +359,11 @@ def create_fixtures():
         second_user.id, None, challenge_not_direct.id
     )
     another_console = create_another_console()
+    third_user = create_third_user()
     return {
         "user": user,
         "second_user": second_user,
+        "third_user": third_user,
         "game": game,
         "challenge": challenge,
         "game_not_active": game_not_active,

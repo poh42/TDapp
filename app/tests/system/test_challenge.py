@@ -306,6 +306,29 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     - int(challenge_created["buy_in"]),
                 )
 
+    def test_post_challenge_challengee_without_user_game(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            self.post_user_game(fixtures)
+            data = {
+                "type": "Test",
+                "game_id": fixtures["game"].id,
+                "date": "2019-01-01T00:00:00",
+                "buy_in": 10,
+                "console_id": fixtures["console"].id,
+                "challenged_id": fixtures["third_user"].id
+            }
+            with self.test_client() as c:
+                g.claims = {"uid": fixtures["user_login"].firebase_id}
+                rv = c.post(
+                    "/challenge", data=json.dumps(data), content_type="application/json"
+                )
+                json_data = rv.get_json()
+                self.assertEqual(rv.status_code, 400, "Wrong status code")
+                self.assertEqual(
+                    json_data["message"], "Challengee doesn't have that user game pair registered"
+                )
+
     def test_post_challenge_without_user_game(self):
         with self.app_context():
             fixtures = create_fixtures()

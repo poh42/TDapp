@@ -119,8 +119,10 @@ class ChallengePost(Resource):
                 return {"message": error_message}, 400
             challenge.is_direct = True
             challenged = UserModel.find_by_id(challenged_id)
+            # Note, in here we don't check if the challenged is None
+            # Because we already do so in can_challenge_user call
             if not challenged.has_user_game(challenge.game_id, challenge.console_id):
-                return {"message": "Challengee has not the user games you requested"}, 400
+                return {"message": "Challengee doesn't have that user game pair registered"}, 400
         challenge.reward = Decimal(challenge.buy_in) * 2
         challenge.status = STATUS_OPEN
         challenge.due_date = challenge.date + timedelta(minutes=5)
