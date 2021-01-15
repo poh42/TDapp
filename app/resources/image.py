@@ -1,5 +1,7 @@
 from flask import request
 from flask_restful import Resource
+
+from decorators import check_token
 from schemas.image import ImageSchema
 from utils import image_helper
 from secrets import token_hex
@@ -15,6 +17,7 @@ image_schema = ImageSchema()
 
 class ImageUpload(Resource):
     @classmethod
+    @check_token
     def post(cls):
         """
         Used to upload an image file.
