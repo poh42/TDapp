@@ -427,6 +427,22 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         "Wrong message",
                     )
 
+    def test_challenge_accept_console_not_matching(self):
+        with self.app_context():
+            fixtures = create_fixtures()
+            challenge_user: ChallengeUserModel = fixtures["challenge_user_direct_2"]
+            with self.test_client() as c:
+                with self.subTest(shouldAccept=False, msg="Wrong user"):
+                    g.claims = {"user_id": fixtures["user_login"].firebase_id}
+                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                    self.assertEqual(rv.status_code, 400, "Wrong status")
+                    json_data = rv.get_json()
+                    self.assertEqual(
+                        "User game console relation not matching",
+                        json_data["message"],
+                        "Wrong message",
+                    )
+
     def test_challenge_accept_not_direct(self):
         with self.app_context():
             fixtures = create_fixtures()

@@ -339,6 +339,11 @@ def create_fixtures():
     challenge_user = create_challenge_user_dummy(
         second_user.id, user_login.id, challenge.id
     )
+    another_console = create_another_console()
+    challenge_2 = create_dummy_challenge(game.id, another_console.id)
+    challenge_user_direct_2 = create_challenge_user_dummy(
+        second_user.id, user_login.id, challenge_2.id
+    )
     challenge_user_upcoming = create_challenge_user_dummy(
         second_user.id,
         user_login.id,
@@ -358,7 +363,6 @@ def create_fixtures():
     challenge_user_not_direct = create_challenge_user_dummy(
         second_user.id, None, challenge_not_direct.id
     )
-    another_console = create_another_console()
     third_user = create_third_user()
     return {
         "user": user,
@@ -366,6 +370,8 @@ def create_fixtures():
         "third_user": third_user,
         "game": game,
         "challenge": challenge,
+        "challenge_2": challenge_2,
+        "challenge_user_direct_2": challenge_user_direct_2,
         "game_not_active": game_not_active,
         "console": console,
         "another_console": another_console,

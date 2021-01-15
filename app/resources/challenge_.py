@@ -503,8 +503,10 @@ class AcceptChallenge(Resource):
             and challenge_user.challenged_id is not None
         ):
             return {"message": "Cannot accept challenge from a different user"}, 400
-        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+        if not has_game_console(challenge.game_id, challenge.console_id):
             return {"message": "User game console relation not matching"}, 400
+        if not current_user.has_user_game(challenge.game_id, challenge.console_id):
+            return {"message": "User/game not in user games"}, 400
         if transaction is None or challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
 
