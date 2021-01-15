@@ -68,7 +68,7 @@ class ChallengeModel(db.Model):
             )
         )
         if kwargs.get("upcoming"):
-            query = query.filter(cls.date >= datetime.now())
+            query = query.filter(cls.due_date >= datetime.now())
         if kwargs.get("last_results"):
             last_results = int(kwargs.get("last_results", 0))
             query = (
