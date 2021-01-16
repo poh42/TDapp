@@ -724,6 +724,69 @@ class ChallengeStatusUpdate(Resource):
         cls.challenge_valid_status: bool
         cls.tie_challenge: bool
 
+        cls.challenge_schema = ChallengeSchema(
+            only=(
+                "id",
+                "console.id",
+                "console.name",
+                "game",
+                "game.id",
+                "game.name",
+                "type",
+                "date",
+                "buy_in",
+                "reward",
+                "status",
+                "due_date",
+                "created_at",
+                "updated_at",
+                "challenge_users",
+                "challenge_users.challenged.avatar",
+                "challenge_users.challenged.username",
+                "challenge_users.challenged.id",
+                "challenge_users.challenged.last_name",
+                "challenge_users.challenged.name",
+                "challenge_users.challenger.avatar",
+                "challenge_users.challenger.username",
+                "challenge_users.challenger.id",
+                "challenge_users.challenger.last_name",
+                "challenge_users.challenger.name",
+                "results_1v1.winner.avatar",
+                "results_1v1.winner.user_games",
+                "results_1v1.winner.username",
+                "results_1v1.winner.id",
+                "results_1v1.winner.last_name",
+                "results_1v1.winner.name",
+            ),
+            exclude=(
+                "results_1v1.player_1",
+                "results_1v1.player_2",
+                # challenge users
+                "challenge_users.challenged.is_private",
+                "challenge_users.challenged.dob",
+                "challenge_users.challenged.is_active",
+                "challenge_users.challenged.phone",
+                "challenge_users.challenged.range_bet_low",
+                "challenge_users.challenged.playing_hours_begin",
+                "challenge_users.challenged.playing_hours_end",
+                "challenge_users.challenged.range_bet_high",
+                "challenge_users.challenged.accepted_terms",
+                # winner
+                "results_1v1.winner.firebase_id",
+                "results_1v1.winner.user_games",
+                "results_1v1.winner.is_private",
+                "results_1v1.winner.dob",
+                "results_1v1.winner.is_active",
+                "results_1v1.winner.phone",
+                "results_1v1.winner.range_bet_low",
+                "results_1v1.winner.playing_hours_begin",
+                "results_1v1.winner.playing_hours_end",
+                "results_1v1.winner.range_bet_high",
+                "results_1v1.winner.accepted_terms",
+                "results_1v1.winner.firebase_id",
+            ),
+        )
+
     @classmethod
     @check_token
     def put(cls, challenge_id):
@@ -753,7 +816,7 @@ class ChallengeStatusUpdate(Resource):
                         {
                             "message": """Challenge updated successfully.
                             There was not a winner, credits reassigned""",
-                            "challenge": challenge_schema.dump(cls.challenge),
+                            "challenge": cls.challenge_schema.dump(cls.challenge),
                         },
                         202,
                     )
@@ -763,7 +826,7 @@ class ChallengeStatusUpdate(Resource):
                             "message": """Challenge updated successfully.
                             There was a mismatch in the scores. 
                             A dispute was open""",
-                            "challenge": challenge_schema.dump(cls.challenge),
+                            "challenge": cls.challenge_schema.dump(cls.challenge),
                         },
                         202,
                     )
@@ -772,7 +835,7 @@ class ChallengeStatusUpdate(Resource):
             return (
                 {
                     "message": "Challenge updated successfully",
-                    "challenge": challenge_schema.dump(cls.challenge),
+                    "challenge": cls.challenge_schema.dump(cls.challenge),
                 },
                 200,
             )
