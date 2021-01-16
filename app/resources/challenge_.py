@@ -514,7 +514,8 @@ class AcceptChallenge(Resource):
             return {"message": "User/game not in user games"}, 400
         if transaction is None or challenge.buy_in > transaction.credit_total:
             return {"message": "Not enough credits"}, 403
-
+        if challenge_user.challenger_id == current_user.id:
+            return {"message": "Cannot accept a challenge from yourself"}, 400
         challenge_user.challenged_id = current_user.id
         challenge_user.status_challenged = STATUS_ACCEPTED
         challenge_user.save_to_db()
