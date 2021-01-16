@@ -550,8 +550,11 @@ class DeclineChallenge(Resource):
             return {"message": "Challenge cannot be declined"}, 400
         if current_user.id != challenge_user.challenged_id:
             return {"message": "Cannot decline challenge from a different user"}, 400
+        challenge: ChallengeModel = ChallengeModel.find_by_id(challenge_user.wager_id)
+        challenge.status = STATUS_REJECTED
         challenge_user.status_challenged = STATUS_DECLINED
         challenge_user.save_to_db()
+        challenge.save_to_db()
         return {"message": "Challenge declined"}, 200
 
 
