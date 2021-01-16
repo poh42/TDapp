@@ -13,8 +13,6 @@ FIELDS_TO_EXCLUDE = (
     "phone",
     "firebase_id",
     "accepted_terms",
-    "range_bet_low",
-    "range_bet_high",
 )
 
 
