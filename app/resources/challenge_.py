@@ -111,6 +111,7 @@ class ChallengePost(Resource):
         if not current_user.has_user_game(challenge.game_id, challenge.console_id):
             return {"message": "User/game not in user games"}, 400
         challenge.is_direct = False
+        challenge.status = STATUS_OPEN
         if challenged_id is not None:
             can_challenge_user, error_message = current_user.can_challenge_user(
                 challenged_id
@@ -118,6 +119,7 @@ class ChallengePost(Resource):
             if not can_challenge_user:
                 return {"message": error_message}, 400
             challenge.is_direct = True
+            challenge.status = STATUS_PENDING
             challenged = UserModel.find_by_id(challenged_id)
             # Note, in here we don't check if the challenged is None
             # Because we already do so in can_challenge_user call
@@ -126,7 +128,6 @@ class ChallengePost(Resource):
                     "message": "Challengee doesn't have that user game pair registered"
                 }, 400
         challenge.reward = Decimal(challenge.buy_in) * 2
-        challenge.status = STATUS_OPEN
         challenge.due_date = challenge.date + timedelta(minutes=5)
         challenge.save_to_db()
         challenge_user_args = {
@@ -287,7 +288,9 @@ class Challenge(Resource):
 class ChallengeList(Resource):
     @classmethod
     def get(cls):
-        query = ChallengeModel.query.options(joinedload(ChallengeModel.game))
+        query = ChallengeModel.query.options(joinedload(ChallengeModel.game)).filter(
+            ChallengeModel.is_direct != True
+        )
         if request.args.get("upcoming") == "true":
             query = query.filter(ChallengeModel.date >= datetime.now())
         try:
@@ -547,8 +550,11 @@ class DeclineChallenge(Resource):
             return {"message": "Challenge cannot be declined"}, 400
         if current_user.id != challenge_user.challenged_id:
             return {"message": "Cannot decline challenge from a different user"}, 400
+        challenge: ChallengeModel = ChallengeModel.find_by_id(challenge_user.wager_id)
+        challenge.status = STATUS_REJECTED
         challenge_user.status_challenged = STATUS_DECLINED
         challenge_user.save_to_db()
+        challenge.save_to_db()
         return {"message": "Challenge declined"}, 200
 
 
