@@ -730,10 +730,10 @@ class ChallengeStatusUpdate(Resource):
         cls.current_user: UserModel
         cls.challenge: ChallengeModel
         cls.challenge_users: ChallengeUserModel
-        cls.user_belongs_challenge: bool
-        cls.user_valid_status: bool
-        cls.challenge_valid_status: bool
-        cls.tie_challenge: bool
+        cls.user_belongs_challenge = False
+        cls.user_valid_status = False
+        cls.challenge_valid_status = False
+        cls.tie_challenge = False
 
         cls.challenge_schema = ChallengeSchema(
             only=(
@@ -961,7 +961,6 @@ class ChallengeStatusUpdate(Resource):
             challenged_won = (
                 cls.challenged_score.own_score > cls.challenger_score.own_score
             )
-            cls.tie_challenge = False
             if challenger_won:
                 results.winner_id = cls.challenge_users.challenger_id
             elif challenged_won:
