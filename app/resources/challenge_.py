@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from marshmallow import ValidationError
 
 from db import db
-from decorators import check_token
+from decorators import check_token, check_is_admin
 from models.user_challenge_scores import UserChallengeScoresModel
 from models.challenge_user import (
     ChallengeUserModel,
@@ -43,7 +43,7 @@ from datetime import datetime
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, text
 from schemas.challenge_user import ChallengeUserSchema
-from schemas.dispute import DisputeSchema
+from schemas.dispute import DisputeSchema, DisputeAdminSchema
 from schemas.results_1v1 import Results1v1Schema
 from utils.schema import get_fields_user_to_exclude
 from decimal import Decimal
@@ -485,6 +485,33 @@ class GetDisputes(Resource):
     def get(cls, challenge_id):
         disputes = DisputeModel.get_by_challenge_id(challenge_id)
         return {"disputes": dispute_schema.dump(disputes, many=True)}
+
+
+class DisputeList(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin
+    def get(cls):
+        data = DisputeModel.get_all_disputes(request.args)
+        items = data.items
+        total = data.total
+        return {
+            "data": DisputeAdminSchema(
+                only=(
+                    "comments",
+                    "id",
+                    "created_at",
+                    "updated_at",
+                    "status",
+                    "challenge_id",
+                    "challenge.challenge_users.id",
+                    "challenge.challenge_users.status_challenged",
+                    "challenge.challenge_users.status_challenger",
+                    "challenge.user_challenge_scores",
+                )
+            ).dump(items, many=True),
+            "total": total,
+        }, 200
 
 
 class AcceptChallenge(Resource):
