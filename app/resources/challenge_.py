@@ -853,7 +853,7 @@ class DirectChallenges(Resource):
 class ChallengeStatusUpdate(Resource):
     @classmethod
     def __init__(cls):
-        cls.now: datetime = datetime.now()
+        cls.now: datetime = datetime.utcnow()
         cls.current_user: UserModel
         cls.challenge: ChallengeModel
         cls.challenge_users: ChallengeUserModel
