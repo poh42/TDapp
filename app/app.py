@@ -26,6 +26,7 @@ from resources.challenge_ import (
     ChallengeStatusUpdate,
     DirectChallenges,
     DisputeList,
+    DisputeAdmin,
 )
 from resources.console import ConsoleList, Console
 from resources.credit import AddCredits, Credit
@@ -147,6 +148,7 @@ api.add_resource(ChallengeResults, "/challenge/<int:challenge_id>/getResultsChal
 api.add_resource(ReportChallenge, "/challenge/<int:challenge_id>/report")
 api.add_resource(GetDisputes, "/challenge/<int:challenge_id>/report/dispute")
 api.add_resource(DisputeList, "/disputes")
+api.add_resource(DisputeAdmin, "/disputes/<int:dispute_id>")
 api.add_resource(Games, "/games")
 api.add_resource(Game, "/games/<int:game_id>")
 api.add_resource(AcceptChallenge, "/challenge/<int:challenge_user_id>/accept")

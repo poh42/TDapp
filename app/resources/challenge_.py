@@ -514,6 +514,29 @@ class DisputeList(Resource):
         }, 200
 
 
+class DisputeAdmin(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin
+    def get(cls, dispute_id):
+        dispute = DisputeModel.find_by_id(dispute_id)
+        if dispute is None:
+            return {"message": "Dispute not found"}, 404
+        only = (
+            "comments",
+            "id",
+            "created_at",
+            "updated_at",
+            "status",
+            "challenge_id",
+            "challenge.challenge_users.id",
+            "challenge.challenge_users.status_challenged",
+            "challenge.challenge_users.status_challenger",
+            "challenge.user_challenge_scores",
+        )
+        return {"data": DisputeAdminSchema(only=only).dump(dispute)}, 200
+
+
 class AcceptChallenge(Resource):
     @classmethod
     @check_token
