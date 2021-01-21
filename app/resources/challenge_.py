@@ -435,6 +435,7 @@ class ChallengeResults(Resource):
                 "winner.id",
                 "winner.name",
                 "winner.last_name",
+                "challenge.reward",
                 "challenge.console.id",
                 "challenge.console.name",
                 "challenge.game.id",
