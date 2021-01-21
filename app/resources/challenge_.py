@@ -43,7 +43,7 @@ from datetime import datetime
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, text
 from schemas.challenge_user import ChallengeUserSchema
-from schemas.dispute import DisputeSchema, DisputeAdminSchema
+from schemas.dispute import DisputeSchema, DisputeAdminSchema, SettleDisputeSchema
 from schemas.results_1v1 import Results1v1Schema
 from utils.schema import get_fields_user_to_exclude
 from decimal import Decimal
@@ -536,6 +536,87 @@ class DisputeAdmin(Resource):
         )
         return {"data": DisputeAdminSchema(only=only).dump(dispute)}, 200
 
+    @classmethod
+    def put(cls, dispute_id):
+        dispute: DisputeModel = DisputeModel.find_by_id(dispute_id)
+        if dispute is None:
+            return {"message": "Dispute not found"}, 404
+        json_data = request.get_json()
+        schema = SettleDisputeSchema()
+        loaded_data = schema.load(json_data)
+        # vamos a encontrar el challenge users de la data
+        challenge_users = ChallengeUserModel.find_by_wager_id(dispute.challenge_id)
+        if loaded_data["score_player_1"] != loaded_data["score_player_2"]:
+            pass
+            # Mandamos los creditos
+        else:
+            pass
+            # retornamos los creditos a sus respectivos usuarios
+        # guardamos los datos en el results
+        cls.store_challenge_results(loaded_data, challenge_users)
+
+    @classmethod
+    def store_challenge_results(cls, data, challenge_users: ChallengeUserModel):
+        results = Results1v1Model()
+        results.challenge_id = challenge_users.wager_id
+        results.score_player_1 = data["score_player_1"]
+        results.score_player_2 = data["score_player_2"]
+        results.player_1_id = challenge_users.challenger_id
+        results.player_2_id = challenge_users.challenged_id
+        results.played = datetime.now()
+        if results.score_player_1 != results.score_player_2:
+            cls.tie_challenge = False
+            results.winner_id = data["winner_id"]
+        else:
+            cls.tie_challenge = True
+        results.save_to_db()
+
+    @classmethod
+    def resolve_challenge_on_tie(cls):
+        if cls.tie_challenge:
+            challenger_transaction = TransactionModel.find_by_user_id(
+                cls.challenge_users.challenger_id
+            )
+            new_transaction = TransactionModel()
+            new_transaction.previous_credit_total = challenger_transaction.credit_total
+            new_transaction.credit_change = cls.challenge.buy_in
+            new_transaction.credit_total = (
+                    challenger_transaction.credit_total + cls.challenge.buy_in
+            )
+            new_transaction.challenge_id = cls.challenge.id
+            new_transaction.user_id = cls.challenge_users.challenger_id
+            new_transaction.type = TYPE_ADD
+            new_transaction.save_to_db()
+
+            challenged_transaction = TransactionModel.find_by_user_id(
+                cls.challenge_users.challenged_id
+            )
+            new_transaction = TransactionModel()
+            new_transaction.previous_credit_total = challenged_transaction.credit_total
+            new_transaction.credit_change = cls.challenge.buy_in
+            new_transaction.credit_total = (
+                    challenged_transaction.credit_total + cls.challenge.buy_in
+            )
+            new_transaction.challenge_id = cls.challenge.id
+            new_transaction.user_id = cls.challenge_users.challenged_id
+            new_transaction.type = TYPE_ADD
+            new_transaction.save_to_db()
+
+            return True
+        return False
+
+    @classmethod
+    def assign_credits_to_winner(cls):
+        results = Results1v1Model.find_by_challenge_id(cls.challenge.id)
+        transaction = TransactionModel.find_by_user_id(results.winner_id)
+        new_transaction = TransactionModel()
+        new_transaction.previous_credit_total = transaction.credit_total
+        new_transaction.credit_change = cls.challenge.reward
+        new_transaction.credit_total = transaction.credit_total + cls.challenge.reward
+        new_transaction.challenge_id = cls.challenge.id
+        new_transaction.user_id = results.winner_id
+        new_transaction.type = TYPE_ADD
+        new_transaction.save_to_db()
 
 class AcceptChallenge(Resource):
     @classmethod

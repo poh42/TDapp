@@ -54,6 +54,10 @@ class ChallengeUserModel(db.Model):
     def find_by_id(cls, _id):
         return cls.query.filter_by(id=_id).first()
 
+    @classmethod
+    def find_by_wager_id(cls, wager_id):
+        return cls.query.filter_by(wager_id=wager_id).first()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
