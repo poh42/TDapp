@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime, timedelta
 
 from marshmallow import ValidationError
@@ -18,7 +19,7 @@ from models.challenge_user import (
     STATUS_DISPUTED,
     STATUS_SOLVED,
 )
-from models.dispute import DisputeModel
+from models.dispute import DisputeModel, STATUS_OPEN as DISPUTE_STATUS_OPEN
 from models.game import GameModel
 from models.transaction import TransactionModel, TYPE_ADD, TYPE_SUBSTRACTION
 from models.results_1v1 import Results1v1Model
@@ -292,7 +293,7 @@ class ChallengeList(Resource):
             ChallengeModel.is_direct != True
         )
         if request.args.get("upcoming") == "true":
-            query = query.filter(ChallengeModel.date >= datetime.now())
+            query = query.filter(ChallengeModel.date >= datetime.utcnow())
         try:
             last_results = int(request.args.get("lastResults", 0))
         except ValueError:
@@ -538,6 +539,8 @@ class DisputeAdmin(Resource):
         return {"data": DisputeAdminSchema(only=only).dump(dispute)}, 200
 
     @classmethod
+    @check_token
+    @check_is_admin
     def put(cls, dispute_id):
         dispute: DisputeModel = DisputeModel.find_by_id(dispute_id)
         if dispute is None:
@@ -555,6 +558,7 @@ class DisputeAdmin(Resource):
             # retornamos los creditos a sus respectivos usuarios
         # guardamos los datos en el results
         cls.store_challenge_results(loaded_data, challenge_users)
+        return {"message": "Status changed", "data": loaded_data}, 200
 
     @classmethod
     def store_challenge_results(cls, data, challenge_users: ChallengeUserModel):
@@ -983,6 +987,7 @@ class ChallengeStatusUpdate(Resource):
             )
         except Exception as e:
             print(e)
+            traceback.print_exc()
             return {
                 "message": "There was an error updating the challenge: " + str(e)
             }, 400
@@ -1141,6 +1146,13 @@ class ChallengeStatusUpdate(Resource):
             cls.challenge_users.status_challenged = STATUS_DISPUTED
             cls.challenge.status = STATUS_DISPUTED
             cls.challenge.save_to_db()
+
+            dispute: DisputeModel = DisputeModel()
+            dispute.challenge_id = cls.challenge.id
+            dispute.user_id = cls.challenge_users.challenger_id
+            dispute.status = DISPUTE_STATUS_OPEN
+            dispute.comments = "GENERATED AUTOMATICALLY"
+            dispute.save_to_db()
             return True
         return False
 
