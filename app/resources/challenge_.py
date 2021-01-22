@@ -548,15 +548,22 @@ class DisputeAdmin(Resource):
         json_data = request.get_json()
         schema = SettleDisputeSchema()
         loaded_data = schema.load(json_data)
-        # vamos a encontrar el challenge users de la data
-        challenge_users = ChallengeUserModel.find_by_wager_id(dispute.challenge_id)
+
+        # let's find the challenge
+        challenge_users: ChallengeUserModel = ChallengeUserModel.find_by_wager_id(
+            dispute.challenge_id
+        )
+        challenge_users.status_challenger = STATUS_COMPLETED
+        challenge_users.status_challenged = STATUS_COMPLETED
+        challenge_users.save_to_db()
+        # Ponemos los estados del challenge users en complete
         if loaded_data["score_player_1"] != loaded_data["score_player_2"]:
             pass
             # Mandamos los creditos
         else:
             pass
             # retornamos los creditos a sus respectivos usuarios
-        # guardamos los datos en el results
+        # Let's record the data in results
         cls.store_challenge_results(loaded_data, challenge_users)
         return {"message": "Status changed", "data": loaded_data}, 200
 
@@ -586,7 +593,7 @@ class DisputeAdmin(Resource):
             new_transaction.previous_credit_total = challenger_transaction.credit_total
             new_transaction.credit_change = cls.challenge.buy_in
             new_transaction.credit_total = (
-                    challenger_transaction.credit_total + cls.challenge.buy_in
+                challenger_transaction.credit_total + cls.challenge.buy_in
             )
             new_transaction.challenge_id = cls.challenge.id
             new_transaction.user_id = cls.challenge_users.challenger_id
@@ -600,7 +607,7 @@ class DisputeAdmin(Resource):
             new_transaction.previous_credit_total = challenged_transaction.credit_total
             new_transaction.credit_change = cls.challenge.buy_in
             new_transaction.credit_total = (
-                    challenged_transaction.credit_total + cls.challenge.buy_in
+                challenged_transaction.credit_total + cls.challenge.buy_in
             )
             new_transaction.challenge_id = cls.challenge.id
             new_transaction.user_id = cls.challenge_users.challenged_id
@@ -622,6 +629,7 @@ class DisputeAdmin(Resource):
         new_transaction.user_id = results.winner_id
         new_transaction.type = TYPE_ADD
         new_transaction.save_to_db()
+
 
 class AcceptChallenge(Resource):
     @classmethod
