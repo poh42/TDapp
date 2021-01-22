@@ -291,11 +291,11 @@ class ChallengeList(Resource):
         query = ChallengeModel.query\
             .options(joinedload(ChallengeModel.game))\
             .filter(ChallengeModel.is_direct is not True)\
-            .order_by(ChallengeModel.id.desc())
+            .order_by(ChallengeModel.date.asc())
         if request.args.get("upcoming") == "true":
             query = query.filter(
                 ChallengeModel.date >= datetime.now()
-                ).order_by(ChallengeModel.id.desc())
+                ).order_by(ChallengeModel.date.asc())
         try:
             last_results = int(request.args.get("lastResults", 0))
         except ValueError:
