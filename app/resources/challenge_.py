@@ -550,6 +550,9 @@ class DisputeAdmin(Resource):
         loaded_data = schema.load(json_data)
 
         # let's find the challenge
+        challenge: ChallengeModel = ChallengeModel.find_by_id(dispute.challenge_id)
+
+        # let's find the challenge users
         challenge_users: ChallengeUserModel = ChallengeUserModel.find_by_wager_id(
             dispute.challenge_id
         )
@@ -557,14 +560,14 @@ class DisputeAdmin(Resource):
         challenge_users.status_challenged = STATUS_COMPLETED
         challenge_users.save_to_db()
         # Ponemos los estados del challenge users en complete
+        results = cls.store_challenge_results(loaded_data, challenge_users)
         if loaded_data["score_player_1"] != loaded_data["score_player_2"]:
             pass
             # Mandamos los creditos
         else:
-            pass
+            cls.resolve_challenge_on_tie(loaded_data, challenge_users, challenge)
             # retornamos los creditos a sus respectivos usuarios
         # Let's record the data in results
-        cls.store_challenge_results(loaded_data, challenge_users)
         return {"message": "Status changed", "data": loaded_data}, 200
 
     @classmethod
@@ -577,40 +580,40 @@ class DisputeAdmin(Resource):
         results.player_2_id = data["player_2_id"]
         results.played = datetime.utcnow()
         if results.score_player_1 != results.score_player_2:
-            cls.tie_challenge = False
             results.winner_id = data["winner_id"]
         else:
-            cls.tie_challenge = True
+            results.winner_id = None
         results.save_to_db()
+        return results
 
     @classmethod
-    def resolve_challenge_on_tie(cls):
-        if cls.tie_challenge:
+    def resolve_challenge_on_tie(cls, data, challenge_users: ChallengeUserModel, challenge: ChallengeModel):
+        if data["score_player_1"] == data["score_player_2"]:
             challenger_transaction = TransactionModel.find_by_user_id(
-                cls.challenge_users.challenger_id
+                challenge_users.challenger_id
             )
             new_transaction = TransactionModel()
             new_transaction.previous_credit_total = challenger_transaction.credit_total
-            new_transaction.credit_change = cls.challenge.buy_in
+            new_transaction.credit_change = challenge.buy_in
             new_transaction.credit_total = (
-                challenger_transaction.credit_total + cls.challenge.buy_in
+                challenger_transaction.credit_total + challenge.buy_in
             )
-            new_transaction.challenge_id = cls.challenge.id
-            new_transaction.user_id = cls.challenge_users.challenger_id
+            new_transaction.challenge_id = challenge.id
+            new_transaction.user_id = challenge_users.challenger_id
             new_transaction.type = TYPE_ADD
             new_transaction.save_to_db()
 
             challenged_transaction = TransactionModel.find_by_user_id(
-                cls.challenge_users.challenged_id
+                challenge_users.challenged_id
             )
             new_transaction = TransactionModel()
             new_transaction.previous_credit_total = challenged_transaction.credit_total
-            new_transaction.credit_change = cls.challenge.buy_in
+            new_transaction.credit_change = challenge.buy_in
             new_transaction.credit_total = (
-                challenged_transaction.credit_total + cls.challenge.buy_in
+                challenged_transaction.credit_total + challenge.buy_in
             )
-            new_transaction.challenge_id = cls.challenge.id
-            new_transaction.user_id = cls.challenge_users.challenged_id
+            new_transaction.challenge_id = challenge.id
+            new_transaction.user_id = challenge_users.challenged_id
             new_transaction.type = TYPE_ADD
             new_transaction.save_to_db()
 
