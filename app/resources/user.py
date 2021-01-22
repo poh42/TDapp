@@ -41,6 +41,10 @@ class UserRegister(Resource):
     def post(cls):
         json_data = request.get_json()
         user_instance: UserModel = user_schema.load(json_data)
+        if UserModel.find_by_email(user_instance.email):
+            return {"message": "Email is already registered"}, 400
+        if UserModel.find_by_username(user_instance.username):
+            return {"message": "Username already in use"}, 400
         try:
             user_firebase = auth.create_user(
                 email=user_instance.email, password=json_data["password"]

@@ -435,6 +435,7 @@ class ChallengeResults(Resource):
                 "winner.id",
                 "winner.name",
                 "winner.last_name",
+                "challenge.reward",
                 "challenge.console.id",
                 "challenge.console.name",
                 "challenge.game.id",
@@ -737,16 +738,19 @@ class ChallengesByUser(Resource):
                 "challenge_users.challenged.id",
                 "challenge_users.challenged.last_name",
                 "challenge_users.challenged.name",
+                "challenge_users.challenged.user_games.gamertag",
                 "challenge_users.challenger.avatar",
                 "challenge_users.challenger.username",
                 "challenge_users.challenger.id",
                 "challenge_users.challenger.last_name",
                 "challenge_users.challenger.name",
+                "challenge_users.challenger.user_games.gamertag",
                 "results_1v1.winner.avatar",
                 "results_1v1.winner.username",
                 "results_1v1.winner.id",
                 "results_1v1.winner.last_name",
                 "results_1v1.winner.name",
+                "results_1v1.winner.user_games.gamertag",
             ),
             exclude=(
                 "results_1v1.player_1",
@@ -857,10 +861,10 @@ class ChallengeStatusUpdate(Resource):
         cls.current_user: UserModel
         cls.challenge: ChallengeModel
         cls.challenge_users: ChallengeUserModel
-        cls.user_belongs_challenge: bool
-        cls.user_valid_status: bool
-        cls.challenge_valid_status: bool
-        cls.tie_challenge: bool
+        cls.user_belongs_challenge = False
+        cls.user_valid_status = False
+        cls.challenge_valid_status = False
+        cls.tie_challenge = False
 
         cls.challenge_schema = ChallengeSchema(
             only=(
@@ -1088,7 +1092,6 @@ class ChallengeStatusUpdate(Resource):
             challenged_won = (
                 cls.challenged_score.own_score > cls.challenger_score.own_score
             )
-            cls.tie_challenge = False
             if challenger_won:
                 results.winner_id = cls.challenge_users.challenger_id
             elif challenged_won:
