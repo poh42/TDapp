@@ -573,9 +573,9 @@ class DisputeAdmin(Resource):
         results.challenge_id = challenge_users.wager_id
         results.score_player_1 = data["score_player_1"]
         results.score_player_2 = data["score_player_2"]
-        results.player_1_id = challenge_users.challenger_id
-        results.player_2_id = challenge_users.challenged_id
-        results.played = datetime.now()
+        results.player_1_id = data["player_1_id"]
+        results.player_2_id = data["player_2_id"]
+        results.played = datetime.utcnow()
         if results.score_player_1 != results.score_player_2:
             cls.tie_challenge = False
             results.winner_id = data["winner_id"]

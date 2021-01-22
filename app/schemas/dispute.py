@@ -41,6 +41,6 @@ class SettleDisputeSchema(Schema):
     # challenge_id = fields.Integer(required=True, validate=validate_challenge_id)
     score_player_1 = fields.Integer(required=True)
     score_player_2 = fields.Integer(required=True)
-    # user_id_1 = fields.Integer(required=True, validate=validate_user_id)
-    # user_id_2 = fields.Integer(required=True, validate=validate_user_id)
+    player_1_id = fields.Integer(required=True, validate=validate_user_id)
+    player_2_id = fields.Integer(required=True, validate=validate_user_id)
     winner_id = fields.Integer(required=True, validate=validate_user_id)
