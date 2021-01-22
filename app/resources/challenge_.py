@@ -288,11 +288,14 @@ class Challenge(Resource):
 class ChallengeList(Resource):
     @classmethod
     def get(cls):
-        query = ChallengeModel.query.options(joinedload(ChallengeModel.game)).filter(
-            ChallengeModel.is_direct != True
-        )
+        query = ChallengeModel.query\
+            .options(joinedload(ChallengeModel.game))\
+            .filter(ChallengeModel.is_direct is not True)\
+            .order_by(ChallengeModel.id.desc())
         if request.args.get("upcoming") == "true":
-            query = query.filter(ChallengeModel.date >= datetime.now())
+            query = query.filter(
+                ChallengeModel.date >= datetime.now()
+                ).order_by(ChallengeModel.id.desc())
         try:
             last_results = int(request.args.get("lastResults", 0))
         except ValueError:
