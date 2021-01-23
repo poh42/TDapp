@@ -47,7 +47,7 @@ class ChallengeModel(db.Model):
         "Results1v1Model", cascade="all, delete-orphan", uselist=False
     )
     user_challenge_scores = db.relationship(
-        "UserChallengeScoresModel", cascade="all, delete-orphan", uselist=False
+        "UserChallengeScoresModel", cascade="all, delete-orphan"
     )
 
     disputes = db.relationship("DisputeModel", cascade="all, delete-orphan")
@@ -68,7 +68,7 @@ class ChallengeModel(db.Model):
             )
         )
         if kwargs.get("upcoming"):
-            query = query.filter(cls.due_date >= datetime.now())
+            query = query.filter(cls.due_date >= datetime.utcnow())
         if kwargs.get("last_results"):
             last_results = int(kwargs.get("last_results", 0))
             query = (
