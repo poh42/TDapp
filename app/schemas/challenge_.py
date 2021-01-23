@@ -7,6 +7,7 @@ from models.game import GameModel
 from schemas.challenge_user import ChallengeUserSchema
 from schemas.console import ConsoleSchema
 from schemas.game import GameSchema
+from schemas.user_challenge_score import UserChallengeScoreSchema
 from utils.validation import validate_lower_upper_fields
 from schemas.results_1v1 import Results1v1Schema
 
@@ -32,6 +33,7 @@ class ChallengeSchema(ma.SQLAlchemyAutoSchema):
     game = fields.Nested(GameSchema)
     game_id = fields.Integer(required=True, validate=validate_game_id)
     challenge_users = fields.Nested(ChallengeUserSchema, many=True)
+    user_challenge_scores = fields.Nested(UserChallengeScoreSchema, many=True)
     console_id = fields.Integer(required=True, validate=validate_console_id)
     console = fields.Nested(ConsoleSchema)
     reward = fields.Decimal(required=False)

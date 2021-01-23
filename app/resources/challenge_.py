@@ -1,9 +1,10 @@
+import traceback
 from datetime import datetime, timedelta
 
 from marshmallow import ValidationError
 
 from db import db
-from decorators import check_token
+from decorators import check_token, check_is_admin
 from models.user_challenge_scores import UserChallengeScoresModel
 from models.challenge_user import (
     ChallengeUserModel,
@@ -18,7 +19,7 @@ from models.challenge_user import (
     STATUS_DISPUTED,
     STATUS_SOLVED,
 )
-from models.dispute import DisputeModel
+from models.dispute import DisputeModel, STATUS_OPEN as DISPUTE_STATUS_OPEN
 from models.game import GameModel
 from models.transaction import TransactionModel, TYPE_ADD, TYPE_SUBSTRACTION
 from models.results_1v1 import Results1v1Model
@@ -43,7 +44,7 @@ from datetime import datetime
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, text
 from schemas.challenge_user import ChallengeUserSchema
-from schemas.dispute import DisputeSchema
+from schemas.dispute import DisputeSchema, DisputeAdminSchema, SettleDisputeSchema
 from schemas.results_1v1 import Results1v1Schema
 from utils.schema import get_fields_user_to_exclude
 from decimal import Decimal
@@ -292,7 +293,7 @@ class ChallengeList(Resource):
             ChallengeModel.is_direct != True
         )
         if request.args.get("upcoming") == "true":
-            query = query.filter(ChallengeModel.date >= datetime.now())
+            query = query.filter(ChallengeModel.date >= datetime.utcnow())
         try:
             last_results = int(request.args.get("lastResults", 0))
         except ValueError:
@@ -486,6 +487,150 @@ class GetDisputes(Resource):
     def get(cls, challenge_id):
         disputes = DisputeModel.get_by_challenge_id(challenge_id)
         return {"disputes": dispute_schema.dump(disputes, many=True)}
+
+
+class DisputeList(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin
+    def get(cls):
+        data = DisputeModel.get_all_disputes(request.args)
+        items = data.items
+        total = data.total
+        return {
+            "data": DisputeAdminSchema(
+                only=(
+                    "comments",
+                    "id",
+                    "created_at",
+                    "updated_at",
+                    "status",
+                    "challenge_id",
+                    "challenge.challenge_users.id",
+                    "challenge.challenge_users.status_challenged",
+                    "challenge.challenge_users.status_challenger",
+                    "challenge.user_challenge_scores",
+                )
+            ).dump(items, many=True),
+            "total": total,
+        }, 200
+
+
+class DisputeAdmin(Resource):
+    @classmethod
+    @check_token
+    @check_is_admin
+    def get(cls, dispute_id):
+        dispute = DisputeModel.find_by_id(dispute_id)
+        if dispute is None:
+            return {"message": "Dispute not found"}, 404
+        only = (
+            "comments",
+            "id",
+            "created_at",
+            "updated_at",
+            "status",
+            "challenge_id",
+            "challenge.challenge_users.id",
+            "challenge.challenge_users.status_challenged",
+            "challenge.challenge_users.status_challenger",
+            "challenge.user_challenge_scores",
+        )
+        return {"data": DisputeAdminSchema(only=only).dump(dispute)}, 200
+
+    @classmethod
+    @check_token
+    @check_is_admin
+    def put(cls, dispute_id):
+        dispute: DisputeModel = DisputeModel.find_by_id(dispute_id)
+        if dispute is None:
+            return {"message": "Dispute not found"}, 404
+        json_data = request.get_json()
+        schema = SettleDisputeSchema()
+        loaded_data = schema.load(json_data)
+
+        # let's find the challenge
+        challenge: ChallengeModel = ChallengeModel.find_by_id(dispute.challenge_id)
+
+        # let's find the challenge users
+        challenge_users: ChallengeUserModel = ChallengeUserModel.find_by_wager_id(
+            dispute.challenge_id
+        )
+        challenge_users.status_challenger = STATUS_COMPLETED
+        challenge_users.status_challenged = STATUS_COMPLETED
+        challenge_users.save_to_db()
+        # Ponemos los estados del challenge users en complete
+        cls.store_challenge_results(loaded_data, challenge_users)
+        if loaded_data["score_player_1"] != loaded_data["score_player_2"]:
+            cls.assign_credits_to_winner(loaded_data, challenge)
+        else:
+            cls.resolve_challenge_on_tie(loaded_data, challenge_users, challenge)
+        # Let's record the data in results
+        return {"message": "Status changed", "data": loaded_data}, 200
+
+    @classmethod
+    def store_challenge_results(cls, data, challenge_users: ChallengeUserModel):
+        results = Results1v1Model()
+        results.challenge_id = challenge_users.wager_id
+        results.score_player_1 = data["score_player_1"]
+        results.score_player_2 = data["score_player_2"]
+        results.player_1_id = data["player_1_id"]
+        results.player_2_id = data["player_2_id"]
+        results.played = datetime.utcnow()
+        if results.score_player_1 != results.score_player_2:
+            results.winner_id = data["winner_id"]
+        else:
+            results.winner_id = None
+        results.save_to_db()
+        return results
+
+    @classmethod
+    def resolve_challenge_on_tie(
+        cls, data, challenge_users: ChallengeUserModel, challenge: ChallengeModel
+    ):
+        if data["score_player_1"] == data["score_player_2"]:
+            challenger_transaction = TransactionModel.find_by_user_id(
+                challenge_users.challenger_id
+            )
+            new_transaction = TransactionModel()
+            new_transaction.previous_credit_total = challenger_transaction.credit_total
+            new_transaction.credit_change = challenge.buy_in
+            new_transaction.credit_total = (
+                challenger_transaction.credit_total + challenge.buy_in
+            )
+            new_transaction.challenge_id = challenge.id
+            new_transaction.user_id = challenge_users.challenger_id
+            new_transaction.type = TYPE_ADD
+            new_transaction.save_to_db()
+
+            challenged_transaction = TransactionModel.find_by_user_id(
+                challenge_users.challenged_id
+            )
+            new_transaction = TransactionModel()
+            new_transaction.previous_credit_total = challenged_transaction.credit_total
+            new_transaction.credit_change = challenge.buy_in
+            new_transaction.credit_total = (
+                challenged_transaction.credit_total + challenge.buy_in
+            )
+            new_transaction.challenge_id = challenge.id
+            new_transaction.user_id = challenge_users.challenged_id
+            new_transaction.type = TYPE_ADD
+            new_transaction.save_to_db()
+
+            return True
+        return False
+
+    @classmethod
+    def assign_credits_to_winner(cls, data, challenge: ChallengeModel):
+        transaction = TransactionModel.find_by_user_id(data["winner_id"])
+        new_transaction = TransactionModel()
+        new_transaction.previous_credit_total = transaction.credit_total
+        new_transaction.credit_change = challenge.reward
+        new_transaction.credit_total = transaction.credit_total + challenge.reward
+        new_transaction.challenge_id = challenge.id
+        new_transaction.user_id = data["winner_id"]
+        new_transaction.type = TYPE_ADD
+        new_transaction.save_to_db()
 
 
 class AcceptChallenge(Resource):
@@ -726,7 +871,7 @@ class DirectChallenges(Resource):
 class ChallengeStatusUpdate(Resource):
     @classmethod
     def __init__(cls):
-        cls.now: datetime = datetime.now()
+        cls.now: datetime = datetime.utcnow()
         cls.current_user: UserModel
         cls.challenge: ChallengeModel
         cls.challenge_users: ChallengeUserModel
@@ -852,6 +997,7 @@ class ChallengeStatusUpdate(Resource):
             )
         except Exception as e:
             print(e)
+            traceback.print_exc()
             return {
                 "message": "There was an error updating the challenge: " + str(e)
             }, 400
@@ -1010,6 +1156,13 @@ class ChallengeStatusUpdate(Resource):
             cls.challenge_users.status_challenged = STATUS_DISPUTED
             cls.challenge.status = STATUS_DISPUTED
             cls.challenge.save_to_db()
+
+            dispute: DisputeModel = DisputeModel()
+            dispute.challenge_id = cls.challenge.id
+            dispute.user_id = cls.challenge_users.challenger_id
+            dispute.status = DISPUTE_STATUS_OPEN
+            dispute.comments = "GENERATED AUTOMATICALLY"
+            dispute.save_to_db()
             return True
         return False
 
