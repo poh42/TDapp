@@ -560,13 +560,11 @@ class DisputeAdmin(Resource):
         challenge_users.status_challenged = STATUS_COMPLETED
         challenge_users.save_to_db()
         # Ponemos los estados del challenge users en complete
-        results = cls.store_challenge_results(loaded_data, challenge_users)
+        cls.store_challenge_results(loaded_data, challenge_users)
         if loaded_data["score_player_1"] != loaded_data["score_player_2"]:
-            pass
-            # Mandamos los creditos
+            cls.assign_credits_to_winner(loaded_data, challenge)
         else:
             cls.resolve_challenge_on_tie(loaded_data, challenge_users, challenge)
-            # retornamos los creditos a sus respectivos usuarios
         # Let's record the data in results
         return {"message": "Status changed", "data": loaded_data}, 200
 
@@ -587,7 +585,9 @@ class DisputeAdmin(Resource):
         return results
 
     @classmethod
-    def resolve_challenge_on_tie(cls, data, challenge_users: ChallengeUserModel, challenge: ChallengeModel):
+    def resolve_challenge_on_tie(
+        cls, data, challenge_users: ChallengeUserModel, challenge: ChallengeModel
+    ):
         if data["score_player_1"] == data["score_player_2"]:
             challenger_transaction = TransactionModel.find_by_user_id(
                 challenge_users.challenger_id
@@ -621,15 +621,14 @@ class DisputeAdmin(Resource):
         return False
 
     @classmethod
-    def assign_credits_to_winner(cls):
-        results = Results1v1Model.find_by_challenge_id(cls.challenge.id)
-        transaction = TransactionModel.find_by_user_id(results.winner_id)
+    def assign_credits_to_winner(cls, data, challenge: ChallengeModel):
+        transaction = TransactionModel.find_by_user_id(data["winner_id"])
         new_transaction = TransactionModel()
         new_transaction.previous_credit_total = transaction.credit_total
-        new_transaction.credit_change = cls.challenge.reward
-        new_transaction.credit_total = transaction.credit_total + cls.challenge.reward
-        new_transaction.challenge_id = cls.challenge.id
-        new_transaction.user_id = results.winner_id
+        new_transaction.credit_change = challenge.reward
+        new_transaction.credit_total = transaction.credit_total + challenge.reward
+        new_transaction.challenge_id = challenge.id
+        new_transaction.user_id = data["winner_id"]
         new_transaction.type = TYPE_ADD
         new_transaction.save_to_db()
 
