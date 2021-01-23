@@ -389,6 +389,7 @@ class ResultsByUser(Resource):
             """
             select
                 c.id as challenge_id,
+                c.reward as reward,
                 g."name" as game_name,
                 rv.played,
                 rv.score_player_1,
