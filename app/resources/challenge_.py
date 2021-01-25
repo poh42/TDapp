@@ -535,6 +535,8 @@ class DisputeAdmin(Resource):
             "updated_at",
             "status",
             "challenge_id",
+            "challenge.game.name",
+            "challenge.console.name",
             "challenge.challenge_users.id",
             "challenge.challenge_users.status_challenged",
             "challenge.challenge_users.status_challenger",
