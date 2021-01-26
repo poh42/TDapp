@@ -2,7 +2,7 @@ from db import db
 from sqlalchemy.sql import func
 
 STATUS_OPEN = "OPEN"
-STATUS_DECIDED = "DECIDED"
+STATUS_SOLVED = "SOLVED"
 
 
 class DisputeModel(db.Model):

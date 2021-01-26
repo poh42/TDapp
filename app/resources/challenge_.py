@@ -19,7 +19,11 @@ from models.challenge_user import (
     STATUS_DISPUTED,
     STATUS_SOLVED,
 )
-from models.dispute import DisputeModel, STATUS_OPEN as DISPUTE_STATUS_OPEN
+from models.dispute import (
+    DisputeModel,
+    STATUS_OPEN as DISPUTE_STATUS_OPEN,
+    STATUS_SOLVED as DISPUTE_STATUS_SOLVED,
+)
 from models.game import GameModel
 from models.transaction import TransactionModel, TYPE_ADD, TYPE_SUBSTRACTION
 from models.results_1v1 import Results1v1Model
@@ -289,14 +293,15 @@ class Challenge(Resource):
 class ChallengeList(Resource):
     @classmethod
     def get(cls):
-        query = ChallengeModel.query\
-            .options(joinedload(ChallengeModel.game))\
-            .filter(ChallengeModel.is_direct is not True)\
+        query = (
+            ChallengeModel.query.options(joinedload(ChallengeModel.game))
+            .filter(ChallengeModel.is_direct is not True)
             .order_by(ChallengeModel.date.asc())
+        )
         if request.args.get("upcoming") == "true":
-            query = query.filter(
-                ChallengeModel.date >= datetime.utcnow()
-                ).order_by(ChallengeModel.date.asc())
+            query = query.filter(ChallengeModel.date >= datetime.utcnow()).order_by(
+                ChallengeModel.date.asc()
+            )
         try:
             last_results = int(request.args.get("lastResults", 0))
         except ValueError:
@@ -575,6 +580,10 @@ class DisputeAdmin(Resource):
         else:
             cls.resolve_challenge_on_tie(loaded_data, challenge_users, challenge)
         # Let's record the data in results
+        challenge.status = STATUS_COMPLETED
+        challenge.save_to_db()
+        dispute.status = DISPUTE_STATUS_SOLVED
+        dispute.save_to_db()
         return {"message": "Status changed", "data": loaded_data}, 200
 
     @classmethod
