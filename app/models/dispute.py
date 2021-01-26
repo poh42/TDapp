@@ -33,7 +33,7 @@ class DisputeModel(db.Model):
         status = kwargs.get("status", None)
         if status:
             query = query.filter_by(status=status)
-        return query.paginate(kwargs.get("page", 1, type=int), 2)
+        return query.paginate(kwargs.get("page", 1, type=int), 20)
 
     @classmethod
     def find_by_id(cls, _id):
