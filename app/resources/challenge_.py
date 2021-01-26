@@ -552,9 +552,12 @@ class DisputeAdmin(Resource):
         json_data = request.get_json()
         schema = SettleDisputeSchema()
         loaded_data = schema.load(json_data)
+        loaded_data["id"] = dispute_id
 
         # let's find the challenge
         challenge: ChallengeModel = ChallengeModel.find_by_id(dispute.challenge_id)
+        if Results1v1Model.find_by_challenge_id(challenge.id) is not None:
+            return {"message": "Challenge already settled"}, 400
 
         # let's find the challenge users
         challenge_users: ChallengeUserModel = ChallengeUserModel.find_by_wager_id(
