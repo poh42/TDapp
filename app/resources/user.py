@@ -115,8 +115,17 @@ class UserLogin(Resource):
                 return {"message": "User not confirmed"}, 400
             try:
                 user = pb.auth().sign_in_with_email_and_password(email, password)
+                is_user_admin = False
+                data_user = pb.auth().get_account_info(user["idToken"])["users"][0]
+                if data_user.get("customAttributes", None):
+                    new_data = json.loads(data_user["customAttributes"])
+                    is_user_admin = new_data.get("admin", False)
                 jwt = user["idToken"]
-                return {"token": jwt, "user": user_dump_schema.dump(user_instance)}, 200
+                return {
+                    "token": jwt,
+                    "user": user_dump_schema.dump(user_instance),
+                    "is_admin": is_user_admin,
+                }, 200
             except HTTPError as e:
                 try:
                     error_data = json.loads(e.strerror)
