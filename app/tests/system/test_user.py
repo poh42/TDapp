@@ -154,8 +154,13 @@ class TestUserEndpoints(BaseAPITestCase):
                     self.assertEqual(rv.status_code, 201)
 
     def test_login(self):
+        return_value_get_account_info = {
+            "users": [{"customAttributes": '{"admin": true}'}]
+        }
+
         class TestClass:
             sign_in_with_email_and_password = Mock(return_value={"idToken": "MyToken"})
+            get_account_info = Mock(return_value=return_value_get_account_info)
 
         with self.test_client() as c:
             with self.app_context():
@@ -164,7 +169,7 @@ class TestUserEndpoints(BaseAPITestCase):
                     confirmation = ConfirmationModel(user.id)
                     confirmation.confirmed = True
                     confirmation.save_to_db()
-                    pb.side_effect = (TestClass,)
+                    pb.side_effect = (TestClass, TestClass)
                     data = json.dumps(dict(email=email, password=password))
                     rv = c.post(
                         "/user/login", data=data, content_type="application/json"
