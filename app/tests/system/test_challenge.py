@@ -603,7 +603,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                 challenge_users: ChallengeUserModel = fixtures["challenge_user"]
                 with self.subTest("Correct transition to READY"):
                     g.claims = {"uid": "myLbdKL8dFhipvanv4AnIUaJpqd2"}
-                    challenge.date = datetime.now()
+                    challenge.date = datetime.utcnow()
                     challenge.status = STATUS_ACCEPTED
                     challenge_users.status_challenger = STATUS_OPEN
                     challenge_users.status_challenged = STATUS_ACCEPTED
@@ -616,7 +616,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     self.assertEqual(challenge_users.status_challenged, STATUS_READY)
                 with self.subTest("Correct transition to READY both users"):
                     g.claims = {"uid": "dummy_2"}
-                    challenge.date = datetime.now()
+                    challenge.date = datetime.utcnow()
                     challenge.status = STATUS_ACCEPTED
                     challenge_users.status_challenger = STATUS_OPEN
                     challenge_users.status_challenged = STATUS_READY
@@ -629,7 +629,7 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     self.assertEqual(challenge_users.status_challenged, STATUS_READY)
                 with self.subTest("Incorrect transition to READY - not in time frame"):
                     g.claims = {"uid": "dummy_2"}
-                    challenge.date = datetime.now() - timedelta(minutes=10)
+                    challenge.date = datetime.utcnow() - timedelta(minutes=10)
                     challenge.status = STATUS_ACCEPTED
                     challenge_users.status_challenger = STATUS_OPEN
                     challenge_users.status_challenged = STATUS_ACCEPTED
