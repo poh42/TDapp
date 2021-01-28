@@ -48,6 +48,7 @@ from datetime import datetime
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, text
 from schemas.challenge_user import ChallengeUserSchema
+from schemas.user_challenge_score import UserChallengeScoreSchema
 from schemas.dispute import DisputeSchema, DisputeAdminSchema, SettleDisputeSchema
 from schemas.results_1v1 import Results1v1Schema
 from utils.schema import get_fields_user_to_exclude
@@ -56,6 +57,7 @@ from decimal import Decimal
 from utils.validation import has_game_console
 
 challenge_schema = ChallengeSchema()
+user_challenge_score_schema = UserChallengeScoreSchema()
 challenge_user_schema = ChallengeUserSchema()
 dispute_schema = DisputeSchema()
 
@@ -964,21 +966,21 @@ class ChallengeStatusUpdate(Resource):
     @classmethod
     @check_token
     def put(cls, challenge_id):
-        cls.assign_init_values(challenge_id)
-        if not cls.challenge:
-            return {"message": "Challenge not found"}, 404
-        if cls.challenge.status == STATUS_DISPUTED:
-            return {"message": "Action not available for user"}, 403
-        cls.validate_challenge_flow()
-        if not cls.user_belongs_challenge:
-            return {"message": "User does not belong to challenge"}, 403
-        if not cls.user_valid_status:
-            return {"message": "Invalid challenge user status"}, 403
-        if not cls.challenge_valid_status:
-            return {"message": "Invalid challenge status"}, 403
-        if cls.next_status == STATUS_READY and not cls.validate_time_window():
-            return {"message": "Incorrect transition for challenge"}, 403
         try:
+            cls.assign_init_values(challenge_id)
+            if not cls.challenge:
+                return {"message": "Challenge not found"}, 404
+            if cls.challenge.status == STATUS_DISPUTED:
+                return {"message": "Action not available for user"}, 403
+            cls.validate_challenge_flow()
+            if not cls.user_belongs_challenge:
+                return {"message": "User does not belong to challenge"}, 403
+            if not cls.user_valid_status:
+                return {"message": "Invalid challenge user status"}, 403
+            if not cls.challenge_valid_status:
+                return {"message": "Invalid challenge status"}, 403
+            if cls.next_status == STATUS_READY and not cls.validate_time_window():
+                return {"message": "Incorrect transition for challenge"}, 403
             cls.update_challenge_user_status()
             cls.update_challenge_status()
             cls.store_challenge_user_score()
@@ -1017,16 +1019,23 @@ class ChallengeStatusUpdate(Resource):
             print(e)
             traceback.print_exc()
             return {
-                "message": "There was an error updating the challenge: " + str(e)
+                "message":
+                "There was an error updating the challenge: " + str(e)
             }, 400
 
     @classmethod
     def assign_init_values(cls, challenge_id):
         cls.json_data = request.get_json()
+        if cls.json_data:
+            errors = user_challenge_score_schema.validate(
+                cls.json_data, partial=True)
+            if errors:
+                raise Exception(errors)
         cls.challenge = ChallengeModel.find_by_id(challenge_id)
         if not cls.challenge:
             return
         cls.current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        # cls.current_user = UserModel.find_by_id(cls.json_data["user_id"])
         if not cls.current_user:
             return
         cls.challenge_users = ChallengeUserModel.query.filter_by(
