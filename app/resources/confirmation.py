@@ -1,9 +1,10 @@
 import traceback
 
-from flask import make_response, render_template
+from flask import make_response, render_template, request
 from flask_restful import Resource
 from models.user import UserModel
 from models.confirmation import ConfirmationModel
+from schemas.confirmation import ResendConfirmationSchema
 from utils.mailgun import MailgunException
 
 
@@ -29,11 +30,12 @@ class Confirmation(Resource):
         )
 
 
-class ConfirmationByUser(Resource):
+class ResendConfirmation(Resource):
     @classmethod
-    def post(cls, user_id):
+    def post(cls):
         """Resends confirmation email"""
-        user = UserModel.find_by_id(user_id)
+        data = ResendConfirmationSchema().load(request.get_json())
+        user = UserModel.find_by_email(data["email"])
         if not user:
             return {"message": "User not found"}, 404
         try:

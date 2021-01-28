@@ -11,7 +11,7 @@ from marshmallow import ValidationError
 
 from ma import ma
 from db import db
-from resources.confirmation import Confirmation, ConfirmationByUser
+from resources.confirmation import Confirmation, ResendConfirmation
 from resources.challenge_ import (
     Challenge,
     ChallengeList,
@@ -137,7 +137,7 @@ api.add_resource(PublicUserList, "/users/public")
 api.add_resource(UserList, "/users")
 api.add_resource(TopEarners, "/users/topEarners")
 api.add_resource(Confirmation, "/user/confirm/<string:confirmation_id>")
-api.add_resource(ConfirmationByUser, "/confirmation/user/<int:user_id>")
+api.add_resource(ResendConfirmation, "/resend_confirmation")
 api.add_resource(Challenge, "/challenge/<int:challenge_id>")
 api.add_resource(ChallengePost, "/challenge")
 api.add_resource(ChallengeList, "/challenges")
