@@ -92,8 +92,8 @@ class ChallengeModel(db.Model):
         sql = """
         select 1 from challenge_users cu
             where cu.wager_id = :challenge_id and
-                ((cu.challenged_id = :user_id and cu.status_challenged = 'COMPLETED') or
-                (cu.challenger_id = :user_id and cu.status_challenger = 'COMPLETED'))
+                (cu.challenged_id = :user_id or cu.challenger_id = :user_id)
+                and (cu.status_challenged <> 'ACCEPTED' and cu.status_challenger <> 'ACCEPTED')
         """
         data = db.engine.execute(
             text(sql), user_id=user_id, challenge_id=self.id
