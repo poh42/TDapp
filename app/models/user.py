@@ -101,9 +101,52 @@ class UserModel(db.Model):
         link = request.url_root[:-1] + url_for(
             "confirmation", confirmation_id=self.most_recent_confirmation.id
         )
-        subject = "Registration confirmation"
-        text = f"Please click to confirm your registration: {link}"
-        html = f'<html>Please click to confirm your registration: <a href="{link}">{link}</a></html>'
+        subject = "Welcome to TopDog"
+        text = f"""\
+Your Play TopDog account has been successfully created. Welcome to the pack!
+Your username is: {self.username}
+Please click this link to activate your account: {link}
+Want some help getting acquainted with the TopDog platform? Checkout our How To’s, FAQ’s, and Tutorial Videos. 
+For any membership help, or questions please join our Discord or contact support@playtopdog.com. 
+Ready to get in the game and start winning? playtopdog.com
+Welcome to the world of TopDog, we look forward to watching you be rewarded for playing your favorite games!
+Game On,
+The TopDog Team
+
+Website, Instagram, Facebook, Twitch
+"""
+        html = f"""\
+<html>
+   <div>
+      <p>Your Play TopDog account has been successfully created. Welcome to the pack</p>
+   </div>
+   <div>
+      <p>
+        Your username is: {self.username}<br/>
+        <a href="{link}">Please click this link to activate your account</a><br/>
+        Want some help getting acquainted with the TopDog platform?<br/> 
+        Checkout our 
+            <a href="https://playtopdog.com/game-specs">How To&rsquo;s</a>, 
+            <a href="https://playtopdog.com/faqs">FAQ&rsquo;s</a>, and 
+            <a href="https://playtopdog.com/tutorial-videos-1">Tutorial Videos</a>.<br/>
+        For any membership help, or questions please join our 
+            <a href="https://discord.gg/vqbVxsFh">Discord</a> or contact 
+            <a href = "mailto: abc@example.com">support@playtopdog.com</a>.<br/>
+        Ready to get in the game and start winning?
+            <a href="https://playtopdog.com/">playtopdog.com</a>, <br/>
+        Welcome to the world of TopDog, we look forward to watching you be 
+        rewarded for playing your favorite games!<br/>
+        Game On,<br/>
+        The TopDog Team
+      </p>
+   </div>
+   <p>
+   <a href="https://playtopdog.com/">Website</a>, 
+   <a href="https://www.instagram.com/playtopdog/">Instagram</a>, 
+   <a href="https://www.facebook.com/playtopdog">Facebook</a>, 
+   <a href="https://www.twitch.tv/playtopdog">Twitch</a></p>
+</html>
+"""
         return send_email([self.email], subject, text, html)
 
     @classmethod

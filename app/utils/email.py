@@ -1,4 +1,6 @@
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import os
 from typing import List
 import logging
@@ -7,23 +9,21 @@ log = logging.getLogger(__name__)
 
 
 def send_email(to: List[str], subject: str, text: str, html: str) -> bool:
-    # TODO this should support html messages
-    # Check https://stackoverflow.com/questions/882712/sending-html-email-using-python
     email_user = os.getenv("EMAIL_USER")
     email_password = os.getenv("EMAIL_PASSWORD")
     sent_from = email_user
-    email_text = """\
-From: %s
-To: %s
-Subject: %s
+    recipients = ", ".join(to)
 
-    %s
-    """ % (
-        sent_from,
-        ", ".join(to),
-        subject,
-        text,
-    )
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From'] = sent_from
+    msg['To'] = recipients
+
+    plain_msg = MIMEText(text, 'plain')
+    html_msg = MIMEText(html, 'html')
+
+    msg.attach(plain_msg)
+    msg.attach(html_msg)
 
     try:
         server = smtplib.SMTP_SSL(
@@ -31,7 +31,7 @@ Subject: %s
         )
         server.ehlo()
         server.login(email_user, email_password)
-        server.sendmail(sent_from, to, email_text)
+        server.sendmail(sent_from, recipients, msg.as_string())
         server.close()
 
         print("Email sent!")
