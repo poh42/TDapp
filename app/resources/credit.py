@@ -31,6 +31,22 @@ where
 
 class AddCredits(Resource):
     @classmethod
+    def add_credits_to_users_not_in_transactions(cls, json_data):
+        sql_get_ids = """
+        select u.id from users u
+            where u.id not in (select t.user_id from transactions t)
+        """
+        result = db.engine.execute(text(sql_get_ids))
+        insert_query = """
+        insert into transactions (previous_credit_total, credit_change, credit_total, challenge_id, user_id, "type") 
+            values (0, :credit_change, :credit_change, null, :user_id, 'ADD')
+        """
+        credit_change = json_data["credit_change"]
+        for r in result:
+            user_id = r[0]
+            db.engine.execute(text(insert_query), user_id=user_id, credit_change=credit_change)
+
+    @classmethod
     @check_token
     @check_is_admin
     def post(cls):
@@ -49,6 +65,7 @@ class AddCredits(Resource):
             threshold=json_data["threshold"],
             credit_change=json_data["credit_change"],
         )
+        cls.add_credits_to_users_not_in_transactions(json_data)
         return {"message": "Credits added"}, 201
 
 
