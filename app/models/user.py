@@ -108,7 +108,7 @@ Your username is: {self.username}
 Please click this link to activate your account: {link}
 Want some help getting acquainted with the TopDog platform? Checkout our How To’s, FAQ’s, and Tutorial Videos. 
 For any membership help, or questions please join our Discord or contact support@playtopdog.com. 
-Ready to get in the game and start winning? playtopdog.com
+Ready to get in the game and start winning? http://lets.playtopdog.com/
 Welcome to the world of TopDog, we look forward to watching you be rewarded for playing your favorite games!
 Game On,
 The TopDog Team
@@ -133,7 +133,7 @@ Website, Instagram, Facebook, Twitch
             <a href="https://discord.gg/vqbVxsFh">Discord</a> or contact 
             <a href = "mailto: abc@example.com">support@playtopdog.com</a>.<br/>
         Ready to get in the game and start winning?
-            <a href="https://playtopdog.com/">playtopdog.com</a>, <br/>
+            <a href="http://lets.playtopdog.com/">Let’s play TopDog</a>, <br/>
         Welcome to the world of TopDog, we look forward to watching you be 
         rewarded for playing your favorite games!<br/>
         Game On,<br/>
