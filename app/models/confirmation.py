@@ -2,7 +2,7 @@ from db import db
 from secrets import token_urlsafe
 from time import time
 
-CONFIRMATION_EXPIRATION_DELTA = 1800  # 30 minutes
+CONFIRMATION_EXPIRATION_DELTA = 604800  # One week
 
 
 class ConfirmationModel(db.Model):
