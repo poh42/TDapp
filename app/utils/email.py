@@ -26,10 +26,12 @@ def send_email(to: List[str], subject: str, text: str, html: str) -> bool:
     msg.attach(html_msg)
 
     try:
-        server = smtplib.SMTP_SSL(
+        server = smtplib.SMTP(
             os.getenv("EMAIL_SMTP_SERVER"), os.getenv("EMAIL_SMTP_PORT")
         )
+        server.connect(os.getenv("EMAIL_SMTP_SERVER"), os.getenv("EMAIL_SMTP_PORT"))
         server.ehlo()
+        server.starttls()
         server.login(email_user, email_password)
         server.sendmail(sent_from, recipients, msg.as_string())
         server.close()
