@@ -81,6 +81,16 @@ class Game(Resource):
     @classmethod
     @check_token
     @check_is_admin
+    def get(cls, game_id):
+        game: GameModel = GameModel.find_by_id(game_id)
+        if game is None:
+            return {"message": "Game not found"}, 400
+        schema = GameSchema()
+        return {"game": schema.dump(game)}, 200
+
+    @classmethod
+    @check_token
+    @check_is_admin
     def delete(cls, game_id):
         game: GameModel = GameModel.find_by_id(game_id)
         if game is None:
