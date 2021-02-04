@@ -548,6 +548,7 @@ class DisputeAdmin(Resource):
             "challenge.challenge_users.status_challenged",
             "challenge.challenge_users.status_challenger",
             "challenge.user_challenge_scores",
+            "user_id",
         )
         return {"data": DisputeAdminSchema(only=only).dump(dispute)}, 200
 
