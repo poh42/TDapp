@@ -190,7 +190,7 @@ Website, Instagram, Facebook, Twitch
 
     @classmethod
     def get_all_users(cls):
-        sql = "SELECT u.* from users u"
+        sql = "SELECT u.* from users u ORDER BY u.id ASC"
         data = db.engine.execute(text(sql)).fetchall()
         return [dict(d) for d in data]
 
