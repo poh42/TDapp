@@ -17,6 +17,7 @@ class DisputeSchema(ma.SQLAlchemyAutoSchema):
 
 class DisputeAdminSchema(ma.SQLAlchemyAutoSchema):
     challenge_id = fields.Integer(required=False)
+    user_id = fields.Integer(required=False)
     challenge = fields.Nested("ChallengeSchema")
 
     class Meta:
