@@ -64,9 +64,7 @@ class TestUserEndpoints(BaseAPITestCase):
                         send_email.assert_called_once()
                         args, kwargs = send_email.call_args
                         self.assertEqual(args[0][0], email)
-                        self.assertEqual(
-                            args[1], "Welcome to TopDog", "Wrong title"
-                        )
+                        self.assertEqual(args[1], "Welcome to TopDog", "Wrong title")
                         self.assertIn(
                             "Please click this link to activate your account",
                             args[2],

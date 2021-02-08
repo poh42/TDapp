@@ -15,6 +15,7 @@ class GameModel(db.Model):
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
     is_active = db.Column(db.Boolean, default=True)
+    description = db.Column(db.Text, nullable=True)
     challenges = db.relationship(
         "ChallengeModel", lazy="dynamic", cascade="all, delete-orphan"
     )

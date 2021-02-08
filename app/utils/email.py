@@ -14,13 +14,13 @@ def send_email(to: List[str], subject: str, text: str, html: str) -> bool:
     sent_from = email_user
     recipients = ", ".join(to)
 
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = sent_from
-    msg['To'] = recipients
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = sent_from
+    msg["To"] = recipients
 
-    plain_msg = MIMEText(text, 'plain')
-    html_msg = MIMEText(html, 'html')
+    plain_msg = MIMEText(text, "plain")
+    html_msg = MIMEText(html, "html")
 
     msg.attach(plain_msg)
     msg.attach(html_msg)

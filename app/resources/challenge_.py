@@ -1026,16 +1026,14 @@ class ChallengeStatusUpdate(Resource):
             print(e)
             traceback.print_exc()
             return {
-                "message":
-                "There was an error updating the challenge: " + str(e)
+                "message": "There was an error updating the challenge: " + str(e)
             }, 400
 
     @classmethod
     def assign_init_values(cls, challenge_id):
         cls.json_data = request.get_json()
         if cls.json_data:
-            errors = user_challenge_score_schema.validate(
-                cls.json_data, partial=True)
+            errors = user_challenge_score_schema.validate(cls.json_data, partial=True)
             if errors:
                 raise Exception(errors)
         cls.challenge = ChallengeModel.find_by_id(challenge_id)

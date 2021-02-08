@@ -44,6 +44,7 @@ class TestGameEndpoints(BaseAPITestCase):
                 "image": "image_url_here",
                 "name": "Test",
                 "consoles": [{"id": console.id}],
+                "description": "Test description"
             }
             with self.test_client() as c:
                 rv = c.post(
@@ -58,6 +59,7 @@ class TestGameEndpoints(BaseAPITestCase):
                 self.assertTrue(game_data["is_active"], "Should be true")
                 self.assertEqual(game_data["name"], "Test", "Wrong name")
                 self.assertEqual(game_data["image"], "image_url_here", "Wrong url")
+                self.assertEqual(game_data["description"], "Test description", "Wrong description")
                 self.assertIn(
                     "consoles", game_data, "Consoles not present in game data"
                 )
@@ -81,10 +83,11 @@ class TestGameEndpoints(BaseAPITestCase):
             fixtures = create_fixtures()
             game = fixtures["game"]
             with self.test_client() as c:
-                data = json.dumps({"is_active": False, "name": "edited"})
+                data = json.dumps({"is_active": False, "name": "edited", "description": "Test"})
                 rv = c.put(
                     f"/games/{game.id}", data=data, content_type="application/json"
                 )
                 self.assertEqual(rv.status_code, 200, "Wrong status code")
                 edited_game = GameModel.find_by_id(game.id)
                 self.assertFalse(edited_game.is_active, "Game wasn't edited")
+                self.assertEqual(edited_game.description, "Test", "Game wasn't edited")
