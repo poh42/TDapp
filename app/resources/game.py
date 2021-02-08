@@ -72,6 +72,8 @@ class Game(Resource):
             game.name = game_data.get("name")
         if game_data.get("image"):
             game.image = game_data.get("image")
+        if game_data.get("description"):
+            game.description = game_data.get("description")
         is_active = game_data.get("is_active")
         if is_active is True or is_active is False:
             game.is_active = is_active
