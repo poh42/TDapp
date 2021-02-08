@@ -44,7 +44,9 @@ class AddCredits(Resource):
         credit_change = json_data["credit_change"]
         for r in result:
             user_id = r[0]
-            db.engine.execute(text(insert_query), user_id=user_id, credit_change=credit_change)
+            db.engine.execute(
+                text(insert_query), user_id=user_id, credit_change=credit_change
+            )
 
     @classmethod
     @check_token
