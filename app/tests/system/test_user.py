@@ -1,6 +1,7 @@
 import unittest
 
 from models.invite import InviteModel
+from models.transaction import TransactionModel
 from tests.base import BaseAPITestCase
 from unittest.mock import patch, Mock, call
 import json
@@ -92,6 +93,23 @@ class TestUserEndpoints(BaseAPITestCase):
                         self.assertEqual(
                             user_game.level, "beginner", "Wrong user_game level"
                         )  # TODO check what should be default level
+                        transactions = TransactionModel.query.filter_by(
+                            user_id=user.id
+                        ).all()
+                        self.assertEqual(
+                            len(transactions),
+                            1,
+                            "Only one transaction should have been created",
+                        )
+                        transaction = transactions[0]
+                        self.assertIsNotNone(
+                            transaction, "Transaction should have been created"
+                        )
+                        self.assertEqual(
+                            transaction.credit_total,
+                            100,
+                            "Incorrect transaction amount for register",
+                        )
 
     def test_signup_user_games_duplicated(self):
         with self.app_context():
