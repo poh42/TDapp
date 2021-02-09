@@ -3,7 +3,9 @@ from flask_restful import Resource
 from flask import request, g
 from firebase_admin import auth
 from marshmallow import ValidationError
+from sqlalchemy import text
 
+from db import db
 from decorators import (
     check_token,
     check_is_admin,
@@ -54,6 +56,15 @@ class UserRegister(Resource):
             confirmation = ConfirmationModel(user_instance.id)
             confirmation.save_to_db()
             user_instance.send_confirmation_email()
+            create_transaction_query = """
+            insert into transactions (previous_credit_total, credit_change, credit_total, challenge_id, user_id, "type") 
+                values (0, :credit_change, :credit_change, null, :user_id, 'ADD')
+            """
+            db.engine.execute(
+                text(create_transaction_query),
+                user_id=user_instance.id,
+                credit_change=100,
+            )
 
         except auth.EmailAlreadyExistsError as e:
             return {"message": "Email is already registered"}, 400
