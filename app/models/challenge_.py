@@ -112,4 +112,5 @@ class ChallengeModel(db.Model):
                 )
             )
             .filter(cls.is_direct == True)
+            .filter(cls.date >= datetime.utcnow())
         ).all()
