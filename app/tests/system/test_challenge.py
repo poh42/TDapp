@@ -164,6 +164,10 @@ class TestChallengeEndpoints(BaseAPITestCase):
                     json_data = rv.get_json()
                     dispute = json_data["dispute"]
                     self.assertEqual(dispute["comments"], comment, "Wrong comment")
+                    found_challenge = ChallengeModel.find_by_id(challenge.id)
+                    found_challenge_users = found_challenge.challenge_users.first()
+                    self.assertEqual(found_challenge.status, "DISPUTED", "Challenge should be disputed")
+                    self.assertEqual(found_challenge_users.status_challenged, "DISPUTED", "Challenge should be disputed")
 
                 with self.subTest("wrong challenge id"):
                     rv = c.post(
