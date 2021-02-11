@@ -37,7 +37,7 @@ from models.challenge_ import (
     STATUS_IN_PROGRESS,
     STATUS_REPORTING,
     STATUS_COMPLETED,
-    STATUS_DISPUTED,
+    STATUS_DISPUTED as CHALLENGE_STATUS_DISPUTED,
     STATUS_SOLVED,
 )
 from flask_restful import Resource
@@ -474,6 +474,7 @@ class ReportChallenge(Resource):
         challenge: ChallengeModel = ChallengeModel.find_by_id(challenge_id)
         if challenge is None:
             return {"message": "Challenge not found"}, 400
+        challenge_users: ChallengeUserModel = challenge.challenge_users.first()
         current_user_firebase_id = g.claims.get("user_id", None)
         if current_user_firebase_id is None:
             return {"message": "Wrong claims"}, 400
@@ -485,6 +486,13 @@ class ReportChallenge(Resource):
         dispute.challenge_id = challenge_id
         dispute.user_id = user.id
         dispute.save_to_db()
+        challenge.status = CHALLENGE_STATUS_DISPUTED
+        challenge.save_to_db()
+        if user.id == challenge_users.challenger_id:
+            challenge_users.status_challenger = STATUS_DISPUTED
+        else:
+            challenge_users.status_challenged = STATUS_DISPUTED
+        challenge_users.save_to_db()
         return (
             {"message": "Dispute created", "dispute": dispute_schema.dump(dispute)},
             200,
