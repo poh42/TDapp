@@ -35,7 +35,9 @@ def _create_user(user):
         "nickname": user.username,
     }
     api_headers = {"Api-Token": API_TOKEN}
-    return requests.post(f"{API_URL}/users", json=data, headers=api_headers) # We might need to check if the user already exists
+    return requests.post(
+        f"{API_URL}/users", json=data, headers=api_headers
+    )  # We might need to check if the user already exists
 
 
 def _create_channel(user1, user2):
