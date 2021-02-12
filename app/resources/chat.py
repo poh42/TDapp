@@ -12,11 +12,12 @@ Crear channel
 """
 import os
 import requests
-from flask import g
+from flask import g, request
 from flask_restful import Resource
 
 from decorators import check_token
 from models.user import UserModel
+from schemas.chat import SendMessageSchema
 
 API_TOKEN = os.environ.get("SENDBIRD_API_TOKEN")
 API_URL = os.environ.get("SENDBIRD_API_URL")
@@ -54,6 +55,20 @@ def _create_channel(user1, user2):
     return requests.post(f"{API_URL}/group_channels", headers=api_headers, json=data)
 
 
+def _send_message(channel_url, user_id, message):
+    api_headers = {"Api-Token": API_TOKEN}
+    data = {
+        "message_type": "MESG",
+        "user_id": user_id,
+        "message": message,
+    }
+    return requests.post(
+        f"{API_URL}/group_channels/{channel_url}/messages",
+        headers=api_headers,
+        json=data,
+    )
+
+
 CODE_USER_EXISTS = (
     400202  # This is a code that specifies that the user was already created
 )
@@ -89,3 +104,18 @@ class CreateChannel(Resource):
             }, 201
         else:
             return {"message": "There was an error creating the channel"}, 500
+
+
+# TODO, test this
+
+class SendMessage(Resource):
+    @classmethod
+    @check_token
+    def post(cls):
+        data = SendMessageSchema().load(request.get_json())
+        response = _send_message(data.get("channel_url"), g.claims["uid"], data.get("message"))
+        if response:
+            return {"message": "Message sent", "data": response.json()}, 201
+        else:
+            print(response.content)
+            return {"message": "There was an error sending the message"}, 500
