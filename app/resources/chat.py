@@ -18,8 +18,8 @@ from flask_restful import Resource
 from decorators import check_token
 from models.user import UserModel
 
-API_TOKEN = os.environ.get("SENBIRD_API_TOKEN")
-API_URL = os.environ.get("SENBIRD_API_URL")
+API_TOKEN = os.environ.get("SENDBIRD_API_TOKEN")
+API_URL = os.environ.get("SENDBIRD_API_URL")
 
 if API_TOKEN is None:
     print("Warning: API TOKEN is None. Please check your settings")
