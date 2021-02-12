@@ -35,19 +35,28 @@ def _create_user(user):
         "nickname": user.username,
     }
     api_headers = {"Api-Token": API_TOKEN}
-    return requests.post(
+    response = requests.post(
         f"{API_URL}/users", json=data, headers=api_headers
     )  # We might need to check if the user already exists
+    if response:
+        user.is_sendbird_user_created = True
+        user.save()
+    return response
 
 
 def _create_channel(user1, user2):
     api_headers = {"Api-Token": API_TOKEN}
-    user_ids = [user1, user2]
+    user_ids = [user1.firebase_id, user2.firebase_id]
     data = {
         "user_ids": user_ids,
         "is_distinct": True,
     }
     return requests.post(f"{API_URL}/group_channels", headers=api_headers, json=data)
+
+
+CODE_USER_EXISTS = (
+    400202  # This is a code that specifies that the user was already created
+)
 
 
 class CreateChannel(Resource):
@@ -59,19 +68,24 @@ class CreateChannel(Resource):
         if other_user is None:
             return {"message": "User not found"}, 404
         if not current_user.is_sendbird_user_created:
-            response = _create_user(current_user.firebase_id)
-            if not response:
+            response = _create_user(current_user)
+            json_data = response.json()
+            if not response and json_data.get("code") != CODE_USER_EXISTS:
                 return {
                     "message": f"There was an error creating the user {current_user.username} in the chat"
                 }, 500
         if not other_user.is_sendbird_user_created:
-            response = _create_user(other_user.firebase_id)
-            if not response:
+            response = _create_user(other_user)
+            json_data = response.json()
+            if not response and json_data.get("code") != CODE_USER_EXISTS:
                 return {
                     "message": f"There was an error creating the user {other_user.username} in the chat"
                 }, 500
         response = _create_channel(current_user, other_user)
         if response:
-            return {"message": "Channel created", "json": response.json()}, 201
+            return {
+                "message": "Channel created",
+                "channel_url": response.json().get("channel_url"),
+            }, 201
         else:
             return {"message": "There was an error creating the channel"}, 500
