@@ -56,13 +56,13 @@ class CreateChannel(Resource):
         other_user = UserModel.find_by_id(user_id)
         if other_user is None:
             return {"message": "User not found"}, 404
-        if not current_user.is_chat_created:
+        if not current_user.is_sendbird_user_created:
             response = _create_user(current_user.firebase_id)
             if not response:
                 return {
                     "message": f"There was an error creating the user {current_user.username} in the chat"
                 }, 500
-        if not other_user.is_chat_created:
+        if not other_user.is_sendbird_user_created:
             response = _create_user(other_user.firebase_id)
             if not response:
                 return {
