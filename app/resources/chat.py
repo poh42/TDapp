@@ -106,13 +106,14 @@ class CreateChannel(Resource):
             return {"message": "There was an error creating the channel"}, 500
 
 
-
 class SendMessage(Resource):
     @classmethod
     @check_token
     def post(cls):
         data = SendMessageSchema().load(request.get_json())
-        response = _send_message(data.get("channel_url"), g.claims["uid"], data.get("message"))
+        response = _send_message(
+            data.get("channel_url"), g.claims["uid"], data.get("message")
+        )
         if response:
             return {"message": "Message sent", "data": response.json()}, 201
         else:
