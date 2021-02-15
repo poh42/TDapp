@@ -1,4 +1,5 @@
-from flask_marshmallow import Schema, fields
+from flask_marshmallow import Schema
+from marshmallow import fields
 
 
 class SendMessageSchema(Schema):

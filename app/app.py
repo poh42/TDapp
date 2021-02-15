@@ -11,7 +11,7 @@ from marshmallow import ValidationError
 
 from ma import ma
 from db import db
-from resources.chat import CreateChannel
+from resources.chat import CreateChannel, SendMessage
 from resources.confirmation import Confirmation, ResendConfirmation
 from resources.challenge_ import (
     Challenge,
@@ -168,6 +168,7 @@ api.add_resource(IsFriend, "/user/isFriend/<int:user_1_id>/<int:user_2_id>")
 api.add_resource(ChallengeStatusUpdate, "/challenge/<int:challenge_id>/updateChallenge")
 api.add_resource(DirectChallenges, "/challenges/direct")
 api.add_resource(CreateChannel, "/chat/create_channel/<int:user_id>")
+api.add_resource(SendMessage, "/chat/send_message")
 
 db.init_app(app)
 migrate.init_app(app)

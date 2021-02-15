@@ -106,7 +106,6 @@ class CreateChannel(Resource):
             return {"message": "There was an error creating the channel"}, 500
 
 
-# TODO, test this
 
 class SendMessage(Resource):
     @classmethod
