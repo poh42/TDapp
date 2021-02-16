@@ -69,6 +69,14 @@ def _send_message(channel_url, user_id, message):
     )
 
 
+def _is_member_channel(channel_url, user_id):
+    print(channel_url, user_id)
+    api_headers = {"Api-Token": API_TOKEN}
+    return requests.get(
+        f"{API_URL}/group_channels/{channel_url}/members/{user_id}", headers=api_headers
+    )
+
+
 CODE_USER_EXISTS = (
     400202  # This is a code that specifies that the user was already created
 )
@@ -119,3 +127,39 @@ class SendMessage(Resource):
         else:
             print(response.content)
             return {"message": "There was an error sending the message"}, 500
+
+
+def _list_messages(channel_url, message_ts):
+    api_headers = {"Api-Token": API_TOKEN}
+    return requests.get(
+        f"{API_URL}/group_channels/{channel_url}/messages",
+        params={"message_ts": message_ts},
+        headers=api_headers,
+    )
+
+
+class ListMessagesFromChannel(Resource):
+    @classmethod
+    @check_token
+    def get(cls, channel_url, timestamp):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        response = _is_member_channel(channel_url, current_user.firebase_id)
+        if response:
+            content = response.json()
+            if not content.get("is_member"):
+                return {"message": "User is not member of channel"}, 400
+        else:
+            return {"message": "User is not member of channel"}, 400
+
+        data = _list_messages(channel_url, timestamp)
+        json_data = data.json()
+        ret_val = []
+        for message in json_data["messages"]:
+            value = {
+                "created_at": message.get("created_at"),
+                "message": message.get("message"),
+                "message_id": message.get("message_id"),
+                "nickname": message.get("user").get("nickname"),
+            }
+            ret_val.append(value)
+        return {"messages": ret_val}, 200
