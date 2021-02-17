@@ -169,7 +169,9 @@ api.add_resource(ChallengeStatusUpdate, "/challenge/<int:challenge_id>/updateCha
 api.add_resource(DirectChallenges, "/challenges/direct")
 api.add_resource(CreateChannel, "/chat/create_channel/<int:user_id>")
 api.add_resource(SendMessage, "/chat/send_message")
-api.add_resource(ListMessagesFromChannel, "/chat/list_messages/<string:channel_url>/<int:timestamp>")
+api.add_resource(
+    ListMessagesFromChannel, "/chat/list_messages/<string:channel_url>/<int:timestamp>"
+)
 
 db.init_app(app)
 migrate.init_app(app)

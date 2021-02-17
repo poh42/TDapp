@@ -123,7 +123,14 @@ class SendMessage(Resource):
             data.get("channel_url"), g.claims["uid"], data.get("message")
         )
         if response:
-            return {"message": "Message sent", "data": response.json()}, 201
+            message = response.json()
+            value = {
+                "created_at": message.get("created_at"),
+                "message": message.get("message"),
+                "message_id": message.get("message_id"),
+                "nickname": message.get("user").get("nickname"),
+            }
+            return {"message": "Message sent", "data": value}, 201
         else:
             print(response.content)
             return {"message": "There was an error sending the message"}, 500
