@@ -106,9 +106,13 @@ class CreateChannel(Resource):
                 }, 500
         response = _create_channel(current_user, other_user)
         if response:
+            json_data = response.json()
             return {
                 "message": "Channel created",
-                "channel_url": response.json().get("channel_url"),
+                "data": {
+                    "channel_url": json_data.get("channel_url"),
+                    "created_at": json_data.get("created_at"),
+                },
             }, 201
         else:
             return {"message": "There was an error creating the channel"}, 500
