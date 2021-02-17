@@ -38,6 +38,7 @@ class UserModel(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=func.now())
     is_active = db.Column(db.Boolean, default=True)
     is_private = db.Column(db.Boolean, default=False)
+    is_sendbird_user_created = db.Column(db.Boolean, default=False)
     avatar = db.Column(db.String(255))
     dob = db.Column(db.Date)
     playing_days = db.Column(db.String(16), default=DAYS_ALL)
