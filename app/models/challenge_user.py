@@ -1,3 +1,8 @@
+from datetime import datetime, timedelta
+
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import aliased
+
 from db import db
 from sqlalchemy.sql import func
 
@@ -26,6 +31,8 @@ class ChallengeUserModel(db.Model):
     status_challenged = db.Column(db.String(45), nullable=True)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, onupdate=func.now())
+    challenger_sms_sent = db.Column(db.Boolean, default=False)
+    challenged_sms_sent = db.Column(db.Boolean, default=False)
 
     challenger = db.relationship("UserModel", foreign_keys=[challenger_id])
     challenged = db.relationship("UserModel", foreign_keys=[challenged_id])
@@ -57,6 +64,32 @@ class ChallengeUserModel(db.Model):
     @classmethod
     def find_by_wager_id(cls, wager_id):
         return cls.query.filter_by(wager_id=wager_id).first()
+
+    @classmethod
+    def find_all_that_need_sms(cls):
+        challenge = aliased(cls.challenge)
+        now = datetime.utcnow()
+        now_minus_five_minutes = now - timedelta(minutes=5)
+        now_plus_five_minutes = now + timedelta(minutes=5)
+        data = (
+            cls.query.join(challenge)
+            .filter(
+                and_(
+                    challenge.date >= now_minus_five_minutes,
+                    challenge.date <= now_plus_five_minutes,
+                )
+            )
+            .filter(
+                # See https://www.xaprb.com/blog/2006/05/18/why-null-never-compares-false-to-anything-in-sql/
+                or_(
+                    cls.challenged_sms_sent == False,
+                    cls.challenged_sms_sent == None,
+                    cls.challenger_sms_sent == False,
+                    cls.challenger_sms_sent == None,
+                )
+            )
+        )
+        return data.all()
 
     def save_to_db(self):
         db.session.add(self)
