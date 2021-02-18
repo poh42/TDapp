@@ -52,6 +52,8 @@ from resources.user import (
     ResetPassword,
 )
 from flask_uploads import configure_uploads, IMAGES
+
+from sms.main import send_messages
 from utils.image_helper import IMAGE_SET
 from resources.image import ImageUpload
 
@@ -97,6 +99,13 @@ def before_request():
 @app.errorhandler(ValidationError)
 def handle_marshmallow_error(err):
     return jsonify(err.messages), 400
+
+
+@app.cli.command("send_sms_upcoming_challenges")
+def send_sms_upcoming_challenges():
+    print("Sending messages")
+    send_messages()
+    print("Messages sent")
 
 
 @app.cli.command("create_fixtures")
