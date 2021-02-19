@@ -17,7 +17,6 @@ if auth_token is None:
 if twilio_from_phone is None:
     print("Warning: Twilio from phone not set")
 
-print(account_sid, auth_token, twilio_from_phone)
 
 client = Client(account_sid, auth_token)
 
