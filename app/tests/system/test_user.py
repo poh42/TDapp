@@ -524,8 +524,8 @@ class TestUserEndpoints(BaseAPITestCase):
             invite: InviteModel = fixtures["invite"]
             claims = {"uid": user_login.firebase_id}
             with patch(
-                    "resources.user.send_msg",
-                    return_value=True,
+                "resources.user.send_msg",
+                return_value=True,
             ):
                 with patch.object(g, "claims", claims, create=True):
                     with self.test_client() as c:

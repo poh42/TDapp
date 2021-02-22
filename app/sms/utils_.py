@@ -18,7 +18,6 @@ if twilio_from_phone is None:
     print("Warning: Twilio from phone not set")
 
 
-
 def send_msg(message_text, number):
     """This is what is used by twilio to send messages"""
     client = Client(account_sid, auth_token)

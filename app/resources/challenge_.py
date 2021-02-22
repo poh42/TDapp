@@ -51,6 +51,7 @@ from schemas.challenge_user import ChallengeUserSchema
 from schemas.user_challenge_score import UserChallengeScoreSchema
 from schemas.dispute import DisputeSchema, DisputeAdminSchema, SettleDisputeSchema
 from schemas.results_1v1 import Results1v1Schema
+from sms.utils_ import send_msg
 from utils.schema import get_fields_user_to_exclude
 from decimal import Decimal
 
@@ -175,6 +176,10 @@ class ChallengePost(Resource):
         new_transaction.user_id = current_user.id
         new_transaction.type = TYPE_SUBSTRACTION
         new_transaction.save_to_db()
+
+        if challenged_id is not None:
+            text_message = f"{current_user.username} just challenged you"
+            send_msg(text_message, challenged.phone)
 
         return {
             "message": "Challenge created",
