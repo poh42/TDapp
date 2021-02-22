@@ -17,11 +17,13 @@ if auth_token is None:
 if twilio_from_phone is None:
     print("Warning: Twilio from phone not set")
 
-client = Client(account_sid, auth_token)
 
 
 def send_msg(message_text, number):
     """This is what is used by twilio to send messages"""
+    client = Client(account_sid, auth_token)
+    if number is None:
+        return False
     try:
         message = client.messages.create(
             body=message_text,
