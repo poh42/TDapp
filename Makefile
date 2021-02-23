@@ -16,6 +16,10 @@ bash:
 create_fixtures:
 	docker-compose -f docker-compose.dev.yml run --rm app flask create_fixtures
 
+send_sms_upcoming_challenges:
+	docker-compose -f docker-compose.dev.yml run --rm app flask send_sms_upcoming_challenges
+
+
 run_migrations:
 	docker-compose -f docker-compose.dev.yml run --rm app flask db upgrade
 
