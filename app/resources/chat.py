@@ -1,15 +1,3 @@
-# Se me ocurren tres endpoints.
-
-# Crear channel, que tendria como parametros
-# user_id: El user id de la segunda persona que esta en el canal
-# la primera persona se obtendria por el claim
-# el user id se obtendria del firebase_id y el nickname seria el username
-# El algoritmo seria algo asi,
-
-"""
-Chequear con el view user si los dos user ids existen, si no crearlos y setear la variable chat created a 1 de cada uno
-Crear channel
-"""
 import os
 import requests
 from flask import g, request

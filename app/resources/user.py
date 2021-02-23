@@ -16,6 +16,7 @@ from models.invite import InviteModel, STATUS_PENDING
 from models.user_photo import UserPhotoModel
 from schemas.invite import InviteSchema
 from schemas.user_game import BaseUserGameSchema, UserGameSchemaWithoutModel
+from sms.utils_ import send_msg
 from utils.claims import set_is_admin, is_admin
 from fb import pb
 from requests import HTTPError
@@ -421,6 +422,9 @@ class AcceptInvite(Resource):
         invite.accept()
         invite.save_to_db()
         current_user.add_friend(invite.user_inviting_id)
+        # Sending email to ask
+        text = f"{current_user.username} has accepted your invite"
+        send_msg(text, invite.user_inviting.phone)
         return {"message": "Friendship added"}, 201
 
 
