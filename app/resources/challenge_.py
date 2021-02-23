@@ -712,6 +712,9 @@ class AcceptChallenge(Resource):
         new_transaction.type = TYPE_SUBSTRACTION
         new_transaction.save_to_db()
 
+        text_message = f"{current_user.username} accepted your challenge"
+        send_msg(text_message, challenge_user.challenger.phone)
+
         return {"message": "Challenge accepted"}, 200
 
 

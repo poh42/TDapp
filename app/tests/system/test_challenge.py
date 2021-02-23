@@ -422,23 +422,26 @@ class TestChallengeEndpoints(BaseAPITestCase):
                         "Wrong message",
                     )
                 g.claims = {"user_id": fixtures["user_login"].firebase_id}
-                with self.subTest(shouldAccept=True):
-                    self.post_user_game(fixtures)
-                    prev_transaction = fixtures["transaction2"]
-                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
-                    self.assertEqual(rv.status_code, 200, "Wrong status")
-                    json_data = rv.get_json()
-                    self.assertEqual(
-                        "Challenge accepted", json_data["message"], "Wrong message"
-                    )
-                    transaction = TransactionModel.find_by_user_id(
-                        UserModel.find_by_firebase_id("myLbdKL8dFhipvanv4AnIUaJpqd2").id
-                    )
-                    challenge = ChallengeModel.find_by_id(challenge_user.wager_id)
-                    self.assertEqual(
-                        transaction.credit_total,
-                        int(prev_transaction.credit_total) - int(challenge.buy_in),
-                    )
+                with patch("resources.challenge_.send_msg", return_value=True):
+                    with self.subTest(shouldAccept=True):
+                        self.post_user_game(fixtures)
+                        prev_transaction = fixtures["transaction2"]
+                        rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                        self.assertEqual(rv.status_code, 200, "Wrong status")
+                        json_data = rv.get_json()
+                        self.assertEqual(
+                            "Challenge accepted", json_data["message"], "Wrong message"
+                        )
+                        transaction = TransactionModel.find_by_user_id(
+                            UserModel.find_by_firebase_id(
+                                "myLbdKL8dFhipvanv4AnIUaJpqd2"
+                            ).id
+                        )
+                        challenge = ChallengeModel.find_by_id(challenge_user.wager_id)
+                        self.assertEqual(
+                            transaction.credit_total,
+                            int(prev_transaction.credit_total) - int(challenge.buy_in),
+                        )
                 with self.subTest(shouldAccept=False, msg="Challenge accepted"):
                     rv = c.post(f"/challenge/{challenge_user.id}/accept")
                     self.assertEqual(rv.status_code, 400, "Wrong status")
@@ -491,21 +494,22 @@ class TestChallengeEndpoints(BaseAPITestCase):
             class TestTransaction:
                 credit_total = 1000
 
-            with patch(
-                "resources.challenge_.TransactionModel.find_by_user_id",
-                return_value=TestTransaction(),
-            ):
-                with self.test_client() as c:
-                    g.claims = {"user_id": fixtures["user"].firebase_id}
-                    challenge_user = fixtures["challenge_user_not_direct"]
-                    rv = c.post(f"/challenge/{challenge_user.id}/accept")
-                    self.assertEqual(rv.status_code, 200, "Wrong status")
-                    json_data = rv.get_json()
-                    self.assertEqual(
-                        "Challenge accepted",
-                        json_data["message"],
-                        "Wrong message",
-                    )
+            with patch("resources.challenge_.send_msg", return_value=True):
+                with patch(
+                    "resources.challenge_.TransactionModel.find_by_user_id",
+                    return_value=TestTransaction(),
+                ):
+                    with self.test_client() as c:
+                        g.claims = {"user_id": fixtures["user"].firebase_id}
+                        challenge_user = fixtures["challenge_user_not_direct"]
+                        rv = c.post(f"/challenge/{challenge_user.id}/accept")
+                        self.assertEqual(rv.status_code, 200, "Wrong status")
+                        json_data = rv.get_json()
+                        self.assertEqual(
+                            "Challenge accepted",
+                            json_data["message"],
+                            "Wrong message",
+                        )
 
     def test_challenge_accept_not_direct_return_value_none(self):
         with self.app_context():
