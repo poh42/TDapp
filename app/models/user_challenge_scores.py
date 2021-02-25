@@ -27,3 +27,7 @@ class UserChallengeScoresModel(db.Model):
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
+
+    @property
+    def did_win_challenge(self):
+        return self.own_score > self.opponent_score
