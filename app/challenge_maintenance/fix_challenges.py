@@ -34,5 +34,17 @@ def get_challenges_that_need_finish():
     return challenges.all()
 
 
+def get_user_challenge(challenge):
+    challenge_score = UserChallengeScoresModel.query.filter(
+        UserChallengeScoresModel.challenge_id == challenge.id
+    ).first()
+    challenge_user = challenge.challenge_user.first()
+    print("get user challenge", challenge_score, challenge_user)
+    if challenge_score.user_id == challenge_user.challenger_id:
+        return challenge_user.challenger_id
+    else:
+        return challenge_user.challenged_id
+
+
 def set_finished_challenges_results():
     pass
