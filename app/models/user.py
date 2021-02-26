@@ -155,7 +155,7 @@ Website, Instagram, Facebook, Twitch
         sql = """
         with t as (
             select SUM(t2.credit_change) as credit_change , t2.user_id from transactions t2
-                    where t2.created_at >= :time_ago
+                    where t2.created_at >= :time_ago AND t2.type = 'ADD'
             group by t2.user_id 
         ) select
              u.*,
@@ -163,8 +163,10 @@ Website, Instagram, Facebook, Twitch
             left join t on t.user_id = u.id
           order by COALESCE(t.credit_change, 0) desc
         """
-        time_ago = datetime.today() - timedelta(days=days)
-        data = db.engine.execute(text(sql), time_ago=time_ago).fetchall()
+        now = datetime.utcnow()
+        now = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        monday = now - timedelta(days=now.weekday())
+        data = db.engine.execute(text(sql), time_ago=monday).fetchall()
         return [dict(d) for d in data]
 
     @classmethod
