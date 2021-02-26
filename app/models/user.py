@@ -165,6 +165,8 @@ Website, Instagram, Facebook, Twitch
         """
         now = datetime.utcnow()
         now = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        # We calculate here the previous monday in order to get earnings
+        # from monday to the current date
         monday = now - timedelta(days=now.weekday())
         data = db.engine.execute(text(sql), time_ago=monday).fetchall()
         return [dict(d) for d in data]
