@@ -5,7 +5,7 @@ from sqlalchemy.orm import aliased
 
 from db import db
 
-from models.challenge_ import ChallengeModel
+from models.challenge_ import ChallengeModel, STATUS_FINISHED
 from models.challenge_user import ChallengeUserModel
 from models.results_1v1 import Results1v1Model
 from models.transaction import TransactionModel, TYPE_ADD
@@ -40,6 +40,7 @@ def get_challenges_that_need_finish():
                 ChallengeModel.due_date <= end,
                 count_scores_query.c.user_scores_count == 1,
                 results_1v1.challenge_id == None,
+                ChallengeModel.status == STATUS_FINISHED,
             )
         )
     )
@@ -62,11 +63,11 @@ def set_finished_challenges_results(challenge):
     challenge_score: UserChallengeScoresModel = UserChallengeScoresModel.query.filter(
         UserChallengeScoresModel.challenge_id == challenge.id
     ).first()
-    challenge_user = challenge.challenge_user.first()
+    challenge_user = challenge.challenge_users.first()
     store_challenge_results(challenge_score, challenge_user)
     if challenge_score.own_score != challenge_score.opponent_score:
         print("Assigning credits to winner", challenge)
-        assign_credits_to_winner(challenge_score, challenge)
+        assign_credits_to_winner(challenge, challenge_score)
     else:
         print("Resolving on tie", challenge)
         resolve_challenge_on_tie(challenge_score, challenge_user, challenge)
@@ -134,8 +135,8 @@ def resolve_challenge_on_tie(
     return False
 
 
-def assign_credits_to_winner(challenge: ChallengeModel):
-    winner_id = get_winner_challenge(challenge)
+def assign_credits_to_winner(challenge: ChallengeModel, challenge_score):
+    winner_id = get_winner_challenge(challenge_score, challenge.challenge_users.first())
     transaction = TransactionModel.find_by_user_id(winner_id)
     new_transaction = TransactionModel()
     new_transaction.previous_credit_total = transaction.credit_total

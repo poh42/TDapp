@@ -9,6 +9,7 @@ import logging
 
 from marshmallow import ValidationError
 
+from challenge_maintenance.set_challenges_closed import update_challenges
 from ma import ma
 from db import db
 from resources.chat import CreateChannel, SendMessage, ListMessagesFromChannel
@@ -56,6 +57,7 @@ from flask_uploads import configure_uploads, IMAGES
 from sms.main import send_messages
 from utils.image_helper import IMAGE_SET
 from resources.image import ImageUpload
+from challenge_maintenance.fix_challenges import main as fix_challenges_one_result
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
@@ -115,6 +117,16 @@ def create_fixtures_command():
     print("Creating fixtures")
     create_fixtures()
     print("Fixtures saved successfully")
+
+
+@app.cli.command("fix_challenges_one_result")
+def fix_challenges_one_result_command():
+    fix_challenges_one_result()
+
+
+@app.cli.command("set_challenges_closed")
+def set_challenges_closed_command():
+    update_challenges()
 
 
 @app.cli.command("delete_database")
