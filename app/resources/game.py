@@ -22,7 +22,7 @@ class GamesByConsole(Resource):
         if not ConsoleModel.console_id_exists(console_id):
             return {"message": "Console not found"}, 400
         sql = """
-        select g.id, g.name, g.image from games g
+        select g.id, g.name, g.image, g.url from games g
             inner join games_has_consoles ghc on g.id = ghc.game_id 
             inner join consoles c on c.id = ghc.console_id 
         where c.id = :id AND g.is_active = True
@@ -77,6 +77,8 @@ class Game(Resource):
         is_active = game_data.get("is_active")
         if is_active is True or is_active is False:
             game.is_active = is_active
+        if game_data.get("url"):
+            game.url = game_data.get("url")
         game.save_to_db()
         return {"game": schema.dump(game)}, 200
 
