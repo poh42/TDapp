@@ -318,7 +318,6 @@ class ChallengeList(Resource):
                 .order_by(Results1v1Model.played.desc())
                 .limit(last_results)
             )
-            print(query)
         challenge_schema = ChallengeSchema(
             only=(
                 "id",
