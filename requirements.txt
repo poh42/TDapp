@@ -56,3 +56,4 @@ Flask-Reuploaded==0.3.2
 Flask-Cors==3.0.9
 urllib3===1.26.2
 twilio~=6.52.0
+mailchimp-transactional==1.0.22
