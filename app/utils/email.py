@@ -1,42 +1,40 @@
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import mailchimp_transactional as MailchimpTransactional
 import os
 from typing import List
 import logging
 
 log = logging.getLogger(__name__)
 
+if not os.getenv("MAILCHIMP_API_KEY"):
+    print("Warning: MAILCHIMP_API_KEY is not specified")
+
 
 def send_email(to: List[str], subject: str, text: str, html: str) -> bool:
-    email_user = os.getenv("EMAIL_USER")
-    email_password = os.getenv("EMAIL_PASSWORD")
-    sent_from = email_user
-    recipients = ", ".join(to)
+    to_list = []
+    for email in to:
+        to_list.append({"type": "to", "email": email})
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = sent_from
-    msg["To"] = recipients
-
-    plain_msg = MIMEText(text, "plain")
-    html_msg = MIMEText(html, "html")
-
-    msg.attach(plain_msg)
-    msg.attach(html_msg)
-
+    client = MailchimpTransactional.Client(os.getenv("MAILCHIMP_API_KEY"))
     try:
-        server = smtplib.SMTP_SSL(
-            os.getenv("EMAIL_SMTP_SERVER"), os.getenv("EMAIL_SMTP_PORT")
+        response = client.messages.send(
+            {
+                "message": {
+                    "html": html,
+                    "text": text,
+                    "from_email": "noreply@playtopdog.com",
+                    "from_name": "Support",
+                    "to": to_list,
+                    "subject": subject,
+                }
+            }
         )
-        server.ehlo()
-        server.login(email_user, email_password)
-        server.sendmail(sent_from, recipients, msg.as_string())
-        server.close()
-
+        log.debug(response)
         print("Email sent!")
         return True
     except Exception as e:
-        print("There was an error sending email", e)
         log.error(e)
+        print(f"There was an error sending email {str(e)}")
         return False
