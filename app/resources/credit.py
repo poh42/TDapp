@@ -20,7 +20,7 @@ select
     :credit_change as credit_change, 
     summary.credit_total + :credit_change as credit_total,
     summary.user_id as user_id,
-    'ADD' as type
+    'INITIAL' as type
 from
     summary
 where
@@ -39,7 +39,7 @@ class AddCredits(Resource):
         result = db.engine.execute(text(sql_get_ids))
         insert_query = """
         insert into transactions (previous_credit_total, credit_change, credit_total, challenge_id, user_id, "type") 
-            values (0, :credit_change, :credit_change, null, :user_id, 'ADD')
+            values (0, :credit_change, :credit_change, null, :user_id, 'INITIAL')
         """
         credit_change = json_data["credit_change"]
         for r in result:
