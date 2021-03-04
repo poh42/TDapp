@@ -128,11 +128,16 @@ class SendMessage(Resource):
             return {"message": "There was an error sending the message"}, 500
 
 
-def _list_messages(channel_url, message_ts):
+def _list_messages(channel_url, message_ts, prev_limit=15, next_limit=15):
     api_headers = {"Api-Token": API_TOKEN}
+    params = {
+        "message_ts": message_ts,
+        "prev_limit": prev_limit,
+        "next_limit": next_limit,
+    }
     return requests.get(
         f"{API_URL}/group_channels/{channel_url}/messages",
-        params={"message_ts": message_ts},
+        params=params,
         headers=api_headers,
     )
 
@@ -150,7 +155,15 @@ class ListMessagesFromChannel(Resource):
         else:
             return {"message": "User is not member of channel"}, 400
 
-        data = _list_messages(channel_url, timestamp)
+        prev_limit = request.args.get("prev_limit", type=int, default=15)
+        next_limit = request.args.get("next_limit", type=int, default=15)
+
+        if prev_limit < 1:
+            prev_limit = 1
+        if next_limit < 1:
+            next_limit = 1
+
+        data = _list_messages(channel_url, timestamp, prev_limit, next_limit)
         json_data = data.json()
         ret_val = []
         for message in json_data["messages"]:

@@ -300,9 +300,8 @@ class Challenge(Resource):
 class ChallengeList(Resource):
     @classmethod
     def get(cls):
-        query = (
-            ChallengeModel.query.options(joinedload(ChallengeModel.game))
-            .filter(ChallengeModel.is_direct is not True)
+        query = ChallengeModel.query.options(joinedload(ChallengeModel.game)).filter(
+            ChallengeModel.is_direct is not True
         )
         if request.args.get("upcoming") == "true":
             query = query.filter(ChallengeModel.date >= datetime.utcnow()).order_by(
