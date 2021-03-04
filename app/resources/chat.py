@@ -159,9 +159,9 @@ class ListMessagesFromChannel(Resource):
         next_limit = request.args.get("next_limit", type=int, default=15)
 
         if prev_limit < 1:
-            prev_limit = 1
+            prev_limit = 0
         if next_limit < 1:
-            next_limit = 1
+            next_limit = 0
 
         data = _list_messages(channel_url, timestamp, prev_limit, next_limit)
         json_data = data.json()

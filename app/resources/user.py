@@ -59,7 +59,7 @@ class UserRegister(Resource):
             user_instance.send_confirmation_email()
             create_transaction_query = """
             insert into transactions (previous_credit_total, credit_change, credit_total, challenge_id, user_id, "type") 
-                values (0, :credit_change, :credit_change, null, :user_id, 'ADD')
+                values (0, :credit_change, :credit_change, null, :user_id, 'INITIAL')
             """
             db.engine.execute(
                 text(create_transaction_query),

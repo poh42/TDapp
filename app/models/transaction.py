@@ -4,6 +4,7 @@ from db import db
 
 TYPE_ADD = "ADD"
 TYPE_SUBSTRACTION = "SUBSTRACTION"
+TYPE_INITIAL = "INITIAL"
 
 
 class TransactionModel(db.Model):
