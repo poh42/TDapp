@@ -179,9 +179,9 @@ class ChallengePost(Resource):
         new_transaction.save_to_db()
 
         if challenged_id is not None:
-            time_to_challenge = datetime.utcnow() - challenge.date
+            time_to_challenge = challenge.date - datetime.utcnow()
             days, hours, minutes = days_hours_minutes(time_to_challenge)
-            if days <= 0:
+            if days >= 1:
                 time_message = f"in {days} days, {hours} hours and {minutes} minutes"
             else:
                 time_message = f"in {hours} hours and {minutes} minutes"
