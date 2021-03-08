@@ -52,6 +52,7 @@ from schemas.user_challenge_score import UserChallengeScoreSchema
 from schemas.dispute import DisputeSchema, DisputeAdminSchema, SettleDisputeSchema
 from schemas.results_1v1 import Results1v1Schema
 from sms.utils_ import send_msg
+from utils.date import days_hours_minutes
 from utils.schema import get_fields_user_to_exclude
 from decimal import Decimal
 
@@ -178,7 +179,13 @@ class ChallengePost(Resource):
         new_transaction.save_to_db()
 
         if challenged_id is not None:
-            text_message = f"{current_user.username} just challenged you"
+            time_to_challenge = datetime.utcnow() - challenge.date
+            days, hours, minutes = days_hours_minutes(time_to_challenge)
+            if days <= 0:
+                time_message = f"in {days} days, {hours} hours and {minutes} minutes"
+            else:
+                time_message = f"in {hours} hours and {minutes} minutes"
+            text_message = f"You have been challenged to play {current_user.username} {time_message} https://lets.playtopdog.com/invites"
             send_msg(text_message, challenged.phone)
 
         return {
