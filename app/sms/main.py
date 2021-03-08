@@ -54,13 +54,6 @@ def send_message_challenge_user(challenge_user: ChallengeUserModel):
         challenge_user.save_to_db()
 
 
-"""
-Aquí tendríamos que hacer el esqueleto de twilio, 
-vamos a crear un comando de flask que va a tener dos banderas 
-que van a significar si se han mandado para el challenger y challenged. 
-"""
-
-
 def send_messages():
     challenges_that_need_sms = ChallengeUserModel.find_all_that_need_sms()
     for challenge_user in challenges_that_need_sms:
