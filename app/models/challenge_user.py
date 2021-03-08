@@ -69,14 +69,14 @@ class ChallengeUserModel(db.Model):
     def find_all_that_need_sms(cls):
         challenge = aliased(cls.challenge)
         now = datetime.utcnow()
-        now_minus_five_minutes = now - timedelta(minutes=5)
-        now_plus_five_minutes = now + timedelta(minutes=5)
+        now_minus_ten_minutes = now - timedelta(minutes=10)
+        now_plus_ten_minutes = now + timedelta(minutes=10)
         data = (
             cls.query.join(challenge)
             .filter(
                 and_(
-                    challenge.date >= now_minus_five_minutes,
-                    challenge.date <= now_plus_five_minutes,
+                    challenge.date >= now_minus_ten_minutes,
+                    challenge.date <= now_plus_ten_minutes,
                 )
             )
             .filter(
