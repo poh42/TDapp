@@ -50,6 +50,28 @@ MAILCHIMP_API_KEY=""
 - [Get a mailchimp api key](https://eepurl.com/dyijVH) and then input it on the `MAILCHIMP_API_KEY` environment variable. This is used to send emails here `app/utils/email.py`
 - Get a [twilio account](https://www.twilio.com) and from its dashboard [get an auth token, an account sid](https://support.twilio.com/hc/en-us/articles/223136027-Auth-Tokens-and-How-to-Change-Them) and a telephone that's going to be used to send messages. Internally we use the Twilio client to make requests to the API. You can see the implementation here `app/sms/utils_.py`. Then you'll be able to set up the environment variables `TWILIO_ACCOUNT_SID` `TWILIO_AUTH_TOKEN` and `TWILIO_FROM_PHONE`
 
+## Crons
+
+There are three cron tasks running the app.
+
+### send_sms_upcoming_challenges
+
+This cron task is ran every minute to send messages indicating that a challenge is about to start
+
+Here's the implementation `app/sms/main.py`
+
+### fix_challenges_one_result
+
+This cron task is ran every 5 minutes to award the credits of a challenge in which only a single result has been proxy_set_header
+
+You can see the implementation here `app/challenge_maintenance/fix_challenges.py`
+
+### set_challenges_closed
+
+This cron task is ran every 5 minutes to set all challenges that are open to closed if they have been open for more than a day.
+
+The implementation can be checked here `app/challenge_maintenance/set_challenges_closed.py`
+
 ## Running the app
 
 For the first run:
