@@ -84,10 +84,33 @@ For regular executions
 make up
 ```
 
+
+## Tests
+
+Tests are located in the `app/tests` directory.
+
+We have three types of tests
+
+### System
+
+These tests make sure endpoints work correctly, they are located in the `app/tests/system` folder
+
+### Integration
+
+Tests that use a test database to make sure that queries to this database work correctly. This is used for challenges, games and user games
+
+They are located in the `app/tests/integration` folder
+
+### Unit
+
+Unit tests for asserting that certain claims are in force in user endpoints
+
+
 To test
 ``` sh
 make test
 ```
+
 
 For more commands, check the `Makefile`
 
