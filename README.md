@@ -30,43 +30,25 @@ const firebaseConfig = {
 - Create a `.env` file with this.
 ```
 ```
-MAILGUN_DOMAIN = ""
-MAILGUN_API_KEY = ""
-MAILGUN_FROM_EMAIL = ""
-MAILGUN_FROM_TITLE = ""
-DATABASE_URI = ""
-APP_SECRET_KEY = ""
-JWT_SECRET_KEY = ""
+DATABASE_URI=""
+APP_SECRET_KEY=""
+JWT_SECRET_KEY=""
 APPLICATION_SETTINGS=default_config.py
 AWS_ACCESS_KEY_ID=""
 AWS_ACCESS_KEY_SECRET=""
 AWS_BUCKET=""
-EMAIL_USER=""
-EMAIL_PASSWORD=""
-EMAIL_SMTP_SERVER=""
-EMAIL_SMTP_PORT=""
-FIREBASE_TYPE=""
-FIREBASE_PROJECT_ID=""
-FIREBASE_PRIVATE_KEY_ID=""
-FIREBASE_PRIVATE_KEY=""
-FIREBASE_CLIENT_EMAIL=""
-FIREBASE_CLIENT_ID=""
-FIREBASE_AUTH_URI=""
-FIREBASE_TOKEN_URI=""
-FIREBASE_AUTH_PROVIDER_X509_CERT_URL=""
-FIREBASE_CLIENT_X509_CERT_URL=""
-PYREBASE_API_KEY=""
-PYREBASE_AUTH_DOMAIN=""
-PYREBASE_DATABASE_URL=""
-PYREBASE_PROJECT_ID=""
-PYREBASE_STORAGE_BUCKET=""
-PYREBASE_MESSAGING_SENDER_ID=""
-PYREBASE_APP_ID=""
-PYREBASE_MEASUREMENT_ID=""
+SENDBIRD_API_TOKEN=""
+SENDBIRD_API_URL=""
+TWILIO_ACCOUNT_SID=""
+TWILIO_AUTH_TOKEN=""
+TWILIO_FROM_PHONE=""
+MAILCHIMP_API_KEY=""
 ```
 - Also create a `.env.test` file that's gonna be used for testing. It's recommended that the `DATABASE_URI` is different for testing
-- Set up a mailgun account and with the Domain and API key
 - Input your AWS app credentials in the env files
+- Get a sendbird account and [get an api token and an api URL](https://sendbird.com/docs/chat/v3/platform-api/getting-started/prepare-to-use-api), this is going to be used internally for the chat functionality which is located here `app/resources/chat.py`
+- [Get a mailchimp api key](https://eepurl.com/dyijVH) and then input it on the `MAILCHIMP_API_KEY` environment variable. This is used to send emails here `app/utils/email.py`
+- Get a [twilio account](https://www.twilio.com) and from its dashboard [get an auth token, an account sid](https://support.twilio.com/hc/en-us/articles/223136027-Auth-Tokens-and-How-to-Change-Them) and a telephone that's going to be used to send messages. Internally we use the Twilio client to make requests to the API. You can see the implementation here `app/sms/utils_.py`. Then you'll be able to set up the environment variables `TWILIO_ACCOUNT_SID` `TWILIO_AUTH_TOKEN` and `TWILIO_FROM_PHONE`
 
 ## Running the app
 
