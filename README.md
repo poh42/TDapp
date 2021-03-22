@@ -29,6 +29,7 @@ const firebaseConfig = {
 - Export Admin SDK private key — Go to Project Overview -> Service Accounts -> Firebase Admin SDK, then select Python as the language and click generate new private key and your file will download. Do NOT share this file or upload it anywhere it allows total read and write access of your Firebase project. Save it somewhere in your computer with the name `fbAdminConfig.json`
 - Create a `.env` file with this.
 ```
+```
 MAILGUN_DOMAIN = ""
 MAILGUN_API_KEY = ""
 MAILGUN_FROM_EMAIL = ""
