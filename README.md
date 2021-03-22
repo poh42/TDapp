@@ -97,3 +97,19 @@ With the server up, you can visit this sites:
 # Production
 
 Production deploys itself whenever `develop` is updated. The URL is http://3.15.194.120/
+
+## To run a new production environment in AWS:
+
+You will need:
+-   A new AWS EC2 VPS with [docker](https://docs.docker.com/engine/install/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/)
+-   A new RDS with PostgreSQL
+
+### Deployment
+1.  Populate your .env file in the root of the application
+2.  Run with the makefile:
+
+``` sh
+$ make prod
+```
+
+And the docker image will create itself, populate, migrate and serve.
