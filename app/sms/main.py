@@ -1,6 +1,7 @@
 from datetime import datetime
 from models.challenge_user import ChallengeUserModel
 from sms.utils_ import send_msg
+from models.challenge_ import STATUS_ACCEPTED
 
 
 def get_date_from_string(d):
@@ -35,6 +36,9 @@ def send_messages_challenge_users(number, challenge_user, is_challenger):
 
 
 def send_message_challenge_user(challenge_user: ChallengeUserModel):
+    challenge = challenge_user.challenge
+    if not challenge.status == STATUS_ACCEPTED:
+        return
     modified = False
     if not challenge_user.challenged_sms_sent:
         user = challenge_user.challenged
