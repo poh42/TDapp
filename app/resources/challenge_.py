@@ -185,7 +185,7 @@ class ChallengePost(Resource):
                 time_message = f"in {days} days, {hours} hours and {minutes} minutes"
             else:
                 time_message = f"in {hours} hours and {minutes} minutes"
-            text_message = f"You have been challenged to play {current_user.username} {time_message} https://lets.playtopdog.com/invites"
+            text_message = f"You have been challenged to play {current_user.username} {time_message} https://lets.playtopdog.com/challenges/pending"
             send_msg(text_message, challenged.phone)
 
         return {
