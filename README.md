@@ -72,6 +72,23 @@ This cron task is ran every 5 minutes to set all challenges that are open to clo
 
 The implementation can be checked here `app/challenge_maintenance/set_challenges_closed.py`
 
+## Other commands
+
+### set is admin
+
+In order to set a user as an admin you must specify the username and whether their admin status is True or False (`t` or `f`)
+
+In the root directory of the project execute
+```sh
+FLASK_APP="app/app" flask set_is_admin [username] [admin status]
+```
+
+For example
+
+```sh
+FLASK_APP="app/app" flask set_is_admin phil f
+```
+
 ## Running the app
 
 For the first run:
