@@ -6,12 +6,14 @@ import os
 import sys
 import simplejson
 import logging
+import click
 
 from marshmallow import ValidationError
 
 from challenge_maintenance.set_challenges_closed import update_challenges
 from ma import ma
 from db import db
+from models.user import UserModel
 from resources.chat import CreateChannel, SendMessage, ListMessagesFromChannel
 from resources.confirmation import Confirmation, ResendConfirmation
 from resources.challenge_ import (
@@ -55,6 +57,7 @@ from resources.user import (
 from flask_uploads import configure_uploads, IMAGES
 
 from sms.main import send_messages
+from utils.claims import set_is_admin
 from utils.image_helper import IMAGE_SET
 from resources.image import ImageUpload
 from challenge_maintenance.fix_challenges import main as fix_challenges_one_result
@@ -108,6 +111,22 @@ def send_sms_upcoming_challenges():
     print("Sending messages")
     send_messages()
     print("Messages sent")
+
+
+@app.cli.command("set_is_admin")
+@click.argument("username", required=True)
+@click.argument(
+    "is_admin",
+    type=click.BOOL,
+    required=True,
+)
+def set_is_admin_command(username, is_admin):
+    user: UserModel = UserModel.find_by_username(username)
+    if not user:
+        print("No user found")
+        return
+    set_is_admin(user.firebase_id, is_admin)
+    print(f"Set admin status ({is_admin}) to {username}")
 
 
 @app.cli.command("create_fixtures")
