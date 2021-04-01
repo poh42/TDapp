@@ -212,3 +212,20 @@ class GetUnreadChannels(Resource):
             return {"channel_url": val.get("channel_url"), "members": members}
 
         return {"data": list(map(map_fn, json_data["channels"]))}, 200
+
+
+def _get_count_unread_channels(user_id):
+    api_headers = {"Api-Token": API_TOKEN}
+    return requests.get(
+        f"{API_URL}/users/{user_id}/unread_channel_count",
+        headers=api_headers,
+    )
+
+
+class GetCountOfUnreadChannels(Resource):
+    @classmethod
+    @check_token
+    def get(cls):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        count = _get_count_unread_channels(current_user.firebase_id)
+        return count.json(), 200
