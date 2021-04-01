@@ -14,7 +14,12 @@ from challenge_maintenance.set_challenges_closed import update_challenges
 from ma import ma
 from db import db
 from models.user import UserModel
-from resources.chat import CreateChannel, SendMessage, ListMessagesFromChannel
+from resources.chat import (
+    CreateChannel,
+    SendMessage,
+    ListMessagesFromChannel,
+    GetUnreadChannels,
+)
 from resources.confirmation import Confirmation, ResendConfirmation
 from resources.challenge_ import (
     Challenge,
@@ -212,6 +217,7 @@ api.add_resource(SendMessage, "/chat/send_message")
 api.add_resource(
     ListMessagesFromChannel, "/chat/list_messages/<string:channel_url>/<int:timestamp>"
 )
+api.add_resource(GetUnreadChannels, "/chat/unread_channels")
 
 db.init_app(app)
 migrate.init_app(app)

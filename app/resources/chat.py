@@ -175,3 +175,45 @@ class ListMessagesFromChannel(Resource):
             }
             ret_val.append(value)
         return {"messages": ret_val}, 200
+
+
+def _get_own_channels(user_id):
+    api_headers = {"Api-Token": API_TOKEN}
+    params = {
+        "unread_filter": "unread_message",
+        "limit": 100,
+        "distinct_mode": "distinct",
+        "show_member": True,
+    }
+    return requests.get(
+        f"{API_URL}/users/{user_id}/my_group_channels",
+        headers=api_headers,
+        params=params,
+    )
+
+
+class GetUnreadChannels(Resource):
+    @classmethod
+    @check_token
+    def get(cls):
+        """
+        1) Obtener la lista de canales a los que me he metido
+        2) Extraer el member_id de cada uno de los canales, este member id sera el del otro usuario del canal.
+        3)
+        """
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        current_channels = _get_own_channels(current_user.firebase_id)
+        json_data = current_channels.json()
+
+        def map_fn(val):
+            members = []
+            for v in val.get("members"):
+                if v["user_id"] != current_user.firebase_id:
+                    to_append = {
+                        "user_id": v["user_id"],
+                        "username": v["nickname"],
+                    }
+                    members.append(to_append)
+            return {"channel_url": val.get("channel_url"), "members": members}
+
+        return list(map(map_fn, json_data["channels"])), 200
