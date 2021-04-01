@@ -131,6 +131,12 @@ make test
 
 For more commands, check the `Makefile`
 
+## Status transitions
+
+Whenever a challenge is created, and it's modified. It can have the following statuses
+
+![Statuses](./img/whimsical.png)
+
 ## More development stuff
 
 With the server up, you can visit this sites:
