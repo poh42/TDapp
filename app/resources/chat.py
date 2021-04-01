@@ -216,4 +216,4 @@ class GetUnreadChannels(Resource):
                     members.append(to_append)
             return {"channel_url": val.get("channel_url"), "members": members}
 
-        return list(map(map_fn, json_data["channels"])), 200
+        return {"data": list(map(map_fn, json_data["channels"]))}, 200
