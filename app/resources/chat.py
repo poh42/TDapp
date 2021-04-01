@@ -175,3 +175,79 @@ class ListMessagesFromChannel(Resource):
             }
             ret_val.append(value)
         return {"messages": ret_val}, 200
+
+
+def _get_own_channels(user_id):
+    api_headers = {"Api-Token": API_TOKEN}
+    params = {
+        "unread_filter": "unread_message",
+        "limit": 100,
+        "distinct_mode": "distinct",
+        "show_member": True,
+    }
+    return requests.get(
+        f"{API_URL}/users/{user_id}/my_group_channels",
+        headers=api_headers,
+        params=params,
+    )
+
+
+class GetUnreadChannels(Resource):
+    @classmethod
+    @check_token
+    def get(cls):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        current_channels = _get_own_channels(current_user.firebase_id)
+        json_data = current_channels.json()
+
+        def map_fn(val):
+            members = []
+            for v in val.get("members"):
+                if v["user_id"] != current_user.firebase_id:
+                    to_append = {
+                        "user_id": v["user_id"],
+                        "username": v["nickname"],
+                    }
+                    members.append(to_append)
+            return {"channel_url": val.get("channel_url"), "members": members}
+
+        return {"data": list(map(map_fn, json_data["channels"]))}, 200
+
+
+def _get_count_unread_channels(user_id):
+    api_headers = {"Api-Token": API_TOKEN}
+    return requests.get(
+        f"{API_URL}/users/{user_id}/unread_channel_count",
+        headers=api_headers,
+    )
+
+
+class GetCountOfUnreadChannels(Resource):
+    @classmethod
+    @check_token
+    def get(cls):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        count = _get_count_unread_channels(current_user.firebase_id)
+        return count.json(), 200
+
+
+def _mark_channel_as_read(user_id, channel_url):
+    api_headers = {"Api-Token": API_TOKEN}
+    data = {"channel_urls": [channel_url]}
+    return requests.put(
+        f"{API_URL}/users/{user_id}/mark_as_read_all",
+        headers=api_headers,
+        json=data,
+    )
+
+
+class MarkAsReadChannel(Resource):
+    @classmethod
+    @check_token
+    def post(cls, channel_url):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        data = _mark_channel_as_read(current_user.firebase_id, channel_url)
+        if data:
+            return {"message": "Channel marked as read"}, 201
+        else:
+            return {"message": "Error marking channel as read"}, 500
