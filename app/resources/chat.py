@@ -196,11 +196,6 @@ class GetUnreadChannels(Resource):
     @classmethod
     @check_token
     def get(cls):
-        """
-        1) Obtener la lista de canales a los que me he metido
-        2) Extraer el member_id de cada uno de los canales, este member id sera el del otro usuario del canal.
-        3)
-        """
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         current_channels = _get_own_channels(current_user.firebase_id)
         json_data = current_channels.json()
