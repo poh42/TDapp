@@ -20,6 +20,7 @@ from resources.chat import (
     ListMessagesFromChannel,
     GetUnreadChannels,
     GetCountOfUnreadChannels,
+    MarkAsReadChannel,
 )
 from resources.confirmation import Confirmation, ResendConfirmation
 from resources.challenge_ import (
@@ -220,6 +221,7 @@ api.add_resource(
 )
 api.add_resource(GetUnreadChannels, "/chat/unread_channels")
 api.add_resource(GetCountOfUnreadChannels, "/chat/count_unread_channels")
+api.add_resource(MarkAsReadChannel, "/chat/mark_as_read/<string:channel_url>")
 
 db.init_app(app)
 migrate.init_app(app)

@@ -229,3 +229,25 @@ class GetCountOfUnreadChannels(Resource):
         current_user = UserModel.find_by_firebase_id(g.claims["uid"])
         count = _get_count_unread_channels(current_user.firebase_id)
         return count.json(), 200
+
+
+def _mark_channel_as_read(user_id, channel_url):
+    api_headers = {"Api-Token": API_TOKEN}
+    data = {"channel_urls": [channel_url]}
+    return requests.put(
+        f"{API_URL}/users/{user_id}/mark_as_read_all",
+        headers=api_headers,
+        json=data,
+    )
+
+
+class MarkAsReadChannel(Resource):
+    @classmethod
+    @check_token
+    def post(cls, channel_url):
+        current_user = UserModel.find_by_firebase_id(g.claims["uid"])
+        data = _mark_channel_as_read(current_user.firebase_id, channel_url)
+        if data:
+            return {"message": "Channel marked as read"}, 201
+        else:
+            return {"message": "Error marking channel as read"}, 500
