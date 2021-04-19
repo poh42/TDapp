@@ -6,7 +6,7 @@ from models.user import UserModel
 
 users = {
     "maureen": {
-        "firebase_id": "ZLcjp2qHwfcXYF2QRSsi3IZPijr1",
+        "firebase_id": "r4aoFsnrOJSOq07YGSvwhqJTgDL2",
         "username": "maureen",
         "name": "Maureen",
         "last_name": "Hernandez",
