@@ -101,6 +101,11 @@ class ChallengeModel(db.Model):
         ).fetchone()
         return data is not None
 
+    @property
+    def is_challenge_completed(self):
+        results_1v1 = Results1v1Model.find_by_challenge_id(self.id)
+        return self.status == STATUS_COMPLETED and results_1v1 is not None
+
     @classmethod
     def get_direct_challenges(cls, user_id):
         challenge_users = aliased(cls.challenge_users)
