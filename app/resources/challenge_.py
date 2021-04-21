@@ -1000,6 +1000,8 @@ class ChallengeStatusUpdate(Resource):
                 return {"message": "Challenge not found"}, 404
             if cls.challenge.status == STATUS_DISPUTED:
                 return {"message": "Action not available for user"}, 403
+            if cls.challenge.is_challenge_completed:
+                return {"message": "Action not available for user"}, 403
             cls.validate_challenge_flow()
             if not cls.user_belongs_challenge:
                 return {"message": "User does not belong to challenge"}, 403
